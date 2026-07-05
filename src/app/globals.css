@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+:root {
+  /* On-Time brand palette (docs/09_Brand_Guidelines.md) */
+  --color-brand-green: #1f3d2b;
+  --color-brand-charcoal: #121212;
+  --color-brand-gold: #c8a96a;
+  --color-brand-warm-white: #f7f5f2;
+}
+
+@theme inline {
+  --color-brand-green: var(--color-brand-green);
+  --color-brand-charcoal: var(--color-brand-charcoal);
+  --color-brand-gold: var(--color-brand-gold);
+  --color-brand-warm-white: var(--color-brand-warm-white);
+
+  --color-warm-white: var(--color-brand-warm-white);
+  --color-charcoal: var(--color-brand-charcoal);
+
+  --font-sans: var(--font-inter), var(--font-noto-armenian), ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+}
