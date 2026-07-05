@@ -50,7 +50,7 @@ export async function registerSpecialist(
 
   const existing = await prisma.specialist.findUnique({ where: { email }, select: { id: true } });
   if (existing) {
-    return { ok: false, fieldErrors: { email: "email_taken" } };
+    return { ok: false, fieldErrors: { email: "emailTaken" } };
   }
 
   const passwordHash = await hashPassword(password);

@@ -18,7 +18,7 @@ export async function resetPassword(
   const token = await prisma.passwordResetToken.findUnique({ where: { tokenHash } });
 
   if (!token || token.consumedAt || token.expiresAt < new Date()) {
-    return { ok: false, formError: "invalid_or_expired_token" };
+    return { ok: false, formError: "invalidOrExpiredToken" };
   }
 
   const passwordHash = await hashPassword(password);
