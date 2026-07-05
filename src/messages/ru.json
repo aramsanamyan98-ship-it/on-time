@@ -1,0 +1,95 @@
+{
+  "Common": {
+    "appName": "On-Time",
+    "loading": "Загрузка…",
+    "languageSwitcher": {
+      "label": "Язык"
+    },
+    "localeNames": {
+      "hy": "Հայերեն",
+      "ru": "Русский",
+      "en": "English"
+    }
+  },
+  "Auth": {
+    "register": {
+      "title": "Создайте аккаунт",
+      "subtitle": "Настройте свою панель On-Time за минуту.",
+      "emailLabel": "Email",
+      "passwordLabel": "Пароль",
+      "confirmPasswordLabel": "Подтвердите пароль",
+      "submit": "Создать аккаунт",
+      "submitting": "Создаём аккаунт…",
+      "haveAccount": "Уже есть аккаунт?",
+      "signInLink": "Войти"
+    },
+    "login": {
+      "title": "Вход",
+      "subtitle": "С возвращением.",
+      "emailLabel": "Email",
+      "passwordLabel": "Пароль",
+      "forgotPasswordLink": "Забыли пароль?",
+      "submit": "Войти",
+      "submitting": "Выполняется вход…",
+      "noAccount": "Нет аккаунта?",
+      "registerLink": "Создать"
+    },
+    "forgotPassword": {
+      "title": "Восстановление пароля",
+      "subtitle": "Введите email, и мы отправим ссылку для сброса пароля.",
+      "emailLabel": "Email",
+      "submit": "Отправить ссылку",
+      "submitting": "Отправляем…",
+      "successTitle": "Проверьте почту",
+      "successMessage": "Если аккаунт с таким email существует, мы отправили на него ссылку для сброса пароля.",
+      "backToLogin": "Вернуться ко входу"
+    },
+    "resetPassword": {
+      "title": "Новый пароль",
+      "passwordLabel": "Новый пароль",
+      "confirmPasswordLabel": "Подтвердите новый пароль",
+      "submit": "Сохранить пароль",
+      "submitting": "Сохраняем…",
+      "successTitle": "Пароль изменён",
+      "successMessage": "Ваш пароль изменён. Теперь вы можете войти.",
+      "signInLink": "Войти",
+      "invalidTokenTitle": "Срок действия ссылки истёк",
+      "invalidTokenMessage": "Ссылки для сброса пароля действительны недолго. Запросите новую.",
+      "requestNewLink": "Запросить новую ссылку"
+    },
+    "checkEmail": {
+      "title": "Проверьте почту",
+      "message": "Мы отправили ссылку для подтверждения на {email}. Перейдите по ней, чтобы активировать аккаунт.",
+      "resendPrompt": "Не пришло письмо?",
+      "resendLink": "Отправить письмо ещё раз",
+      "resendSent": "Письмо отправлено повторно."
+    },
+    "verifyEmail": {
+      "verifyingTitle": "Подтверждаем ваш email…",
+      "successTitle": "Email подтверждён",
+      "successMessage": "Ваш аккаунт готов. Переходим в панель управления…",
+      "invalidTitle": "Ссылка недействительна",
+      "invalidMessage": "Эта ссылка для подтверждения недействительна или устарела.",
+      "resendLink": "Отправить новое письмо для подтверждения"
+    },
+    "errors": {
+      "emailRequired": "Введите email.",
+      "emailInvalid": "Введите корректный email.",
+      "passwordRequired": "Введите пароль.",
+      "passwordTooShort": "Пароль должен содержать не менее 8 символов.",
+      "passwordsDoNotMatch": "Пароли не совпадают.",
+      "emailTaken": "Аккаунт с таким email уже существует.",
+      "invalidCredentials": "Неверный email или пароль.",
+      "emailNotVerified": "Подтвердите email перед входом.",
+      "invalidOrExpiredToken": "Ссылка недействительна или устарела.",
+      "tooManyRequests": "Слишком много попыток. Попробуйте позже.",
+      "generic": "Что-то пошло не так. Попробуйте ещё раз."
+    }
+  },
+  "Dashboard": {
+    "title": "Панель управления",
+    "welcomeTitle": "Добро пожаловать, {name}",
+    "welcomeMessage": "Ваша панель готова. Запись на приём и страница для клиентов появятся здесь совсем скоро.",
+    "logout": "Выйти"
+  }
+}

@@ -1,0 +1,93 @@
+// Prisma schema for On-Time (see docs/05_Database.md)
+//
+// v1 build stage: only the `specialists` table plus the two token tables
+// needed to support the authentication flows in docs/02_PRD.md Section 3
+// (register, email verification, login, forgot/reset password). Every
+// other table in 05_Database.md (services, appointments, etc.) is out of
+// scope until later build phases.
+//
+// Deviations from the literal field list in 05_Database.md, and why:
+// - `display_name` and `slug` are populated automatically at registration
+//   (slug from a slugified/uniquified display_name, display_name from the
+//   email's local part) rather than collected in a form, since the profile
+//   UI (02_PRD.md Section 4) is not built at this stage. Both remain
+//   editable once that UI exists — the doc already calls the slug
+//   "auto-generated from name, editable once", so this just applies the
+//   same pattern to display_name for now.
+// - `profile_photo_url`, `cover_photo_url`, `bio`, `phone`, `address`,
+//   `instagram_url` are nullable: they're profile-step fields with no
+//   collection UI yet.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Language {
+  am
+  ru
+  en
+}
+
+enum Plan {
+  basic
+  starter
+  pro
+}
+
+model Specialist {
+  id                 String    @id @default(uuid())
+  email              String    @unique
+  passwordHash       String    @map("password_hash")
+  emailVerifiedAt    DateTime? @map("email_verified_at")
+  displayName        String    @map("display_name")
+  slug               String    @unique
+  profilePhotoUrl    String?   @map("profile_photo_url")
+  coverPhotoUrl      String?   @map("cover_photo_url")
+  bio                String?
+  phone              String?
+  address            String?
+  timezone           String    @default("Asia/Yerevan")
+  instagramUrl       String?   @map("instagram_url")
+  languagePreference Language  @default(am) @map("language_preference")
+  plan               Plan      @default(basic)
+  trialEndsAt        DateTime? @map("trial_ends_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  deletedAt          DateTime? @map("deleted_at")
+
+  emailVerificationTokens EmailVerificationToken[]
+  passwordResetTokens     PasswordResetToken[]
+
+  @@map("specialists")
+}
+
+model EmailVerificationToken {
+  id           String     @id @default(uuid())
+  specialistId String     @map("specialist_id")
+  specialist   Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  tokenHash    String     @unique @map("token_hash")
+  expiresAt    DateTime   @map("expires_at")
+  consumedAt   DateTime?  @map("consumed_at")
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  @@index([specialistId])
+  @@map("email_verification_tokens")
+}
+
+model PasswordResetToken {
+  id           String     @id @default(uuid())
+  specialistId String     @map("specialist_id")
+  specialist   Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  tokenHash    String     @unique @map("token_hash")
+  expiresAt    DateTime   @map("expires_at")
+  consumedAt   DateTime?  @map("consumed_at")
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  @@index([specialistId])
+  @@map("password_reset_tokens")
+}

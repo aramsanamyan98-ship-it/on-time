@@ -1,0 +1,95 @@
+{
+  "Common": {
+    "appName": "On-Time",
+    "loading": "Loading…",
+    "languageSwitcher": {
+      "label": "Language"
+    },
+    "localeNames": {
+      "hy": "Հայերեն",
+      "ru": "Русский",
+      "en": "English"
+    }
+  },
+  "Auth": {
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Set up your On-Time dashboard in a minute.",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "confirmPasswordLabel": "Confirm password",
+      "submit": "Create account",
+      "submitting": "Creating account…",
+      "haveAccount": "Already have an account?",
+      "signInLink": "Sign in"
+    },
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Welcome back.",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "forgotPasswordLink": "Forgot password?",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Create one"
+    },
+    "forgotPassword": {
+      "title": "Reset your password",
+      "subtitle": "Enter your email and we'll send you a reset link.",
+      "emailLabel": "Email",
+      "submit": "Send reset link",
+      "submitting": "Sending…",
+      "successTitle": "Check your email",
+      "successMessage": "If an account exists for that email, we've sent a link to reset your password.",
+      "backToLogin": "Back to sign in"
+    },
+    "resetPassword": {
+      "title": "Set a new password",
+      "passwordLabel": "New password",
+      "confirmPasswordLabel": "Confirm new password",
+      "submit": "Reset password",
+      "submitting": "Saving…",
+      "successTitle": "Password updated",
+      "successMessage": "Your password has been changed. You can now sign in.",
+      "signInLink": "Sign in",
+      "invalidTokenTitle": "This link has expired",
+      "invalidTokenMessage": "Password reset links are only valid for a short time. Request a new one.",
+      "requestNewLink": "Request a new link"
+    },
+    "checkEmail": {
+      "title": "Check your email",
+      "message": "We've sent a verification link to {email}. Click it to activate your account.",
+      "resendPrompt": "Didn't get it?",
+      "resendLink": "Resend email",
+      "resendSent": "Verification email sent again."
+    },
+    "verifyEmail": {
+      "verifyingTitle": "Verifying your email…",
+      "successTitle": "Email verified",
+      "successMessage": "Your account is ready. Taking you to your dashboard…",
+      "invalidTitle": "This link isn't valid",
+      "invalidMessage": "This verification link is invalid or has expired.",
+      "resendLink": "Send a new verification email"
+    },
+    "errors": {
+      "emailRequired": "Enter your email address.",
+      "emailInvalid": "Enter a valid email address.",
+      "passwordRequired": "Enter a password.",
+      "passwordTooShort": "Password must be at least 8 characters.",
+      "passwordsDoNotMatch": "Passwords don't match.",
+      "emailTaken": "An account with this email already exists.",
+      "invalidCredentials": "Incorrect email or password.",
+      "emailNotVerified": "Please verify your email before signing in.",
+      "invalidOrExpiredToken": "This link is invalid or has expired.",
+      "tooManyRequests": "Too many attempts. Please try again later.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "Dashboard": {
+    "title": "Dashboard",
+    "welcomeTitle": "Welcome, {name}",
+    "welcomeMessage": "Your dashboard is ready. Appointment scheduling and your public booking page are coming soon.",
+    "logout": "Log out"
+  }
+}
