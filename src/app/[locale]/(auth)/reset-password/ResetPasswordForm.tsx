@@ -24,7 +24,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
     );
   }
 
-  if (state.formError === "invalid_or_expired_token") {
+  if (state.formError === "invalidOrExpiredToken") {
     return (
       <div className="flex flex-col gap-4">
         <h1 className="text-xl font-semibold text-brand-charcoal">{t("invalidTokenTitle")}</h1>

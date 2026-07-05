@@ -7,7 +7,7 @@ export async function verifyEmailToken(rawToken: string): Promise<AuthResult<{ s
   const token = await prisma.emailVerificationToken.findUnique({ where: { tokenHash } });
 
   if (!token || token.consumedAt || token.expiresAt < new Date()) {
-    return { ok: false, formError: "invalid_or_expired_token" };
+    return { ok: false, formError: "invalidOrExpiredToken" };
   }
 
   await prisma.$transaction([

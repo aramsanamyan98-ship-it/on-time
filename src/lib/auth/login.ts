@@ -24,11 +24,11 @@ export async function loginSpecialist(
 
   const passwordMatches = await verifyPassword(password, specialist?.passwordHash ?? DUMMY_HASH);
   if (!specialist || !passwordMatches) {
-    return { ok: false, formError: "invalid_credentials" };
+    return { ok: false, formError: "invalidCredentials" };
   }
 
   if (!specialist.emailVerifiedAt) {
-    return { ok: false, formError: "email_not_verified" };
+    return { ok: false, formError: "emailNotVerified" };
   }
 
   await setSessionCookie(specialist.id);

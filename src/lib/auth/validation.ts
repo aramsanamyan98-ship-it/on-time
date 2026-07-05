@@ -9,21 +9,21 @@ export function normalizeEmail(email: string): string {
 
 export function validateEmail(email: string): FieldErrors {
   const trimmed = email.trim();
-  if (!trimmed) return { email: "email_required" };
-  if (!EMAIL_RE.test(trimmed)) return { email: "email_invalid" };
+  if (!trimmed) return { email: "emailRequired" };
+  if (!EMAIL_RE.test(trimmed)) return { email: "emailInvalid" };
   return {};
 }
 
 export function validatePassword(password: string): FieldErrors {
-  if (!password) return { password: "password_required" };
-  if (password.length < MIN_PASSWORD_LENGTH) return { password: "password_too_short" };
+  if (!password) return { password: "passwordRequired" };
+  if (password.length < MIN_PASSWORD_LENGTH) return { password: "passwordTooShort" };
   return {};
 }
 
 export function validateRegistration(email: string, password: string, confirmPassword: string): FieldErrors {
   const errors: FieldErrors = { ...validateEmail(email), ...validatePassword(password) };
   if (!errors.password && password !== confirmPassword) {
-    errors.confirmPassword = "passwords_do_not_match";
+    errors.confirmPassword = "passwordsDoNotMatch";
   }
   return errors;
 }
@@ -31,7 +31,7 @@ export function validateRegistration(email: string, password: string, confirmPas
 export function validateNewPassword(password: string, confirmPassword: string): FieldErrors {
   const errors: FieldErrors = { ...validatePassword(password) };
   if (!errors.password && password !== confirmPassword) {
-    errors.confirmPassword = "passwords_do_not_match";
+    errors.confirmPassword = "passwordsDoNotMatch";
   }
   return errors;
 }
