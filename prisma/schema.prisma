@@ -1,10 +1,10 @@
 // Prisma schema for On-Time (see docs/05_Database.md)
 //
-// Build stage: auth (specialists + token tables), plus the Phase 2
-// specialist-profile tables (services, working_hours) per
-// docs/08_Roadmap.md. Appointments, blocked_time, portfolio_photos,
-// notifications_log, and referrals are still out of scope until their
-// respective phases.
+// Build stage: auth (specialists + token tables), Phase 2 specialist-profile
+// tables (services, working_hours), and the Phase 3 portfolio_photos table
+// (needed for the public profile page's portfolio display) per
+// docs/08_Roadmap.md. Appointments, blocked_time, notifications_log, and
+// referrals are still out of scope until their respective phases.
 //
 // Deviations from the literal field list in 05_Database.md, and why:
 // - `display_name` and `slug` are populated automatically at registration
@@ -66,6 +66,7 @@ model Specialist {
   passwordResetTokens     PasswordResetToken[]
   services                Service[]
   workingHours            WorkingHours[]
+  portfolioPhotos         PortfolioPhoto[]
 
   @@map("specialists")
 }
@@ -100,6 +101,18 @@ model WorkingHours {
 
   @@unique([specialistId, dayOfWeek])
   @@map("working_hours")
+}
+
+model PortfolioPhoto {
+  id           String     @id @default(uuid())
+  specialistId String     @map("specialist_id")
+  specialist   Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  imageUrl     String     @map("image_url")
+  sortOrder    Int        @map("sort_order")
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  @@index([specialistId])
+  @@map("portfolio_photos")
 }
 
 model EmailVerificationToken {
