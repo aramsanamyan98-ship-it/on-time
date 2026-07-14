@@ -95,6 +95,7 @@
       "label": "Dashboard sections",
       "home": "Home",
       "profile": "Profile",
+      "portfolio": "Portfolio",
       "workingHours": "Working hours",
       "services": "Services"
     },
@@ -173,5 +174,30 @@
     "deactivate": "Deactivate",
     "durationValue": "{minutes} min",
     "priceValue": "{price} AMD"
+  },
+  "Portfolio": {
+    "title": "Portfolio",
+    "subtitle": "Add photos of your work. They'll appear on your public booking page.",
+    "empty": "You haven't added any portfolio photos yet.",
+    "addPhoto": "Add photo",
+    "uploading": "Uploading…",
+    "delete": "Delete",
+    "confirmDelete": "Delete this photo?",
+    "moveUp": "Move up",
+    "moveDown": "Move down"
+  },
+  "PublicProfile": {
+    "bookButton": "Book",
+    "bookingComingSoon": "Online booking is coming soon.",
+    "portfolioTitle": "Portfolio",
+    "servicesTitle": "Services",
+    "workingHoursTitle": "Working hours",
+    "noServices": "No services listed yet.",
+    "dayOff": "Day off"
+  },
+  "NotFound": {
+    "title": "We couldn't find this page",
+    "message": "This link may be broken, or the page is no longer available.",
+    "homeLink": "Go to On-Time"
   }
 }

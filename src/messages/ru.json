@@ -95,6 +95,7 @@
       "label": "Разделы панели",
       "home": "Главная",
       "profile": "Профиль",
+      "portfolio": "Портфолио",
       "workingHours": "Часы работы",
       "services": "Услуги"
     },
@@ -173,5 +174,30 @@
     "deactivate": "Деактивировать",
     "durationValue": "{minutes} мин",
     "priceValue": "{price} AMD"
+  },
+  "Portfolio": {
+    "title": "Портфолио",
+    "subtitle": "Добавьте фото своих работ. Они появятся на вашей публичной странице для записи.",
+    "empty": "Вы ещё не добавили ни одного фото в портфолио.",
+    "addPhoto": "Добавить фото",
+    "uploading": "Загружаем…",
+    "delete": "Удалить",
+    "confirmDelete": "Удалить это фото?",
+    "moveUp": "Переместить вверх",
+    "moveDown": "Переместить вниз"
+  },
+  "PublicProfile": {
+    "bookButton": "Записаться",
+    "bookingComingSoon": "Онлайн-запись появится совсем скоро.",
+    "portfolioTitle": "Портфолио",
+    "servicesTitle": "Услуги",
+    "workingHoursTitle": "Часы работы",
+    "noServices": "Услуги пока не указаны.",
+    "dayOff": "Выходной"
+  },
+  "NotFound": {
+    "title": "Страница не найдена",
+    "message": "Возможно, ссылка повреждена или страница больше недоступна.",
+    "homeLink": "На главную On-Time"
   }
 }

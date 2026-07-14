@@ -29,7 +29,7 @@ const UPLOADS_ROOT = path.join(process.cwd(), "public", "uploads");
 export async function saveUploadedImage(
   file: File | null,
   specialistId: string,
-  kind: "profile" | "cover",
+  kind: "profile" | "cover" | "portfolio",
 ): Promise<UploadResult> {
   if (!file || file.size === 0) {
     return { ok: false, error: "fileRequired" };
