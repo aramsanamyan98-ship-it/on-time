@@ -102,10 +102,8 @@ needing to guess. Update this file whenever a new ambiguous case comes up
 Flagging these explicitly so they don't get decided by default/accident
 inside the code:
 
-1. Minimum notice window before appointment start? (Before Phase 4 —
-   low-stakes, a default of 0–30 minutes is fine to ship with)
-2. Grace period after a specialist deletes their account? (Before Phase 2)
-3. Reminder timing (24h / 2h / both)? (Before Phase 6)
+1. Grace period after a specialist deletes their account? (Before Phase 2)
+2. Reminder timing (24h / 2h / both)? (Before Phase 6)
 
 **Resolved:**
 - ~~How far in advance can a guest book?~~ → No limit; earliest available
@@ -113,3 +111,9 @@ inside the code:
 - ~~Can guests self-cancel/reschedule via a link?~~ → Yes, via a private
   booking-token link included in every confirmation (see Cancellation &
   Rescheduling above).
+- ~~Minimum notice window before appointment start?~~ → 30 minutes (see
+  `MINIMUM_NOTICE_MINUTES` in `src/lib/booking/availability.ts`). Candidate
+  slot start times are generated on a 15-minute grid
+  (`SLOT_GRANULARITY_MINUTES`) within working hours, regardless of a given
+  service's own duration — not specified elsewhere, documented here as the
+  Phase 4 implementation choice.

@@ -4,8 +4,9 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/prisma";
-import { defaultSchedule, type DaySchedule } from "@/lib/working-hours/defaults";
+import { loadSchedule } from "@/lib/working-hours/load-schedule";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { Link } from "@/i18n/navigation";
 
 export default async function PublicProfilePage({
   params,
@@ -39,29 +40,17 @@ export default async function PublicProfilePage({
     notFound();
   }
 
-  const [services, workingHoursRows, portfolioPhotos] = await Promise.all([
+  const [services, schedule, portfolioPhotos] = await Promise.all([
     prisma.service.findMany({
       where: { specialistId: specialist.id, isActive: true },
       orderBy: { createdAt: "asc" },
     }),
-    prisma.workingHours.findMany({ where: { specialistId: specialist.id } }),
+    loadSchedule(specialist.id),
     prisma.portfolioPhoto.findMany({
       where: { specialistId: specialist.id },
       orderBy: { sortOrder: "asc" },
     }),
   ]);
-
-  const byDay = new Map(workingHoursRows.map((row) => [row.dayOfWeek, row]));
-  const schedule: DaySchedule[] = defaultSchedule().map((fallback) => {
-    const row = byDay.get(fallback.dayOfWeek);
-    if (!row) return fallback;
-    return {
-      dayOfWeek: fallback.dayOfWeek,
-      isDayOff: row.isDayOff,
-      startTime: row.startTime ?? fallback.startTime,
-      endTime: row.endTime ?? fallback.endTime,
-    };
-  });
 
   const t = await getTranslations("PublicProfile");
   const tHours = await getTranslations("WorkingHours");
@@ -128,13 +117,14 @@ export default async function PublicProfilePage({
             </div>
           )}
 
-          <button
-            type="button"
-            className="mt-2 w-fit rounded-md bg-brand-gold px-6 py-3 text-sm font-semibold text-brand-charcoal transition hover:opacity-90"
-          >
-            {t("bookButton")}
-          </button>
-          <p className="text-xs text-brand-charcoal/50">{t("bookingComingSoon")}</p>
+          {services.length > 0 && (
+            <Link
+              href={`/book/${slug}/new`}
+              className="mt-2 w-fit rounded-md bg-brand-gold px-6 py-3 text-sm font-semibold text-brand-charcoal transition hover:opacity-90"
+            >
+              {t("bookButton")}
+            </Link>
+          )}
         </div>
 
         {portfolioPhotos.length > 0 && (
