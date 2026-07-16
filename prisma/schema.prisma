@@ -1,10 +1,9 @@
 // Prisma schema for On-Time (see docs/05_Database.md)
 //
 // Build stage: auth (specialists + token tables), Phase 2 specialist-profile
-// tables (services, working_hours), and the Phase 3 portfolio_photos table
-// (needed for the public profile page's portfolio display) per
-// docs/08_Roadmap.md. Appointments, blocked_time, notifications_log, and
-// referrals are still out of scope until their respective phases.
+// tables (services, working_hours), Phase 3 portfolio_photos, and Phase 4
+// booking-engine tables (appointments, blocked_time) per docs/08_Roadmap.md.
+// notifications_log and referrals are still out of scope until Phase 6/7.
 //
 // Deviations from the literal field list in 05_Database.md, and why:
 // - `display_name` and `slug` are populated automatically at registration
@@ -19,6 +18,21 @@
 //   slot-generation math done in application code (Phase 4), and a plain
 //   string avoids Prisma's `@db.Time` values round-tripping as full `Date`
 //   objects for what is really just a wall-clock time.
+// - `appointments.booking_token` is stored as the raw random token (not a
+//   hash like the auth token tables). Unlike a password-reset/verification
+//   token, this is a long-lived capability link a guest may reopen many
+//   times (view, then later cancel/reschedule) rather than a one-time
+//   secret exchanged once, 05_Database.md names the column `booking_token`
+//   (not `_hash`) exactly for this reason, and 32 bytes of CSPRNG output is
+//   already unguessable without needing the extra hash-on-lookup layer.
+// - The no-double-booking rule (05_Database.md) is enforced with a
+//   Postgres EXCLUDE constraint (`btree_gist`, gist index on
+//   specialist_id + tstzrange(start_at, end_at), partial WHERE status <>
+//   'cancelled') rather than a plain unique constraint, since bookings
+//   aren't on a fixed slot grid — any two overlapping ranges must be
+//   rejected, not just exact duplicate start times. Prisma's schema DSL
+//   can't express EXCLUDE constraints, so it's added by hand-editing the
+//   generated migration SQL (see prisma/migrations).
 
 generator client {
   provider = "prisma-client"
@@ -39,6 +53,18 @@ enum Plan {
   basic
   starter
   pro
+}
+
+enum AppointmentStatus {
+  confirmed
+  cancelled
+  completed
+  no_show
+}
+
+enum AppointmentSource {
+  guest_booking
+  manual_specialist_entry
 }
 
 model Specialist {
@@ -67,6 +93,8 @@ model Specialist {
   services                Service[]
   workingHours            WorkingHours[]
   portfolioPhotos         PortfolioPhoto[]
+  appointments            Appointment[]
+  blockedTime             BlockedTime[]
 
   @@map("specialists")
 }
@@ -82,6 +110,8 @@ model Service {
   isActive         Boolean    @default(true) @map("is_active")
   createdAt        DateTime   @default(now()) @map("created_at")
   updatedAt        DateTime   @updatedAt @map("updated_at")
+
+  appointments Appointment[]
 
   @@index([specialistId])
   @@map("services")
@@ -113,6 +143,54 @@ model PortfolioPhoto {
 
   @@index([specialistId])
   @@map("portfolio_photos")
+}
+
+// Specialist-private unavailable time (lunch, personal errands, etc.) that
+// blocks slot generation the same way an appointment does, without being
+// one (07_Business_Rules.md / 05_Database.md). No management UI ships in
+// Phase 4 — see 08_Roadmap.md Phase 4 scope — but the availability engine
+// already reads this table so it's ready for that UI later.
+model BlockedTime {
+  id           String     @id @default(uuid())
+  specialistId String     @map("specialist_id")
+  specialist   Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  startAt      DateTime   @map("start_at")
+  endAt        DateTime   @map("end_at")
+  reason       String?
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  @@index([specialistId])
+  @@map("blocked_time")
+}
+
+// See 05_Database.md `appointments` and 07_Business_Rules.md Booking Rules.
+// The no-overlap guarantee is a Postgres EXCLUDE constraint added by hand
+// to the generated migration (Prisma can't express it) — see the schema
+// header comment above.
+model Appointment {
+  id           String            @id @default(uuid())
+  specialistId String            @map("specialist_id")
+  specialist   Specialist        @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  serviceId    String            @map("service_id")
+  // Services are only ever deactivated, never deleted, from the app
+  // (07_Business_Rules.md: "past appointments ... must remain intact") —
+  // Restrict makes that invariant explicit at the DB level too.
+  service      Service           @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  startAt      DateTime          @map("start_at")
+  endAt        DateTime          @map("end_at")
+  status       AppointmentStatus @default(confirmed)
+  guestName    String            @map("guest_name")
+  guestPhone   String            @map("guest_phone")
+  guestEmail   String?           @map("guest_email")
+  guestNotes   String?           @map("guest_notes")
+  source       AppointmentSource @default(guest_booking)
+  bookingToken String            @unique @map("booking_token")
+  createdAt    DateTime          @default(now()) @map("created_at")
+  updatedAt    DateTime          @updatedAt @map("updated_at")
+
+  @@index([specialistId])
+  @@index([serviceId])
+  @@map("appointments")
 }
 
 model EmailVerificationToken {
