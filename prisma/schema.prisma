@@ -95,6 +95,7 @@ model Specialist {
   portfolioPhotos         PortfolioPhoto[]
   appointments            Appointment[]
   blockedTime             BlockedTime[]
+  clientNotes             ClientNote[]
 
   @@map("specialists")
 }
@@ -191,6 +192,24 @@ model Appointment {
   @@index([specialistId])
   @@index([serviceId])
   @@map("appointments")
+}
+
+// Per-client manual notes (02_PRD.md Section 10 — "not a full CRM ... just a
+// list and history"). There's no `customers` table in v1 (05_Database.md
+// defers that); clients are identified the same way appointments already
+// identify guests — by phone, scoped to one specialist — rather than via a
+// customer FK. One row per (specialist, guest phone) pair.
+model ClientNote {
+  id           String     @id @default(uuid())
+  specialistId String     @map("specialist_id")
+  specialist   Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  guestPhone   String     @map("guest_phone")
+  notes        String?
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  @@unique([specialistId, guestPhone])
+  @@map("client_notes")
 }
 
 model EmailVerificationToken {

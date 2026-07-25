@@ -91,10 +91,17 @@
     "welcomeTitle": "Welcome, {name}",
     "welcomeMessage": "Your dashboard is ready. Appointment scheduling and your public booking page are coming soon.",
     "logout": "Log out",
+    "manageServices": "Manage services",
+    "viewAllAppointments": "View all appointments",
+    "todayTitle": "Today's appointments",
+    "todayEmpty": "No appointments today.",
+    "upcomingTitle": "Upcoming (next 7 days)",
+    "upcomingEmpty": "No upcoming appointments in the next 7 days.",
     "nav": {
       "label": "Dashboard sections",
       "home": "Home",
       "appointments": "Appointments",
+      "clients": "Clients",
       "profile": "Profile",
       "portfolio": "Portfolio",
       "workingHours": "Working hours",
@@ -263,7 +270,36 @@
     "rescheduleTitle": "Reschedule appointment",
     "confirmReschedule": "Confirm new time",
     "confirming": "Confirming…",
-    "newTimePreview": "New time: {time}"
+    "newTimePreview": "New time: {time}",
+    "addAppointment": "Add appointment",
+    "addedSuccess": "Appointment added.",
+    "newAppointmentTitle": "Add a walk-in or phone booking",
+    "newAppointmentSubtitle": "Book an appointment directly onto your calendar — it goes through the same availability check as an online booking.",
+    "noActiveServices": "Add an active service before you can create an appointment."
+  },
+  "Clients": {
+    "title": "Clients",
+    "empty": "You don't have any clients yet.",
+    "appointmentCount": "{count} appointments",
+    "lastVisit": "Last visit: {date}",
+    "backToClients": "Back to clients",
+    "historyTitle": "Appointment history",
+    "notesLabel": "Notes",
+    "notesPlaceholder": "Private notes about this client…",
+    "saveNotes": "Save notes",
+    "savingNotes": "Saving…",
+    "notesSaved": "Notes saved.",
+    "status": {
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "no_show": "No-show"
+    },
+    "errors": {
+      "notesTooLong": "Notes must be 2000 characters or fewer.",
+      "notFound": "This client couldn't be found.",
+      "generic": "Something went wrong. Please try again."
+    }
   },
   "NotFound": {
     "title": "We couldn't find this page",
