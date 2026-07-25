@@ -91,10 +91,17 @@
     "welcomeTitle": "Добро пожаловать, {name}",
     "welcomeMessage": "Ваша панель готова. Запись на приём и страница для клиентов появятся здесь совсем скоро.",
     "logout": "Выйти",
+    "manageServices": "Управление услугами",
+    "viewAllAppointments": "Все записи",
+    "todayTitle": "Записи на сегодня",
+    "todayEmpty": "На сегодня записей нет.",
+    "upcomingTitle": "Предстоящие (следующие 7 дней)",
+    "upcomingEmpty": "На ближайшие 7 дней записей нет.",
     "nav": {
       "label": "Разделы панели",
       "home": "Главная",
       "appointments": "Записи",
+      "clients": "Клиенты",
       "profile": "Профиль",
       "portfolio": "Портфолио",
       "workingHours": "Часы работы",
@@ -263,7 +270,36 @@
     "rescheduleTitle": "Перенос записи",
     "confirmReschedule": "Подтвердить новое время",
     "confirming": "Подтверждение…",
-    "newTimePreview": "Новое время: {time}"
+    "newTimePreview": "Новое время: {time}",
+    "addAppointment": "Добавить запись",
+    "addedSuccess": "Запись добавлена.",
+    "newAppointmentTitle": "Добавить запись вручную",
+    "newAppointmentSubtitle": "Например, если клиент пришёл без записи или позвонил по телефону. Проверка доступности такая же, как при онлайн-записи.",
+    "noActiveServices": "Прежде чем создать запись, добавьте активную услугу."
+  },
+  "Clients": {
+    "title": "Клиенты",
+    "empty": "У вас пока нет клиентов.",
+    "appointmentCount": "{count} записей",
+    "lastVisit": "Последний визит: {date}",
+    "backToClients": "Назад к клиентам",
+    "historyTitle": "История записей",
+    "notesLabel": "Заметки",
+    "notesPlaceholder": "Личные заметки об этом клиенте…",
+    "saveNotes": "Сохранить заметки",
+    "savingNotes": "Сохраняем…",
+    "notesSaved": "Заметки сохранены.",
+    "status": {
+      "confirmed": "Подтверждена",
+      "cancelled": "Отменена",
+      "completed": "Завершена",
+      "no_show": "Неявка"
+    },
+    "errors": {
+      "notesTooLong": "Заметки должны содержать не более 2000 символов.",
+      "notFound": "Этот клиент не найден.",
+      "generic": "Что-то пошло не так. Попробуйте ещё раз."
+    }
   },
   "NotFound": {
     "title": "Страница не найдена",
