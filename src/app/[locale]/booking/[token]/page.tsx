@@ -39,6 +39,18 @@ export default async function ManageBookingPage({
 
   const t = await getTranslations("Booking");
 
+  // Formatted server-side (not passed as raw startAt + locale for the
+  // client to format) so the hydrated output can never diverge from the
+  // SSR HTML — see the comment in AppointmentRow.tsx.
+  const dateTimeFormatter = new Intl.DateTimeFormat(locale, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: appointment.specialist.timezone,
+  });
+
   return (
     <div className="flex flex-1 flex-col gap-6 px-6 py-8">
       <div className="flex items-center justify-between gap-4">
@@ -55,7 +67,7 @@ export default async function ManageBookingPage({
           serviceName: appointment.service.name,
           durationMinutes: appointment.service.durationMinutes,
           priceAmd: appointment.service.priceAmd,
-          startAt: appointment.startAt.toISOString(),
+          formattedDateTime: dateTimeFormatter.format(appointment.startAt),
           guestName: appointment.guestName,
           specialistName: appointment.specialist.displayName,
           timezone: appointment.specialist.timezone,

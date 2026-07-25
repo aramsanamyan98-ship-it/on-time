@@ -59,7 +59,7 @@ export async function cancelBookingAction(
   const appointment = await loadAppointmentByToken(token);
   if (!appointment) return { formError: "notFound" };
 
-  const result = await cancelAppointment(appointment);
+  const result = await cancelAppointment(appointment, appointment.specialist, "guest");
   if (!result.ok) return { formError: result.formError };
 
   return redirect({ href: `/booking/${token}?cancelled=1`, locale });
@@ -83,6 +83,7 @@ export async function rescheduleBookingAction(
     appointment.specialist,
     appointment.service.durationMinutes,
     startAt,
+    "guest",
   );
   if (!result.ok) return { formError: result.formError };
 
