@@ -69,6 +69,7 @@ export async function createBookingAction(
     guestPhone: String(formData.get("guestPhone") ?? ""),
     guestEmail: String(formData.get("guestEmail") ?? ""),
     guestNotes: String(formData.get("guestNotes") ?? ""),
+    guestLocale: locale,
   });
 
   if (!result.ok) {

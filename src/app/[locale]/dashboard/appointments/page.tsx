@@ -29,6 +29,18 @@ export default async function AppointmentsPage({
     orderBy: { startAt: "asc" },
   });
 
+  // Formatted server-side (not passed as raw startAt + locale for the
+  // client to format) so the hydrated output can never diverge from the
+  // SSR HTML — see the comment in AppointmentRow.tsx.
+  const dateTimeFormatter = new Intl.DateTimeFormat(locale, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: specialist.timezone,
+  });
+
   return (
     <div className="flex max-w-2xl flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
@@ -50,12 +62,10 @@ export default async function AppointmentsPage({
           {appointments.map((appointment) => (
             <AppointmentRow
               key={appointment.id}
-              locale={locale}
-              timezone={specialist.timezone}
               appointment={{
                 id: appointment.id,
                 serviceName: appointment.service.name,
-                startAt: appointment.startAt.toISOString(),
+                formattedDateTime: dateTimeFormatter.format(appointment.startAt),
                 guestName: appointment.guestName,
                 guestPhone: appointment.guestPhone,
               }}

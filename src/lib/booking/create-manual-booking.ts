@@ -3,8 +3,11 @@ import { isSlotAvailable } from "@/lib/booking/slots";
 import { validateGuestDetails } from "@/lib/booking/validation";
 import { generateUniqueBookingToken } from "@/lib/booking/token";
 import { isSlotConflictError } from "@/lib/booking/conflict-error";
+import { enqueueBookingNotifications } from "@/lib/notifications/queue";
+import { routingLocaleToLanguage } from "@/lib/locale";
 import type { BookingActionResult } from "@/lib/booking/errors";
 import type { Appointment, Specialist } from "@/generated/prisma/client";
+import type { AppLocale } from "@/i18n/routing";
 
 export type CreateManualBookingInput = {
   specialist: Specialist;
@@ -14,6 +17,7 @@ export type CreateManualBookingInput = {
   guestPhone: string;
   guestEmail: string;
   guestNotes: string;
+  guestLocale: AppLocale;
 };
 
 /**
@@ -61,8 +65,10 @@ export async function createManualBooking(
         guestNotes: input.guestNotes.trim() || null,
         source: "manual_specialist_entry",
         bookingToken,
+        guestLocale: routingLocaleToLanguage[input.guestLocale],
       },
     });
+    await enqueueBookingNotifications(appointment);
     return { ok: true, data: appointment };
   } catch (err) {
     // Same race-condition backstop as createGuestBooking: the specialist's

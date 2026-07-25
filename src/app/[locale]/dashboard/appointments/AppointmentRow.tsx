@@ -7,40 +7,31 @@ import { cancelAppointmentAction, type AppointmentActionState } from "./actions"
 
 const initialState: AppointmentActionState = {};
 
+// `formattedDateTime` is pre-formatted by the server (not `startAt` +
+// `locale` reformatted here) so the exact same string is used for both the
+// SSR HTML and hydration — formatting via Intl.DateTimeFormat inside a
+// client component re-runs in the browser during hydration, and for
+// less-common locales the server's and browser's bundled ICU/CLDR data can
+// disagree on "short" weekday/month names, causing a hydration mismatch.
 export function AppointmentRow({
   appointment,
-  locale,
-  timezone,
 }: {
   appointment: {
     id: string;
     serviceName: string;
-    startAt: string;
+    formattedDateTime: string;
     guestName: string;
     guestPhone: string;
   };
-  locale: string;
-  timezone: string;
 }) {
   const t = useTranslations("Appointments");
   const tErrors = useTranslations("Booking.errors");
   const [state, formAction, isPending] = useActionState(cancelAppointmentAction, initialState);
 
-  const dateTimeFormatter = new Intl.DateTimeFormat(locale, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: timezone,
-  });
-
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
       <div>
-        <p className="text-sm font-medium text-brand-charcoal">
-          {dateTimeFormatter.format(new Date(appointment.startAt))}
-        </p>
+        <p className="text-sm font-medium text-brand-charcoal">{appointment.formattedDateTime}</p>
         <p className="text-sm text-brand-charcoal/70">{appointment.serviceName}</p>
         <p className="text-xs text-brand-charcoal/60">
           {appointment.guestName} · {appointment.guestPhone}

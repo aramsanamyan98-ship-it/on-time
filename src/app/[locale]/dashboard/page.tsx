@@ -55,11 +55,23 @@ export default async function DashboardPage({
     }),
   ]);
 
+  // Formatted server-side (not passed as raw startAt + locale for the
+  // client to format) so the hydrated output can never diverge from the
+  // SSR HTML — see the comment in AppointmentRow.tsx.
+  const dateTimeFormatter = new Intl.DateTimeFormat(locale, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: specialist.timezone,
+  });
+
   function toRowAppointment(appointment: (typeof todayAppointments)[number]) {
     return {
       id: appointment.id,
       serviceName: appointment.service.name,
-      startAt: appointment.startAt.toISOString(),
+      formattedDateTime: dateTimeFormatter.format(appointment.startAt),
       guestName: appointment.guestName,
       guestPhone: appointment.guestPhone,
     };
@@ -101,12 +113,7 @@ export default async function DashboardPage({
         ) : (
           <div className="flex flex-col divide-y divide-brand-charcoal/10 rounded-lg border border-brand-charcoal/10">
             {todayAppointments.map((appointment) => (
-              <AppointmentRow
-                key={appointment.id}
-                locale={locale}
-                timezone={specialist.timezone}
-                appointment={toRowAppointment(appointment)}
-              />
+              <AppointmentRow key={appointment.id} appointment={toRowAppointment(appointment)} />
             ))}
           </div>
         )}
@@ -119,12 +126,7 @@ export default async function DashboardPage({
         ) : (
           <div className="flex flex-col divide-y divide-brand-charcoal/10 rounded-lg border border-brand-charcoal/10">
             {upcomingAppointments.map((appointment) => (
-              <AppointmentRow
-                key={appointment.id}
-                locale={locale}
-                timezone={specialist.timezone}
-                appointment={toRowAppointment(appointment)}
-              />
+              <AppointmentRow key={appointment.id} appointment={toRowAppointment(appointment)} />
             ))}
           </div>
         )}

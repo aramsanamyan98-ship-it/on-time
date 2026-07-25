@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
-import { isSlotAvailable, type BookingSpecialist } from "@/lib/booking/slots";
+import { isSlotAvailable } from "@/lib/booking/slots";
 import { isSlotConflictError } from "@/lib/booking/conflict-error";
+import { rescheduleReminderNotification, enqueueGuestRescheduledAlert } from "@/lib/notifications/queue";
 import type { BookingActionResult } from "@/lib/booking/errors";
-import type { Appointment } from "@/generated/prisma/client";
+import type { Appointment, Specialist } from "@/generated/prisma/client";
 
 /**
  * Shared by the guest self-service link and the specialist dashboard.
@@ -10,13 +11,19 @@ import type { Appointment } from "@/generated/prisma/client";
  * (07_Business_Rules.md: "the same double-booking protection applies as
  * any other booking") — a reschedule is not a special case that bypasses
  * conflict checking. `excludeAppointmentId` keeps the appointment's own
- * current slot from blocking itself in that check.
+ * current slot from blocking itself in that check. `initiatedBy` only
+ * decides who gets notified (07_Business_Rules.md: the specialist is
+ * alerted when a *guest* reschedules via their link) — it doesn't change
+ * the reschedule itself. `specialist` takes the full model (not just the
+ * `{id, timezone}` shape `isSlotAvailable` needs) because the alert also
+ * needs the specialist's email/language.
  */
 export async function rescheduleAppointment(
   appointment: Appointment,
-  specialist: BookingSpecialist,
+  specialist: Specialist,
   serviceDurationMinutes: number,
   newStartAt: Date,
+  initiatedBy: "guest" | "specialist",
 ): Promise<BookingActionResult<Appointment>> {
   if (appointment.status === "cancelled") {
     return { ok: false, formError: "alreadyCancelled" };
@@ -34,6 +41,10 @@ export async function rescheduleAppointment(
       where: { id: appointment.id },
       data: { startAt: newStartAt, endAt: newEndAt },
     });
+    await rescheduleReminderNotification(updated);
+    if (initiatedBy === "guest") {
+      await enqueueGuestRescheduledAlert(updated, specialist);
+    }
     return { ok: true, data: updated };
   } catch (err) {
     if (isSlotConflictError(err)) return { ok: false, formError: "slotTaken" };

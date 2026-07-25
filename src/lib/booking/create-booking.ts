@@ -3,8 +3,11 @@ import { isSlotAvailable } from "@/lib/booking/slots";
 import { validateGuestDetails } from "@/lib/booking/validation";
 import { generateUniqueBookingToken } from "@/lib/booking/token";
 import { isSlotConflictError } from "@/lib/booking/conflict-error";
+import { enqueueBookingNotifications, enqueueNewBookingAlert } from "@/lib/notifications/queue";
+import { routingLocaleToLanguage } from "@/lib/locale";
 import type { BookingActionResult } from "@/lib/booking/errors";
 import type { Appointment } from "@/generated/prisma/client";
+import type { AppLocale } from "@/i18n/routing";
 
 export type CreateGuestBookingInput = {
   specialistId: string;
@@ -14,6 +17,7 @@ export type CreateGuestBookingInput = {
   guestPhone: string;
   guestEmail: string;
   guestNotes: string;
+  guestLocale: AppLocale;
 };
 
 export async function createGuestBooking(
@@ -61,8 +65,14 @@ export async function createGuestBooking(
         guestNotes: input.guestNotes.trim() || null,
         source: "guest_booking",
         bookingToken,
+        guestLocale: routingLocaleToLanguage[input.guestLocale],
       },
     });
+    await enqueueBookingNotifications(appointment);
+    // Guest-initiated only — createManualBooking (Phase 5) doesn't alert
+    // the specialist about their own walk-in/phone entry (02_PRD.md
+    // Section 9: "New booking notification sent to specialist").
+    await enqueueNewBookingAlert(appointment, specialist);
     return { ok: true, data: appointment };
   } catch (err) {
     // The pre-check above already covers the common case; this is the

@@ -45,7 +45,7 @@ export async function cancelAppointmentAction(
   const appointment = await loadOwnedAppointment(session.specialistId, appointmentId);
   if (!appointment) return { formError: "notFound" };
 
-  const result = await cancelAppointment(appointment);
+  const result = await cancelAppointment(appointment, appointment.specialist, "specialist");
   if (!result.ok) return { formError: result.formError };
 
   return redirect({ href: "/dashboard/appointments", locale });
@@ -107,6 +107,7 @@ export async function rescheduleAppointmentAction(
     appointment.specialist,
     appointment.service.durationMinutes,
     startAt,
+    "specialist",
   );
   if (!result.ok) return { formError: result.formError };
 
@@ -173,6 +174,10 @@ export async function createManualAppointmentAction(
     guestPhone: String(formData.get("guestPhone") ?? ""),
     guestEmail: String(formData.get("guestEmail") ?? ""),
     guestNotes: String(formData.get("guestNotes") ?? ""),
+    // No separate guest-language picker in the manual-entry form — the
+    // specialist's own active dashboard locale is the closest available
+    // signal for a walk-in/phone booking they're entering themselves.
+    guestLocale: locale,
   });
   if (!result.ok) return { fieldErrors: result.fieldErrors, formError: result.formError };
 

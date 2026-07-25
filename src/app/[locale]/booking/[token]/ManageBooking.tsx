@@ -10,7 +10,11 @@ type AppointmentSummary = {
   serviceName: string;
   durationMinutes: number;
   priceAmd: number;
-  startAt: string;
+  // Pre-formatted server-side, not `startAt` reformatted here — see the
+  // comment in AppointmentRow.tsx for why: Intl.DateTimeFormat re-run in
+  // this client component during hydration can disagree with the server's
+  // output for less-common locales, causing a hydration mismatch.
+  formattedDateTime: string;
   guestName: string;
   specialistName: string;
   timezone: string;
@@ -55,14 +59,9 @@ export function ManageBooking({
     initialState,
   );
 
-  const dateTimeFormatter = new Intl.DateTimeFormat(locale, {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: appointment.timezone,
-  });
+  // Safe to format client-side: `slotIso` is only ever set from a client
+  // interaction (picking a reschedule slot) after hydration, so this text
+  // never has to match anything the server rendered.
   const slotFormatter = new Intl.DateTimeFormat(locale, {
     weekday: "long",
     month: "long",
@@ -102,7 +101,7 @@ export function ManageBooking({
       <div className="flex flex-col gap-2 rounded-lg border border-brand-charcoal/10 px-4 py-4">
         <p className="text-sm text-brand-charcoal/60">{t("withSpecialist", { name: appointment.specialistName })}</p>
         <p className="text-lg font-semibold text-brand-charcoal">{appointment.serviceName}</p>
-        <p className="text-brand-charcoal">{dateTimeFormatter.format(new Date(appointment.startAt))}</p>
+        <p className="text-brand-charcoal">{appointment.formattedDateTime}</p>
         <p className="text-sm text-brand-charcoal/70">
           {tServices("durationValue", { minutes: appointment.durationMinutes })} ·{" "}
           {tServices("priceValue", { price: appointment.priceAmd })}

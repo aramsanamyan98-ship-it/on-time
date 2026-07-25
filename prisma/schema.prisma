@@ -1,9 +1,10 @@
 // Prisma schema for On-Time (see docs/05_Database.md)
 //
 // Build stage: auth (specialists + token tables), Phase 2 specialist-profile
-// tables (services, working_hours), Phase 3 portfolio_photos, and Phase 4
-// booking-engine tables (appointments, blocked_time) per docs/08_Roadmap.md.
-// notifications_log and referrals are still out of scope until Phase 6/7.
+// tables (services, working_hours), Phase 3 portfolio_photos, Phase 4
+// booking-engine tables (appointments, blocked_time), Phase 5 client_notes,
+// and Phase 6 notifications_log, per docs/08_Roadmap.md. `referrals` is
+// still out of scope until Phase 7.
 //
 // Deviations from the literal field list in 05_Database.md, and why:
 // - `display_name` and `slug` are populated automatically at registration
@@ -65,6 +66,38 @@ enum AppointmentStatus {
 enum AppointmentSource {
   guest_booking
   manual_specialist_entry
+}
+
+// See 05_Database.md `notifications_log` and 02_PRD.md Section 9: guests
+// get `booking_confirmation`/`reminder`; specialists get `new_booking_alert`
+// (new guest booking), `cancellation` (guest-initiated cancel), and
+// `reschedule_alert` (guest-initiated reschedule) — the specialist-side
+// half of 07_Business_Rules.md's "the specialist is notified whenever a
+// guest cancels or reschedules via their link, the same as if the
+// specialist had made the change." `reschedule_alert` isn't in
+// 05_Database.md's literal type list; added because reusing
+// `new_booking_alert` for a reschedule would make the audit log say "new
+// booking" for something that wasn't one. Non-email channels remain
+// documented-but-not-yet-triggered (see `NotificationChannel`).
+enum NotificationType {
+  booking_confirmation
+  reminder
+  cancellation
+  new_booking_alert
+  reschedule_alert
+}
+
+enum NotificationChannel {
+  email
+  whatsapp
+  telegram
+  sms
+}
+
+enum NotificationStatus {
+  queued
+  sent
+  failed
 }
 
 model Specialist {
@@ -186,12 +219,50 @@ model Appointment {
   guestNotes   String?           @map("guest_notes")
   source       AppointmentSource @default(guest_booking)
   bookingToken String            @unique @map("booking_token")
+  // The guest's own language at booking time (02_PRD.md Section 2: guest
+  // language is "stored per booking", independent of the specialist's
+  // dashboard language) — captured here because notifications (Phase 6)
+  // are sent asynchronously, sometimes hours later via the reminder queue,
+  // long after any request/cookie context from the original booking is
+  // gone.
+  guestLocale  Language          @default(am) @map("guest_locale")
   createdAt    DateTime          @default(now()) @map("created_at")
   updatedAt    DateTime          @updatedAt @map("updated_at")
+
+  notifications NotificationLog[]
 
   @@index([specialistId])
   @@index([serviceId])
   @@map("appointments")
+}
+
+// Queue + audit log for notification delivery (05_Database.md
+// `notifications_log`, 02_PRD.md Section 9, 08_Roadmap.md Phase 6). An
+// appointment's success never depends on this table — appointments are
+// always written first; this only records the separate, retryable act of
+// telling someone about it (07_Business_Rules.md Notifications, 10_Risks.md
+// "Client books but specialist doesn't receive it").
+model NotificationLog {
+  id            String              @id @default(uuid())
+  appointmentId String              @map("appointment_id")
+  appointment   Appointment         @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  type          NotificationType
+  channel       NotificationChannel @default(email)
+  recipient     String
+  status        NotificationStatus  @default(queued)
+  // When this notification becomes eligible to send: "now" for a
+  // confirmation, `appointment.startAt` minus the reminder lead time for a
+  // reminder — see REMINDER_LEAD_HOURS in src/lib/notifications/queue.ts.
+  scheduledFor  DateTime            @map("scheduled_for")
+  attempts      Int                 @default(0)
+  attemptedAt   DateTime?           @map("attempted_at")
+  errorMessage  String?             @map("error_message")
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @updatedAt @map("updated_at")
+
+  @@index([status, scheduledFor])
+  @@index([appointmentId])
+  @@map("notifications_log")
 }
 
 // Per-client manual notes (02_PRD.md Section 10 — "not a full CRM ... just a
