@@ -61,6 +61,8 @@ export async function createBookingAction(
     return { formError: "slotInvalid" };
   }
 
+  const referralCode = String(formData.get("referralCode") ?? "").trim() || null;
+
   const result = await createGuestBooking({
     specialistId,
     serviceId,
@@ -70,6 +72,7 @@ export async function createBookingAction(
     guestEmail: String(formData.get("guestEmail") ?? ""),
     guestNotes: String(formData.get("guestNotes") ?? ""),
     guestLocale: locale,
+    referralCode,
   });
 
   if (!result.ok) {

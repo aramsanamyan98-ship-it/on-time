@@ -10,10 +10,13 @@ import { getSlotsForDateAction, getEarliestAvailableAction, createBookingAction 
 
 export default async function NewBookingPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; slug: string }>;
+  searchParams: Promise<{ ref?: string }>;
 }) {
   const { locale, slug } = await params;
+  const { ref } = await searchParams;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
 
@@ -51,6 +54,7 @@ export default async function NewBookingPage({
           specialistId={specialist.id}
           timezone={specialist.timezone}
           locale={locale}
+          referralCode={ref ?? null}
           services={services.map((s) => ({
             id: s.id,
             name: s.name,

@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 import { SlotPicker } from "@/components/booking/SlotPicker";
+import { Link } from "@/i18n/navigation";
 import {
   createManualAppointmentAction,
   getManualBookingSlotsAction,
@@ -211,6 +212,11 @@ export function ManualBookingForm({
                 >
                   {t("pickAnotherTime")}
                 </button>
+              )}
+              {state.formError === "bookingLimitReached" && (
+                <Link href="/dashboard/plan" className="underline">
+                  {tAppointments("viewPlan")}
+                </Link>
               )}
             </p>
           )}

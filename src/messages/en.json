@@ -105,7 +105,8 @@
       "profile": "Profile",
       "portfolio": "Portfolio",
       "workingHours": "Working hours",
-      "services": "Services"
+      "services": "Services",
+      "plan": "Plan"
     },
     "errors": {
       "bioTooLong": "Bio must be 500 characters or fewer.",
@@ -125,6 +126,8 @@
       "timeRequired": "Enter a time.",
       "timeInvalid": "Enter a valid time.",
       "endBeforeStart": "End time must be after start time.",
+      "emailRequired": "Enter an email address.",
+      "emailInvalid": "Enter a valid email address.",
       "notFound": "This item couldn't be found.",
       "generic": "Something went wrong. Please try again."
     }
@@ -249,6 +252,7 @@
       "slotRequired": "Choose a time.",
       "slotInvalid": "This time is no longer valid. Please choose another.",
       "slotTaken": "This time was just taken. Please choose another.",
+      "bookingLimitReached": "No more bookings can be accepted right now.",
       "nameRequired": "Enter your name.",
       "nameTooLong": "Name must be 100 characters or fewer.",
       "phoneRequired": "Enter your phone number.",
@@ -275,7 +279,8 @@
     "addedSuccess": "Appointment added.",
     "newAppointmentTitle": "Add a walk-in or phone booking",
     "newAppointmentSubtitle": "Book an appointment directly onto your calendar — it goes through the same availability check as an online booking.",
-    "noActiveServices": "Add an active service before you can create an appointment."
+    "noActiveServices": "Add an active service before you can create an appointment.",
+    "viewPlan": "View plans"
   },
   "Clients": {
     "title": "Clients",
@@ -300,6 +305,43 @@
       "notFound": "This client couldn't be found.",
       "generic": "Something went wrong. Please try again."
     }
+  },
+  "Subscription": {
+    "title": "Plan & billing",
+    "currentPlanTitle": "Current plan",
+    "planBasic": "Basic (Free)",
+    "planStarter": "Starter",
+    "planPro": "Pro",
+    "trialBadge": "Free trial",
+    "trialDaysRemaining": "{days} days left in your free trial",
+    "trialExpired": "Your free trial has ended — you're now on the Basic (Free) plan.",
+    "basicUsage": "{used}/{limit} bookings used this month",
+    "bookingMilestoneProgress": "{count}/{total} bookings — reach {total} to earn +14 trial days",
+    "referralProgress": "{count} successful referrals so far — every {block} adds +7 trial days",
+    "referralLinkTitle": "Your referral link",
+    "referralLinkHint": "Share this link with clients. When someone books their first appointment through it, it counts as a successful referral — every 5 successful referrals adds 7 days to your trial.",
+    "copyLink": "Copy link",
+    "copied": "Copied!",
+    "inviteTitle": "Invite by email",
+    "inviteEmailLabel": "Client's email",
+    "inviteSend": "Send invite",
+    "inviteSending": "Sending…",
+    "inviteSent": "Invite sent.",
+    "upgradeTitle": "Upgrade your plan",
+    "starterPrice": "6,000 AMD / month",
+    "starterFeature1": "Unlimited bookings",
+    "starterFeature2": "Notifications",
+    "starterFeature3": "Calendar sync",
+    "starterFeature4": "Basic analytics",
+    "starterFeature5": "Reviews",
+    "proPrice": "12,000 AMD / month",
+    "proFeature1": "Everything in Starter",
+    "proFeature2": "CRM-lite and daily reports",
+    "contactToUpgrade": "Contact us to upgrade",
+    "contactSubject": "Upgrading my On-Time plan",
+    "promptBannerText": "You've received 5 bookings! Take a look at Starter and Pro for unlimited bookings and more.",
+    "promptBannerCta": "View plans",
+    "promptBannerDismiss": "Dismiss"
   },
   "NotFound": {
     "title": "We couldn't find this page",
