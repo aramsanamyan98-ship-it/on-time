@@ -11,6 +11,7 @@ const TABS = [
   { href: "/dashboard/portfolio", key: "portfolio" },
   { href: "/dashboard/working-hours", key: "workingHours" },
   { href: "/dashboard/services", key: "services" },
+  { href: "/dashboard/plan", key: "plan" },
 ] as const;
 
 export function DashboardNav() {

@@ -20,6 +20,7 @@ export type BookingErrorCode =
   | "notesTooLong"
   | "notFound"
   | "alreadyCancelled"
+  | "bookingLimitReached"
   | "generic";
 
 export type BookingFieldErrors<K extends string = string> = Partial<Record<K, BookingErrorCode>>;

@@ -6,10 +6,10 @@ import { sendEmail } from "@/lib/mailer";
 import { buildVerificationEmail } from "@/lib/email-templates";
 import { normalizeEmail, validateRegistration } from "@/lib/auth/validation";
 import { routingLocaleToLanguage } from "@/lib/locale";
+import { generateUniqueReferralCode } from "@/lib/subscription/referrals";
+import { TRIAL_LENGTH_MS } from "@/lib/subscription/trial";
 import type { AppLocale } from "@/i18n/routing";
 import type { AuthResult } from "@/lib/auth/errors";
-
-const TRIAL_LENGTH_MS = 30 * 24 * 60 * 60 * 1000; // 30 days, see 07_Business_Rules.md
 
 function displayNameFromEmail(email: string): string {
   const localPart = email.split("@")[0] ?? "specialist";
@@ -56,6 +56,7 @@ export async function registerSpecialist(
   const passwordHash = await hashPassword(password);
   const displayName = displayNameFromEmail(email);
   const slug = await generateUniqueSlug(displayName);
+  const referralCode = await generateUniqueReferralCode();
 
   const specialist = await prisma.specialist.create({
     data: {
@@ -63,6 +64,7 @@ export async function registerSpecialist(
       passwordHash,
       displayName,
       slug,
+      referralCode,
       languagePreference: routingLocaleToLanguage[locale],
       trialEndsAt: new Date(Date.now() + TRIAL_LENGTH_MS),
     },

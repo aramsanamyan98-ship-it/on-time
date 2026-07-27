@@ -23,6 +23,8 @@ export type DashboardErrorCode =
   | "timeRequired"
   | "timeInvalid"
   | "endBeforeStart"
+  | "emailRequired"
+  | "emailInvalid"
   | "notFound"
   | "generic";
 

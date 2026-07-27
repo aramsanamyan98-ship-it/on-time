@@ -10,10 +10,13 @@ import { Link } from "@/i18n/navigation";
 
 export default async function PublicProfilePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; slug: string }>;
+  searchParams: Promise<{ ref?: string }>;
 }) {
   const { locale, slug } = await params;
+  const { ref } = await searchParams;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
 
@@ -119,7 +122,7 @@ export default async function PublicProfilePage({
 
           {services.length > 0 && (
             <Link
-              href={`/book/${slug}/new`}
+              href={ref ? `/book/${slug}/new?ref=${encodeURIComponent(ref)}` : `/book/${slug}/new`}
               className="mt-2 w-fit rounded-md bg-brand-gold px-6 py-3 text-sm font-semibold text-brand-charcoal transition hover:opacity-90"
             >
               {t("bookButton")}

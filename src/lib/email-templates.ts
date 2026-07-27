@@ -188,3 +188,32 @@ export function buildGuestCancelledAlertEmail(locale: AppLocale, params: Special
 export function buildGuestRescheduledAlertEmail(locale: AppLocale, params: SpecialistAlertEmailParams): EmailContent {
   return GUEST_RESCHEDULED_ALERT_COPY[locale](params);
 }
+
+// Referral invite (08_Roadmap.md Phase 7, 02_PRD.md Section 14 "+7 days per
+// 5 invited clients"): sent to the *invitee*, in the *specialist's* dashboard
+// language — unlike guest booking emails, there's no guest-side locale to
+// read yet since this person hasn't booked anything (see
+// src/lib/subscription/referrals.ts).
+export type ReferralInviteEmailParams = { link: string; specialistName: string };
+
+const REFERRAL_INVITE_COPY: Record<AppLocale, (p: ReferralInviteEmailParams) => EmailContent> = {
+  en: (p) => ({
+    subject: `${p.specialistName} invited you to book on On-Time`,
+    text: `${p.specialistName} would like to invite you to book an appointment:\n${p.link}\n\nSee you soon!`,
+    html: `<p>${p.specialistName} would like to invite you to book an appointment:</p><p><a href="${p.link}">${p.link}</a></p><p>See you soon!</p>`,
+  }),
+  ru: (p) => ({
+    subject: `${p.specialistName} приглашает вас записаться на On-Time`,
+    text: `${p.specialistName} приглашает вас записаться на приём:\n${p.link}\n\nДо встречи!`,
+    html: `<p>${p.specialistName} приглашает вас записаться на приём:</p><p><a href="${p.link}">${p.link}</a></p><p>До встречи!</p>`,
+  }),
+  hy: (p) => ({
+    subject: `${p.specialistName}-ը հրավիրում է Ձեզ ամրագրել On-Time-ում`,
+    text: `${p.specialistName}-ը հրավիրում է Ձեզ ամրագրել այց.\n${p.link}\n\nՏեսնվում ենք շուտով!`,
+    html: `<p>${p.specialistName}-ը հրավիրում է Ձեզ ամրագրել այց.</p><p><a href="${p.link}">${p.link}</a></p><p>Տեսնվում ենք շուտով!</p>`,
+  }),
+};
+
+export function buildReferralInviteEmail(locale: AppLocale, params: ReferralInviteEmailParams): EmailContent {
+  return REFERRAL_INVITE_COPY[locale](params);
+}

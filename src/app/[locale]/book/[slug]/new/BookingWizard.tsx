@@ -13,6 +13,7 @@ export function BookingWizard({
   specialistId,
   timezone,
   locale,
+  referralCode,
   services,
   initialDateStr,
   getSlotsForDateAction,
@@ -22,6 +23,7 @@ export function BookingWizard({
   specialistId: string;
   timezone: string;
   locale: string;
+  referralCode: string | null;
   services: Service[];
   initialDateStr: string;
   getSlotsForDateAction: (
@@ -135,6 +137,7 @@ export function BookingWizard({
           <input type="hidden" name="specialistId" value={specialistId} />
           <input type="hidden" name="serviceId" value={selectedService.id} />
           <input type="hidden" name="startAt" value={slotIso} />
+          {referralCode && <input type="hidden" name="referralCode" value={referralCode} />}
 
           <div className="flex flex-col gap-1">
             <label htmlFor="guestName" className="text-sm font-medium text-brand-charcoal">
