@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { forgotPasswordAction, type ForgotPasswordState } from "./actions";
+import { CardHeading } from "@/components/Heading";
 
 const initialState: ForgotPasswordState = {};
 
@@ -15,8 +16,8 @@ export function ForgotPasswordForm() {
   if (state.success) {
     return (
       <div className="flex flex-col gap-4">
-        <h1 className="text-xl font-semibold text-brand-charcoal">{t("successTitle")}</h1>
-        <p className="text-sm text-brand-charcoal/70">{t("successMessage")}</p>
+        <CardHeading>{t("successTitle")}</CardHeading>
+        <p className="body-text text-sm">{t("successMessage")}</p>
         <Link href="/login" className="text-sm font-medium text-brand-green underline">
           {t("backToLogin")}
         </Link>
@@ -27,8 +28,8 @@ export function ForgotPasswordForm() {
   return (
     <form action={formAction} className="flex flex-col gap-4" noValidate>
       <div>
-        <h1 className="text-xl font-semibold text-brand-charcoal">{t("title")}</h1>
-        <p className="mt-1 text-sm text-brand-charcoal/70">{t("subtitle")}</p>
+        <CardHeading>{t("title")}</CardHeading>
+        <p className="body-text mt-2 text-sm">{t("subtitle")}</p>
       </div>
 
       <div className="flex flex-col gap-1">
@@ -53,7 +54,7 @@ export function ForgotPasswordForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="mt-2 rounded-md bg-brand-green px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-60"
+        className="btn-primary mt-2"
       >
         {isPending ? t("submitting") : t("submit")}
       </button>

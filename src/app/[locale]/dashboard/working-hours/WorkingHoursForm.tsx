@@ -17,7 +17,7 @@ export function WorkingHoursForm({ initialSchedule }: { initialSchedule: DaySche
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <div className="flex flex-col divide-y divide-brand-charcoal/10 rounded-lg border border-brand-charcoal/10">
+      <div className="-mx-4 flex flex-col divide-y divide-brand-charcoal/10">
         {initialSchedule.map((day) => {
           const errors = state.dayErrors?.[day.dayOfWeek];
           const isOff = dayOff[day.dayOfWeek];
@@ -84,7 +84,7 @@ export function WorkingHoursForm({ initialSchedule }: { initialSchedule: DaySche
       <button
         type="submit"
         disabled={isPending}
-        className="w-fit rounded-md bg-brand-green px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-60"
+        className="btn-primary w-fit"
       >
         {isPending ? t("saving") : t("save")}
       </button>

@@ -1,46 +1,27 @@
 import { prisma } from "@/lib/prisma";
-import { utcToZonedDateStr, zonedTimeToUtc } from "@/lib/booking/timezone";
 import { hasFullAccess } from "@/lib/subscription/trial";
 import type { Specialist } from "@/generated/prisma/client";
 
-// 02_PRD.md Section 14: Basic (Free) plan includes "limited bookings
-// (~30/month)"; Starter/Pro are unlimited, as is an active trial (which
-// grants Starter-level access — see hasFullAccess).
-export const BASIC_PLAN_MONTHLY_BOOKING_LIMIT = 30;
+// 02_PRD.md Section 14 (updated): Basic (the cheapest paid tier, 4,000
+// AMD/month) is capped at 5 portfolio photos; Starter/Pro (and anyone
+// still in their trial, which grants Starter-level access — see
+// hasFullAccess) get unlimited photos. Bookings themselves are uncapped on
+// every plan, including Basic — this replaces the old ~30 bookings/month
+// Basic cap.
+export const BASIC_PLAN_PORTFOLIO_PHOTO_LIMIT = 5;
 
-function monthWindow(now: Date, timezone: string): { start: Date; end: Date } {
-  const [year, month] = utcToZonedDateStr(now, timezone).split("-").map(Number);
-  const start = zonedTimeToUtc(`${year}-${String(month).padStart(2, "0")}-01`, "00:00", timezone);
-  const nextYear = month === 12 ? year + 1 : year;
-  const nextMonth = month === 12 ? 1 : month + 1;
-  const end = zonedTimeToUtc(`${nextYear}-${String(nextMonth).padStart(2, "0")}-01`, "00:00", timezone);
-  return { start, end };
+export async function countPortfolioPhotos(specialistId: string): Promise<number> {
+  return prisma.portfolioPhoto.count({ where: { specialistId } });
 }
 
 /**
- * Counted by `createdAt` (when the booking was made), not `startAt` — this
- * is a usage cap on how much of the app a Basic specialist can consume in a
- * given calendar month, not a cap on how far out they can be booked.
- */
-export async function countBookingsThisMonth(specialist: Pick<Specialist, "id" | "timezone">): Promise<number> {
-  const { start, end } = monthWindow(new Date(), specialist.timezone);
-  return prisma.appointment.count({
-    where: {
-      specialistId: specialist.id,
-      status: { not: "cancelled" },
-      createdAt: { gte: start, lt: end },
-    },
-  });
-}
-
-/**
- * Enforces 02_PRD.md Section 14's Basic-plan monthly booking cap. Starter/
+ * Enforces 02_PRD.md Section 14's Basic-plan portfolio photo cap. Starter/
  * Pro specialists and anyone still inside their trial are exempt
  * (hasFullAccess) — this only ever blocks a specialist who is both on the
  * `basic` plan value AND past trial expiry, i.e. actually on Basic.
  */
-export async function hasReachedBasicBookingLimit(specialist: Specialist): Promise<boolean> {
+export async function hasReachedBasicPortfolioPhotoLimit(specialist: Specialist): Promise<boolean> {
   if (hasFullAccess(specialist)) return false;
-  const count = await countBookingsThisMonth(specialist);
-  return count >= BASIC_PLAN_MONTHLY_BOOKING_LIMIT;
+  const count = await countPortfolioPhotos(specialist.id);
+  return count >= BASIC_PLAN_PORTFOLIO_PHOTO_LIMIT;
 }

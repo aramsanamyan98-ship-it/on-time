@@ -13,6 +13,7 @@ import {
   cancelBookingAction,
   rescheduleBookingAction,
 } from "./actions";
+import { PageHeading } from "@/components/Heading";
 
 // This is the private link sent in every guest booking confirmation
 // (05_Database.md `booking_token`, 04_User_Flows.md Flow 4b): it doubles as
@@ -54,7 +55,7 @@ export default async function ManageBookingPage({
   return (
     <div className="flex flex-1 flex-col gap-6 px-6 py-8">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold text-brand-charcoal">{t("manageTitle")}</h1>
+        <PageHeading>{t("manageTitle")}</PageHeading>
         <LanguageSwitcher />
       </div>
       <Link href={`/book/${appointment.specialist.slug}`} className="w-fit text-sm text-brand-charcoal/60 underline">

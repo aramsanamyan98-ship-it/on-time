@@ -7,6 +7,7 @@ import { requireSpecialist } from "@/lib/dashboard/require-specialist";
 import { prisma } from "@/lib/prisma";
 import { utcToZonedDateStr } from "@/lib/booking/timezone";
 import { RescheduleForm } from "./RescheduleForm";
+import { PageHeading } from "@/components/Heading";
 
 export default async function RescheduleAppointmentPage({
   params,
@@ -29,17 +30,19 @@ export default async function RescheduleAppointmentPage({
   return (
     <div className="flex max-w-lg flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold text-brand-charcoal">{t("rescheduleTitle")}</h1>
-        <p className="mt-1 text-sm text-brand-charcoal/70">
+        <PageHeading>{t("rescheduleTitle")}</PageHeading>
+        <p className="body-text mt-2 text-sm">
           {appointment.service.name} — {appointment.guestName}
         </p>
       </div>
-      <RescheduleForm
-        appointmentId={appointment.id}
-        timezone={specialist.timezone}
-        locale={locale}
-        initialDateStr={utcToZonedDateStr(new Date(), specialist.timezone)}
-      />
+      <div className="panel">
+        <RescheduleForm
+          appointmentId={appointment.id}
+          timezone={specialist.timezone}
+          locale={locale}
+          initialDateStr={utcToZonedDateStr(new Date(), specialist.timezone)}
+        />
+      </div>
     </div>
   );
 }

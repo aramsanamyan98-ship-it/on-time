@@ -5,8 +5,6 @@ import { generateUniqueBookingToken } from "@/lib/booking/token";
 import { isSlotConflictError } from "@/lib/booking/conflict-error";
 import { enqueueBookingNotifications } from "@/lib/notifications/queue";
 import { routingLocaleToLanguage } from "@/lib/locale";
-import { hasReachedBasicBookingLimit } from "@/lib/subscription/plan-limits";
-import { applyBookingMilestoneExtension } from "@/lib/subscription/trial";
 import type { BookingActionResult } from "@/lib/booking/errors";
 import type { Appointment, Specialist } from "@/generated/prisma/client";
 import type { AppLocale } from "@/i18n/routing";
@@ -48,12 +46,6 @@ export async function createManualBooking(
   });
   if (!service) return { ok: false, formError: "serviceNotFound" };
 
-  // Same Basic-plan monthly cap as guest bookings (02_PRD.md Section 14) —
-  // a specialist's own walk-in/phone entries count against it too.
-  if (await hasReachedBasicBookingLimit(input.specialist)) {
-    return { ok: false, formError: "bookingLimitReached" };
-  }
-
   const available = await isSlotAvailable(input.specialist, service.durationMinutes, input.startAt);
   if (!available) return { ok: false, formError: "slotTaken" };
 
@@ -76,8 +68,7 @@ export async function createManualBooking(
         guestLocale: routingLocaleToLanguage[input.guestLocale],
       },
     });
-    await enqueueBookingNotifications(appointment);
-    await applyBookingMilestoneExtension(input.specialist.id);
+    await enqueueBookingNotifications(appointment, input.specialist);
     return { ok: true, data: appointment };
   } catch (err) {
     // Same race-condition backstop as createGuestBooking: the specialist's

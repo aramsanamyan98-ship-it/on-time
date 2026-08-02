@@ -18,7 +18,7 @@ export function ServiceRow({
   const isActive = state.isActive ?? service.isActive;
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+    <div className="surface-card flex flex-wrap items-center justify-between gap-3">
       <div>
         <p className="font-medium text-brand-charcoal">{service.name}</p>
         <p className="text-sm text-brand-charcoal/60">
@@ -43,11 +43,7 @@ export function ServiceRow({
         <form action={formAction}>
           <input type="hidden" name="serviceId" value={service.id} />
           <input type="hidden" name="isActive" value={String(isActive)} />
-          <button
-            type="submit"
-            disabled={isPending}
-            className="rounded-md border border-brand-charcoal/20 px-3 py-1.5 text-sm font-medium text-brand-charcoal transition hover:border-brand-charcoal/40 disabled:opacity-60"
-          >
+          <button type="submit" disabled={isPending} className="btn-outline px-3 py-1.5">
             {isActive ? t("deactivate") : t("activate")}
           </button>
         </form>

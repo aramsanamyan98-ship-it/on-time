@@ -73,9 +73,9 @@ export function ManageBooking({
 
   if (appointment.status === "cancelled") {
     return (
-      <div className="flex max-w-lg flex-col gap-3 rounded-lg border border-brand-charcoal/10 px-4 py-4">
+      <div className="panel flex max-w-lg flex-col gap-3">
         <p className="font-medium text-brand-charcoal">{t("alreadyCancelledTitle")}</p>
-        <p className="text-sm text-brand-charcoal/70">{t("alreadyCancelledMessage")}</p>
+        <p className="body-text text-sm">{t("alreadyCancelledMessage")}</p>
       </div>
     );
   }
@@ -98,11 +98,11 @@ export function ManageBooking({
         </p>
       )}
 
-      <div className="flex flex-col gap-2 rounded-lg border border-brand-charcoal/10 px-4 py-4">
+      <div className="panel flex flex-col gap-2">
         <p className="text-sm text-brand-charcoal/60">{t("withSpecialist", { name: appointment.specialistName })}</p>
         <p className="text-lg font-semibold text-brand-charcoal">{appointment.serviceName}</p>
         <p className="text-brand-charcoal">{appointment.formattedDateTime}</p>
-        <p className="text-sm text-brand-charcoal/70">
+        <p className="body-text text-sm">
           {tServices("durationValue", { minutes: appointment.durationMinutes })} ·{" "}
           {tServices("priceValue", { price: appointment.priceAmd })}
         </p>
@@ -110,11 +110,7 @@ export function ManageBooking({
 
       {mode === "view" && (
         <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={() => setMode("reschedule")}
-            className="rounded-md bg-brand-green px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
-          >
+          <button type="button" onClick={() => setMode("reschedule")} className="btn-primary">
             {t("reschedule")}
           </button>
           <form
@@ -127,7 +123,7 @@ export function ManageBooking({
             <button
               type="submit"
               disabled={isCancelling}
-              className="rounded-md border border-brand-charcoal/20 px-4 py-2 text-sm font-medium text-red-700 transition hover:border-red-700 disabled:opacity-40"
+              className="rounded-md border border-brand-charcoal/20 px-4 py-2 text-sm font-medium text-red-700 transition hover:border-red-700 hover:bg-red-50 disabled:opacity-40"
             >
               {isCancelling ? t("cancelling") : t("cancel")}
             </button>
@@ -156,7 +152,7 @@ export function ManageBooking({
           />
 
           {slotIso && (
-            <p className="text-sm text-brand-charcoal/70">
+            <p className="body-text text-sm">
               {t("newTimePreview", { time: slotFormatter.format(new Date(slotIso)) })}
             </p>
           )}
@@ -171,7 +167,7 @@ export function ManageBooking({
             <button
               type="submit"
               disabled={!slotIso || isRescheduling}
-              className="w-fit rounded-md bg-brand-gold px-6 py-3 text-sm font-semibold text-brand-charcoal transition hover:opacity-90 disabled:opacity-40"
+              className="btn-accent w-fit"
             >
               {isRescheduling ? t("confirming") : t("confirmReschedule")}
             </button>
@@ -181,7 +177,7 @@ export function ManageBooking({
                 setMode("view");
                 setSlotIso(null);
               }}
-              className="w-fit rounded-md border border-brand-charcoal/20 px-4 py-2 text-sm font-medium text-brand-charcoal"
+              className="btn-outline w-fit"
             >
               {t("keepOriginalTime")}
             </button>

@@ -7,6 +7,7 @@ import { utcToZonedDateStr } from "@/lib/booking/timezone";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { BookingWizard } from "./BookingWizard";
 import { getSlotsForDateAction, getEarliestAvailableAction, createBookingAction } from "./actions";
+import { PageHeading } from "@/components/Heading";
 
 export default async function NewBookingPage({
   params,
@@ -41,14 +42,12 @@ export default async function NewBookingPage({
   return (
     <div className="flex flex-1 flex-col gap-6 px-6 py-8">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold text-brand-charcoal">
-          {t("title", { name: specialist.displayName })}
-        </h1>
+        <PageHeading>{t("title", { name: specialist.displayName })}</PageHeading>
         <LanguageSwitcher />
       </div>
 
       {services.length === 0 ? (
-        <p className="text-brand-charcoal/70">{t("noServicesAvailable")}</p>
+        <p className="body-text">{t("noServicesAvailable")}</p>
       ) : (
         <BookingWizard
           specialistId={specialist.id}

@@ -42,7 +42,7 @@ export function ClientNoteForm({
       <button
         type="submit"
         disabled={isPending}
-        className="w-fit rounded-md bg-brand-green px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-60"
+        className="btn-primary w-fit"
       >
         {isPending ? t("savingNotes") : t("saveNotes")}
       </button>

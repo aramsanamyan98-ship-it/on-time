@@ -22,8 +22,8 @@ export function PortfolioPhotoCard({
   const [moveState, moveAction, isMoving] = useActionState(movePortfolioPhotoAction, initialState);
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="aspect-square overflow-hidden rounded-lg border border-brand-charcoal/10 bg-brand-warm-white">
+    <div className="panel flex flex-col gap-2">
+      <div className="aspect-square overflow-hidden rounded-lg bg-brand-warm-white">
         <Image src={photo.imageUrl} alt="" width={300} height={300} className="h-full w-full object-cover" />
       </div>
       <div className="flex items-center justify-between gap-2">
@@ -35,7 +35,7 @@ export function PortfolioPhotoCard({
               type="submit"
               disabled={isFirst || isMoving}
               aria-label={t("moveUp")}
-              className="rounded-md border border-brand-charcoal/20 px-2 py-1 text-xs text-brand-charcoal disabled:opacity-30"
+              className="rounded-md border border-brand-charcoal/20 px-2 py-1 text-xs text-brand-charcoal transition hover:border-brand-charcoal/40 hover:bg-brand-charcoal/5 disabled:opacity-30"
             >
               &uarr;
             </button>
@@ -47,7 +47,7 @@ export function PortfolioPhotoCard({
               type="submit"
               disabled={isLast || isMoving}
               aria-label={t("moveDown")}
-              className="rounded-md border border-brand-charcoal/20 px-2 py-1 text-xs text-brand-charcoal disabled:opacity-30"
+              className="rounded-md border border-brand-charcoal/20 px-2 py-1 text-xs text-brand-charcoal transition hover:border-brand-charcoal/40 hover:bg-brand-charcoal/5 disabled:opacity-30"
             >
               &darr;
             </button>
@@ -63,7 +63,7 @@ export function PortfolioPhotoCard({
           <button
             type="submit"
             disabled={isDeleting}
-            className="rounded-md border border-brand-charcoal/20 px-2 py-1 text-xs font-medium text-red-700 disabled:opacity-40"
+            className="rounded-md border border-brand-charcoal/20 px-2 py-1 text-xs font-medium text-red-700 transition hover:border-red-700 hover:bg-red-50 disabled:opacity-40"
           >
             {t("delete")}
           </button>

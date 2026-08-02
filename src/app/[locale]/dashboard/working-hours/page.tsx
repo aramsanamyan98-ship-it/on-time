@@ -7,6 +7,7 @@ import { requireSpecialist } from "@/lib/dashboard/require-specialist";
 import { prisma } from "@/lib/prisma";
 import { defaultSchedule, type DaySchedule } from "@/lib/working-hours/defaults";
 import { WorkingHoursForm } from "./WorkingHoursForm";
+import { PageHeading } from "@/components/Heading";
 
 export default async function WorkingHoursPage({
   params,
@@ -37,10 +38,12 @@ export default async function WorkingHoursPage({
   return (
     <div className="flex max-w-2xl flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold text-brand-charcoal">{t("title")}</h1>
-        <p className="mt-1 text-sm text-brand-charcoal/70">{t("subtitle")}</p>
+        <PageHeading>{t("title")}</PageHeading>
+        <p className="body-text mt-2 text-sm">{t("subtitle")}</p>
       </div>
-      <WorkingHoursForm initialSchedule={schedule} />
+      <div className="panel">
+        <WorkingHoursForm initialSchedule={schedule} />
+      </div>
     </div>
   );
 }

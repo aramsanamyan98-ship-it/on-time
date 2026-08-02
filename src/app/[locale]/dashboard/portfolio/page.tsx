@@ -7,6 +7,7 @@ import { requireSpecialist } from "@/lib/dashboard/require-specialist";
 import { prisma } from "@/lib/prisma";
 import { PortfolioUploadForm } from "./PortfolioUploadForm";
 import { PortfolioPhotoCard } from "./PortfolioPhotoCard";
+import { PageHeading } from "@/components/Heading";
 
 export default async function PortfolioPage({
   params,
@@ -28,14 +29,14 @@ export default async function PortfolioPage({
   return (
     <div className="flex max-w-2xl flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold text-brand-charcoal">{t("title")}</h1>
-        <p className="mt-1 text-sm text-brand-charcoal/70">{t("subtitle")}</p>
+        <PageHeading>{t("title")}</PageHeading>
+        <p className="body-text mt-2 text-sm">{t("subtitle")}</p>
       </div>
 
       <PortfolioUploadForm />
 
       {photos.length === 0 ? (
-        <p className="text-sm text-brand-charcoal/70">{t("empty")}</p>
+        <p className="body-text text-sm">{t("empty")}</p>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           {photos.map((photo, index) => (

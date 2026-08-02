@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { utcToZonedDateStr, addDaysToDateStr, zonedTimeToUtc } from "@/lib/booking/timezone";
 import { AppointmentRow } from "./appointments/AppointmentRow";
+import { PageHeading, SectionHeading } from "@/components/Heading";
 
 // 02_PRD.md Section 13 / 04_User_Flows.md Flow 3: dashboard home shows
 // today's appointments first, then the next 7 days. Both ranges are
@@ -79,39 +80,26 @@ export default async function DashboardPage({
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-brand-charcoal">
-          {t("welcomeTitle", { name: specialist.displayName })}
-        </h1>
-      </div>
+      <PageHeading>{t("welcomeTitle", { name: specialist.displayName })}</PageHeading>
 
       <div className="flex flex-wrap gap-3">
-        <Link
-          href="/dashboard/appointments/new"
-          className="rounded-md bg-brand-green px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
-        >
+        <Link href="/dashboard/appointments/new" className="btn-primary">
           {tAppointments("addAppointment")}
         </Link>
-        <Link
-          href="/dashboard/services"
-          className="rounded-md border border-brand-charcoal/20 px-4 py-2 text-sm font-medium text-brand-charcoal transition hover:border-brand-charcoal/40"
-        >
+        <Link href="/dashboard/services" className="btn-outline">
           {t("manageServices")}
         </Link>
-        <Link
-          href="/dashboard/appointments"
-          className="rounded-md border border-brand-charcoal/20 px-4 py-2 text-sm font-medium text-brand-charcoal transition hover:border-brand-charcoal/40"
-        >
+        <Link href="/dashboard/appointments" className="btn-outline">
           {t("viewAllAppointments")}
         </Link>
       </div>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold text-brand-charcoal">{t("todayTitle")}</h2>
+        <SectionHeading>{t("todayTitle")}</SectionHeading>
         {todayAppointments.length === 0 ? (
-          <p className="text-sm text-brand-charcoal/70">{t("todayEmpty")}</p>
+          <p className="body-text text-sm">{t("todayEmpty")}</p>
         ) : (
-          <div className="flex flex-col divide-y divide-brand-charcoal/10 rounded-lg border border-brand-charcoal/10">
+          <div className="flex flex-col gap-3">
             {todayAppointments.map((appointment) => (
               <AppointmentRow key={appointment.id} appointment={toRowAppointment(appointment)} />
             ))}
@@ -120,11 +108,11 @@ export default async function DashboardPage({
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold text-brand-charcoal">{t("upcomingTitle")}</h2>
+        <SectionHeading>{t("upcomingTitle")}</SectionHeading>
         {upcomingAppointments.length === 0 ? (
-          <p className="text-sm text-brand-charcoal/70">{t("upcomingEmpty")}</p>
+          <p className="body-text text-sm">{t("upcomingEmpty")}</p>
         ) : (
-          <div className="flex flex-col divide-y divide-brand-charcoal/10 rounded-lg border border-brand-charcoal/10">
+          <div className="flex flex-col gap-3">
             {upcomingAppointments.map((appointment) => (
               <AppointmentRow key={appointment.id} appointment={toRowAppointment(appointment)} />
             ))}

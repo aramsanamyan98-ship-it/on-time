@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { loadSchedule } from "@/lib/working-hours/load-schedule";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Link } from "@/i18n/navigation";
+import { PageHeading, SectionHeading } from "@/components/Heading";
 
 export default async function PublicProfilePage({
   params,
@@ -96,11 +97,11 @@ export default async function PublicProfilePage({
 
       <div className="flex flex-col gap-8 px-6 pb-10 pt-14 sm:pt-16">
         <div className="flex flex-col gap-3">
-          <h1 className="text-2xl font-semibold text-brand-charcoal">{specialist.displayName}</h1>
-          {specialist.bio && <p className="max-w-prose text-brand-charcoal/70">{specialist.bio}</p>}
+          <PageHeading>{specialist.displayName}</PageHeading>
+          {specialist.bio && <p className="body-text max-w-prose">{specialist.bio}</p>}
 
           {(specialist.phone || specialist.address || specialist.instagramUrl) && (
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-brand-charcoal/70">
+            <div className="body-text flex flex-wrap gap-x-4 gap-y-1 text-sm">
               {specialist.phone && (
                 <a href={`tel:${specialist.phone}`} className="underline">
                   {specialist.phone}
@@ -123,7 +124,7 @@ export default async function PublicProfilePage({
           {services.length > 0 && (
             <Link
               href={ref ? `/book/${slug}/new?ref=${encodeURIComponent(ref)}` : `/book/${slug}/new`}
-              className="mt-2 w-fit rounded-md bg-brand-gold px-6 py-3 text-sm font-semibold text-brand-charcoal transition hover:opacity-90"
+              className="btn-accent mt-2 w-fit"
             >
               {t("bookButton")}
             </Link>
@@ -132,10 +133,13 @@ export default async function PublicProfilePage({
 
         {portfolioPhotos.length > 0 && (
           <section className="flex flex-col gap-3">
-            <h2 className="text-lg font-semibold text-brand-charcoal">{t("portfolioTitle")}</h2>
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+            <SectionHeading>{t("portfolioTitle")}</SectionHeading>
+            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
               {portfolioPhotos.map((photo) => (
-                <div key={photo.id} className="aspect-square overflow-hidden rounded-md bg-brand-charcoal/5">
+                <div
+                  key={photo.id}
+                  className="aspect-square overflow-hidden rounded-lg bg-brand-charcoal/5 shadow-sm"
+                >
                   <Image
                     src={photo.imageUrl}
                     alt=""
@@ -150,16 +154,16 @@ export default async function PublicProfilePage({
         )}
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold text-brand-charcoal">{t("servicesTitle")}</h2>
+          <SectionHeading>{t("servicesTitle")}</SectionHeading>
           {services.length === 0 ? (
-            <p className="text-sm text-brand-charcoal/70">{t("noServices")}</p>
+            <p className="body-text text-sm">{t("noServices")}</p>
           ) : (
-            <div className="flex flex-col divide-y divide-brand-charcoal/10 rounded-lg border border-brand-charcoal/10">
+            <div className="flex flex-col gap-3">
               {services.map((service) => (
-                <div key={service.id} className="flex flex-col gap-1 px-4 py-3">
+                <div key={service.id} className="surface-card flex flex-col gap-1">
                   <div className="flex items-center justify-between gap-4">
                     <span className="font-medium text-brand-charcoal">{service.name}</span>
-                    <span className="whitespace-nowrap text-sm text-brand-charcoal/70">
+                    <span className="body-text whitespace-nowrap text-sm">
                       {tServices("durationValue", { minutes: service.durationMinutes })} ·{" "}
                       {tServices("priceValue", { price: service.priceAmd })}
                     </span>
@@ -174,12 +178,12 @@ export default async function PublicProfilePage({
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold text-brand-charcoal">{t("workingHoursTitle")}</h2>
-          <div className="flex flex-col divide-y divide-brand-charcoal/10 rounded-lg border border-brand-charcoal/10">
+          <SectionHeading>{t("workingHoursTitle")}</SectionHeading>
+          <div className="panel flex flex-col divide-y divide-brand-charcoal/10 p-0">
             {schedule.map((day) => (
               <div key={day.dayOfWeek} className="flex items-center justify-between px-4 py-2 text-sm">
                 <span className="text-brand-charcoal">{tHours(`days.${day.dayOfWeek}`)}</span>
-                <span className="text-brand-charcoal/70">
+                <span className="body-text">
                   {day.isDayOff ? t("dayOff") : `${day.startTime} – ${day.endTime}`}
                 </span>
               </div>

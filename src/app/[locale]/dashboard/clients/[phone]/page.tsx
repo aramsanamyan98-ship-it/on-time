@@ -7,6 +7,7 @@ import { requireSpecialist } from "@/lib/dashboard/require-specialist";
 import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { ClientNoteForm } from "./ClientNoteForm";
+import { PageHeading, SectionHeading } from "@/components/Heading";
 
 export default async function ClientDetailPage({
   params,
@@ -54,25 +55,27 @@ export default async function ClientDetailPage({
       </Link>
 
       <div>
-        <h1 className="text-2xl font-semibold text-brand-charcoal">{latest.guestName}</h1>
-        <p className="text-sm text-brand-charcoal/70">
+        <PageHeading>{latest.guestName}</PageHeading>
+        <p className="body-text mt-2 text-sm">
           {guestPhone}
           {latest.guestEmail ? ` · ${latest.guestEmail}` : ""}
         </p>
       </div>
 
-      <ClientNoteForm guestPhone={guestPhone} initialNotes={note?.notes ?? ""} justSaved={saved === "1"} />
+      <div className="panel">
+        <ClientNoteForm guestPhone={guestPhone} initialNotes={note?.notes ?? ""} justSaved={saved === "1"} />
+      </div>
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold text-brand-charcoal">{t("historyTitle")}</h2>
-        <div className="flex flex-col divide-y divide-brand-charcoal/10 rounded-lg border border-brand-charcoal/10">
+        <SectionHeading>{t("historyTitle")}</SectionHeading>
+        <div className="flex flex-col gap-3">
           {appointments.map((appointment) => (
-            <div key={appointment.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+            <div key={appointment.id} className="surface-card flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-medium text-brand-charcoal">
                   {dateTimeFormatter.format(appointment.startAt)}
                 </p>
-                <p className="text-sm text-brand-charcoal/70">{appointment.service.name}</p>
+                <p className="body-text text-sm">{appointment.service.name}</p>
               </div>
               <span className="whitespace-nowrap rounded-full bg-brand-charcoal/5 px-3 py-1 text-xs font-medium text-brand-charcoal/70">
                 {t(`status.${appointment.status}`)}

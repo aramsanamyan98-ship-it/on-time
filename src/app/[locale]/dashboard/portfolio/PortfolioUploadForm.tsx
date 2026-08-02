@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { uploadPortfolioPhotoAction, type PortfolioActionState } from "./actions";
 
@@ -10,20 +10,24 @@ export function PortfolioUploadForm() {
   const t = useTranslations("Portfolio");
   const tErrors = useTranslations("Dashboard.errors");
   const [state, formAction, isPending] = useActionState(uploadPortfolioPhotoAction, initialState);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
     <form action={formAction} className="flex flex-wrap items-center gap-2">
       <input
+        ref={fileInputRef}
         type="file"
         name="photo"
         accept="image/jpeg,image/png,image/webp"
         required
-        className="text-sm text-brand-charcoal/70"
+        className="sr-only"
+        onChange={(e) => e.currentTarget.form?.requestSubmit()}
       />
       <button
-        type="submit"
+        type="button"
         disabled={isPending}
-        className="rounded-md border border-brand-charcoal/20 px-3 py-1.5 text-sm font-medium text-brand-charcoal transition hover:border-brand-charcoal/40 disabled:opacity-60"
+        onClick={() => fileInputRef.current?.click()}
+        className="btn-outline px-3 py-1.5"
       >
         {isPending ? t("uploading") : t("addPhoto")}
       </button>

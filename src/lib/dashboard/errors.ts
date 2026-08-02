@@ -26,6 +26,7 @@ export type DashboardErrorCode =
   | "emailRequired"
   | "emailInvalid"
   | "notFound"
+  | "portfolioLimitReached"
   | "generic";
 
 export type FieldErrors<K extends string = string> = Partial<Record<K, DashboardErrorCode>>;

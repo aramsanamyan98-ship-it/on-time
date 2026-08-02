@@ -1,10 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import type { Specialist } from "@/generated/prisma/client";
 
-// 02_PRD.md Section 14 / 07_Business_Rules.md Trial & Billing Rules.
-export const TRIAL_LENGTH_DAYS = 30;
-export const BOOKING_MILESTONE_COUNT = 10;
-export const BOOKING_MILESTONE_EXTENSION_DAYS = 14;
+// 02_PRD.md Section 14 (updated) / 08_Roadmap.md Phase 7 follow-up: flat
+// 3-month trial replaces the old 30-day + booking-milestone model. Referral
+// extensions are unchanged.
+export const TRIAL_LENGTH_DAYS = 90;
 export const REFERRAL_BLOCK_SIZE = 5;
 export const REFERRAL_EXTENSION_DAYS = 7;
 export const SUBSCRIPTION_PROMPT_BOOKING_THRESHOLD = 5;
@@ -20,8 +20,8 @@ export function isTrialActive(specialist: TrialFields): boolean {
 
 /**
  * Whether a specialist currently gets Starter-level access — either because
- * they've actually upgraded, or because their trial (base 30 days plus any
- * extensions) hasn't run out yet. `plan` itself is never written to
+ * they've actually upgraded, or because their trial (base 3 months plus any
+ * referral extensions) hasn't run out yet. `plan` itself is never written to
  * "basic" on trial expiry (see prisma/schema.prisma header comment); this
  * is the one place that "drop" is expressed.
  */
@@ -42,34 +42,6 @@ export function trialDaysRemaining(specialist: TrialFields): number {
  */
 export async function countBookings(specialistId: string): Promise<number> {
   return prisma.appointment.count({ where: { specialistId, status: { not: "cancelled" } } });
-}
-
-/**
- * +14-day trial extension the first time a specialist reaches 10 total
- * bookings (07_Business_Rules.md: "additive", granted once). Safe to call
- * after every booking is created — `bookingMilestoneExtendedAt` makes
- * every call after the first a no-op, and never throws so it can't affect
- * the booking action that triggered it.
- */
-export async function applyBookingMilestoneExtension(specialistId: string): Promise<void> {
-  try {
-    const specialist = await prisma.specialist.findUnique({ where: { id: specialistId } });
-    if (!specialist || specialist.bookingMilestoneExtendedAt) return;
-
-    const count = await countBookings(specialistId);
-    if (count < BOOKING_MILESTONE_COUNT) return;
-
-    const base = isTrialActive(specialist) ? specialist.trialEndsAt! : new Date();
-    await prisma.specialist.update({
-      where: { id: specialistId },
-      data: {
-        trialEndsAt: new Date(base.getTime() + BOOKING_MILESTONE_EXTENSION_DAYS * DAY_MS),
-        bookingMilestoneExtendedAt: new Date(),
-      },
-    });
-  } catch (err) {
-    console.error("[subscription] failed to apply booking milestone extension:", err);
-  }
 }
 
 /**

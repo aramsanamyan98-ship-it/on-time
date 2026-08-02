@@ -23,7 +23,7 @@ export function ReferralBox({ link }: { link: string }) {
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);
         }}
-        className="w-fit rounded-md border border-brand-charcoal/20 px-4 py-2 text-sm font-medium text-brand-charcoal transition hover:border-brand-charcoal/40"
+        className="btn-outline w-fit"
       >
         {copied ? t("copied") : t("copyLink")}
       </button>

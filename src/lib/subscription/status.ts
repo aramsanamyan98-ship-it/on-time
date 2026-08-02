@@ -1,12 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import {
-  isTrialActive,
-  trialDaysRemaining,
-  countBookings,
-  BOOKING_MILESTONE_COUNT,
-  SUBSCRIPTION_PROMPT_BOOKING_THRESHOLD,
-} from "@/lib/subscription/trial";
-import { countBookingsThisMonth, BASIC_PLAN_MONTHLY_BOOKING_LIMIT } from "@/lib/subscription/plan-limits";
+import { isTrialActive, trialDaysRemaining, countBookings, SUBSCRIPTION_PROMPT_BOOKING_THRESHOLD } from "@/lib/subscription/trial";
+import { countPortfolioPhotos, BASIC_PLAN_PORTFOLIO_PHOTO_LIMIT } from "@/lib/subscription/plan-limits";
+import { PLAN_PRICE_AMD } from "@/lib/subscription/pricing";
 import type { Specialist } from "@/generated/prisma/client";
 
 export type PlanStatus = {
@@ -15,12 +10,13 @@ export type PlanStatus = {
   trialEndsAt: Date | null;
   trialDaysRemaining: number;
   bookingCount: number;
-  bookingMilestoneReached: boolean;
   successfulReferralCount: number;
   showSubscriptionPrompt: boolean;
   /** Only meaningful once actually on Basic (past trial, not upgraded) — null otherwise. */
-  basicMonthlyBookingsUsed: number | null;
-  basicMonthlyBookingLimit: number;
+  basicPortfolioPhotosUsed: number | null;
+  basicPortfolioPhotoLimit: number;
+  /** 02_PRD.md Section 14 (updated): every plan value, including "basic", now has a real monthly price — there's no free tier once the trial ends. */
+  currentPlanPriceAmd: number;
 };
 
 /**
@@ -30,10 +26,10 @@ export type PlanStatus = {
  */
 export async function getPlanStatus(specialist: Specialist): Promise<PlanStatus> {
   const trialActive = isTrialActive(specialist);
-  const [bookingCount, successfulReferralCount, basicMonthlyBookingsUsed] = await Promise.all([
+  const [bookingCount, successfulReferralCount, basicPortfolioPhotosUsed] = await Promise.all([
     countBookings(specialist.id),
     prisma.referral.count({ where: { specialistId: specialist.id, status: "booked_first_appointment" } }),
-    specialist.plan === "basic" && !trialActive ? countBookingsThisMonth(specialist) : Promise.resolve(null),
+    specialist.plan === "basic" && !trialActive ? countPortfolioPhotos(specialist.id) : Promise.resolve(null),
   ]);
 
   return {
@@ -42,15 +38,19 @@ export async function getPlanStatus(specialist: Specialist): Promise<PlanStatus>
     trialEndsAt: specialist.trialEndsAt,
     trialDaysRemaining: trialDaysRemaining(specialist),
     bookingCount,
-    bookingMilestoneReached: bookingCount >= BOOKING_MILESTONE_COUNT || !!specialist.bookingMilestoneExtendedAt,
     successfulReferralCount,
     // Only nudge specialists who haven't upgraded yet — Starter/Pro
-    // specialists have already made the decision this prompt is for.
+    // specialists have already made the decision this prompt is for. Never
+    // during an active trial (02_PRD.md Section 14, updated): trialing
+    // specialists already have full Starter-level access and shouldn't see
+    // an upgrade paywall/prompt before the trial itself has run out.
     showSubscriptionPrompt:
       specialist.plan === "basic" &&
+      !trialActive &&
       !specialist.subscriptionPromptDismissedAt &&
       bookingCount >= SUBSCRIPTION_PROMPT_BOOKING_THRESHOLD,
-    basicMonthlyBookingsUsed,
-    basicMonthlyBookingLimit: BASIC_PLAN_MONTHLY_BOOKING_LIMIT,
+    basicPortfolioPhotosUsed,
+    basicPortfolioPhotoLimit: BASIC_PLAN_PORTFOLIO_PHOTO_LIMIT,
+    currentPlanPriceAmd: PLAN_PRICE_AMD[specialist.plan],
   };
 }
