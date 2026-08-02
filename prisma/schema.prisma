@@ -54,6 +54,21 @@
 //   `booking_milestone_extended_at` column were removed (see the
 //   `remove_booking_milestone_phase7_update` migration) rather than kept
 //   as a dead field.
+// - `reviews` (08_Roadmap.md Phase 9, 02_PRD.md Section 14 Starter
+//   feature): `appointmentId` is `@unique` rather than a plain FK — that's
+//   the entire enforcement of "one review per appointment, no editing" (a
+//   second insert for the same appointment simply violates the unique
+//   constraint; there's no update path in the app at all, matching "no
+//   editing after submission"). `specialistId` is denormalized onto the
+//   row (not just reachable via `appointment.specialistId`) so the public
+//   profile page and dashboard reviews list can query/aggregate directly
+//   by specialist without joining through `appointments` for every read —
+//   the same rationale as `ClientNote.specialistId` below. Guest identity
+//   (name/phone) is deliberately NOT copied onto `Review` — the public
+//   profile only ever needs the guest's first name for display, which is
+//   read from `appointment.guestName` at query time, keeping the privacy
+//   boundary (no phone, no full name) enforced by what the query selects
+//   rather than by what's stored.
 
 generator client {
   provider = "prisma-client"
@@ -116,6 +131,7 @@ enum NotificationType {
   cancellation
   new_booking_alert
   reschedule_alert
+  review_request
 }
 
 enum NotificationChannel {
@@ -170,6 +186,7 @@ model Specialist {
   blockedTime             BlockedTime[]
   clientNotes             ClientNote[]
   referrals               Referral[]
+  reviews                 Review[]
 
   @@map("specialists")
 }
@@ -271,6 +288,7 @@ model Appointment {
   updatedAt    DateTime          @updatedAt @map("updated_at")
 
   notifications NotificationLog[]
+  review        Review?
 
   @@index([specialistId])
   @@index([serviceId])
@@ -342,6 +360,26 @@ model Referral {
 
   @@index([specialistId])
   @@map("referrals")
+}
+
+// Guest-authored review of a completed appointment (08_Roadmap.md Phase 9,
+// 02_PRD.md Section 14 — Starter tier and above). One review per
+// appointment, guest-submitted, never editable — see the schema header
+// comment for how `appointmentId`'s uniqueness enforces both. Submission
+// eligibility (appointment not cancelled, and its `endAt` has passed) is
+// application logic, not a DB constraint — see src/lib/reviews.
+model Review {
+  id            String      @id @default(uuid())
+  appointmentId String      @unique @map("appointment_id")
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  specialistId  String      @map("specialist_id")
+  specialist    Specialist  @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  rating        Int
+  comment       String?
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  @@index([specialistId])
+  @@map("reviews")
 }
 
 model EmailVerificationToken {

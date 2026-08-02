@@ -5,9 +5,11 @@ import { prisma } from "@/lib/prisma";
 import { getSlotsForDate, findEarliestAvailable } from "@/lib/booking/slots";
 import { cancelAppointment } from "@/lib/booking/cancel-booking";
 import { rescheduleAppointment } from "@/lib/booking/reschedule-booking";
+import { submitReview } from "@/lib/reviews/submit-review";
 import { redirect } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import type { BookingErrorCode } from "@/lib/booking/errors";
+import type { ReviewErrorCode, ReviewFieldErrors } from "@/lib/reviews/errors";
 
 function loadAppointmentByToken(token: string) {
   return prisma.appointment.findUnique({
@@ -88,4 +90,32 @@ export async function rescheduleBookingAction(
   if (!result.ok) return { formError: result.formError };
 
   return redirect({ href: `/booking/${token}?rescheduled=1`, locale });
+}
+
+export type ReviewFormState = {
+  fieldErrors?: ReviewFieldErrors<"rating" | "comment">;
+  formError?: ReviewErrorCode;
+  success?: boolean;
+  submittedRating?: number;
+  submittedComment?: string | null;
+};
+
+/**
+ * 08_Roadmap.md Phase 9: no redirect on success (unlike cancel/reschedule
+ * above) — the form swaps in place for a "thanks for your review" state
+ * using the just-submitted rating/comment, since there's nothing else on
+ * this page that needs a fresh server render to reflect.
+ */
+export async function submitReviewAction(
+  _prevState: ReviewFormState,
+  formData: FormData,
+): Promise<ReviewFormState> {
+  const token = String(formData.get("token") ?? "");
+  const rating = Number(formData.get("rating") ?? "0");
+  const comment = String(formData.get("comment") ?? "");
+
+  const result = await submitReview(token, rating, comment);
+  if (!result.ok) return { fieldErrors: result.fieldErrors, formError: result.formError };
+
+  return { success: true, submittedRating: result.data.rating, submittedComment: result.data.comment };
 }

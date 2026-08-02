@@ -3,6 +3,7 @@ import { sendEmail } from "@/lib/mailer";
 import {
   buildBookingConfirmationEmail,
   buildReminderEmail,
+  buildReviewRequestEmail,
   buildNewBookingAlertEmail,
   buildGuestCancelledAlertEmail,
   buildGuestRescheduledAlertEmail,
@@ -73,6 +74,9 @@ export async function sendNotification(row: NotificationLog, appointment: Appoin
       break;
     case "reminder":
       content = buildReminderEmail(guestLocale, guestParams(appointment, guestLocale));
+      break;
+    case "review_request":
+      content = buildReviewRequestEmail(guestLocale, guestParams(appointment, guestLocale));
       break;
     case "new_booking_alert":
       content = buildNewBookingAlertEmail(specialistLocale, specialistParams(appointment, specialistLocale));

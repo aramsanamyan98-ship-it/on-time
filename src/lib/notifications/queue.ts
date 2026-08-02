@@ -31,6 +31,29 @@ async function enqueueReminderIfNeeded(appointment: Appointment): Promise<void> 
 }
 
 /**
+ * 08_Roadmap.md Phase 9: prompts the guest to leave a review once their
+ * appointment is actually over — scheduled for `endAt`, not gated by plan
+ * (unlike the reminder above). Reviews can be submitted regardless of the
+ * specialist's plan (only *displaying* them publicly is Starter+ — see
+ * 02_PRD.md Section 14 and src/app/[locale]/book/[slug]/page.tsx), so a
+ * Basic specialist still gets to collect reviews ahead of upgrading.
+ */
+async function enqueueReviewRequestIfNeeded(appointment: Appointment): Promise<void> {
+  if (!appointment.guestEmail) return;
+  if (appointment.endAt.getTime() <= Date.now()) return; // nothing to schedule ahead of time for
+
+  await prisma.notificationLog.create({
+    data: {
+      appointmentId: appointment.id,
+      type: "review_request",
+      channel: "email",
+      recipient: appointment.guestEmail,
+      scheduledFor: appointment.endAt,
+    },
+  });
+}
+
+/**
  * Queues one immediately-due notification and schedules a post-response
  * processing pass — the shared shape behind every enqueue* function below.
  * Never throws: a failed enqueue must not affect the booking action that
@@ -66,6 +89,13 @@ async function enqueueNow(appointmentId: string, type: NotificationType, recipie
 export async function enqueueBookingNotifications(appointment: Appointment, specialist: Specialist): Promise<void> {
   if (!appointment.guestEmail) return; // only channel implemented this phase is email (02_PRD.md Section 9); nothing to queue without an address
   await enqueueNow(appointment.id, "booking_confirmation", appointment.guestEmail);
+
+  try {
+    await enqueueReviewRequestIfNeeded(appointment);
+  } catch (err) {
+    console.error("[notifications] failed to enqueue review request:", err);
+  }
+
   if (!hasFullAccess(specialist)) return;
   try {
     await enqueueReminderIfNeeded(appointment);
@@ -111,6 +141,23 @@ export async function rescheduleReminderNotification(appointment: Appointment, s
     await enqueueReminderIfNeeded(appointment);
   } catch (err) {
     console.error("[notifications] failed to reschedule reminder notification:", err);
+  }
+}
+
+/**
+ * Same idea as rescheduleReminderNotification, for the review-request
+ * notification — keeps it pointed at the appointment's new `endAt` instead
+ * of firing (or having already fired) for a time the appointment no
+ * longer occupies. Not plan-gated, matching enqueueReviewRequestIfNeeded.
+ */
+export async function rescheduleReviewRequestNotification(appointment: Appointment): Promise<void> {
+  try {
+    await prisma.notificationLog.deleteMany({
+      where: { appointmentId: appointment.id, type: "review_request", status: "queued" },
+    });
+    await enqueueReviewRequestIfNeeded(appointment);
+  } catch (err) {
+    console.error("[notifications] failed to reschedule review request notification:", err);
   }
 }
 

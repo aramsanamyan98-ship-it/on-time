@@ -103,19 +103,42 @@ bill monthly only.** Follow-up work:
    plan/subscription page.~~ Superseded: the final model removed
    commitment-length pricing entirely in favor of a single monthly price
    per tier (Basic/Starter/Pro), shown side by side on the Plan page.
-5. Do NOT enable real billing/payment collection for Starter until
-   Reviews (see "Later / Explicitly Deferred" below) is either built or
-   removed from the advertised feature list. **Still applies** — Reviews
-   is not built; the Starter feature list already omits it (see the Plan
-   page), so this blocker only applies once/if Reviews gets marketed
-   again. Basic and Pro billing aren't blocked by this (neither has ever
-   listed Reviews).
+5. ~~Do NOT enable real billing/payment collection for Starter until
+   Reviews is either built or removed from the advertised feature
+   list.~~ Resolved — Reviews is now built (Phase 9 below) and back in
+   the Starter feature list.
 
 ## Phase 8 — Marketing Site Connection
 
 - Webflow site live on `ontime.am`
 - Sign-up/CTA buttons correctly linking to `app.ontime.am/register`
 - Consistent branding between Webflow and app (see 09_Brand_Guidelines.md)
+
+## Phase 9 — Reviews (COMPLETED)
+
+- `Review` model: one per completed appointment, guest-authored, 1–5
+  star rating + optional comment, never editable after submission (see
+  prisma/schema.prisma, src/lib/reviews)
+- Guest submission via the existing booking-token page
+  (`/booking/[token]`), enabled once the appointment's `endAt` has
+  passed and it wasn't cancelled — plus a proactive "how was your
+  appointment?" email pointing at that same link
+  (`review_request` notification type)
+- Public profile (`book/[slug]`): average rating near the top, full
+  review list below the portfolio/services section — Starter tier and
+  above only (02_PRD.md Section 14); Basic still collects reviews, they
+  just aren't displayed publicly yet
+- Dashboard: specialists can view every review (average + full list,
+  with full guest name for context) on any plan, with no delete/hide
+  action anywhere — reviews can't be edited or removed once submitted,
+  by design, to keep the system trustworthy
+- Public-page reviewer identity is reduced to first name/"Anonymous" —
+  never phone or full name
+
+**Exit criteria:** a guest can leave one review per completed
+appointment; it shows up correctly (right average, right list) on a
+Starter+ specialist's public profile, and is visible to the specialist
+on their dashboard regardless of plan.
 
 ## Later / Explicitly Deferred (v2+)
 
@@ -124,11 +147,6 @@ bill monthly only.** Follow-up work:
 - Marketplace search/discovery (browsing all specialists, not just direct
   links)
 - Multi-staff/multi-location support
-- Reviews — not yet built. 02_PRD.md Section 14 deliberately leaves it
-  out of the Starter feature list for now; it's expected to be added to
-  Starter as a separate future task once built (see Section 14's
-  "Important implementation note — Reviews"). Don't market or sell
-  Starter with reviews as a live feature until then.
 - CRM-lite / advanced analytics (Pro plan features)
 - SMS notifications (if WhatsApp/Telegram prove sufficient)
 

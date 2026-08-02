@@ -106,6 +106,7 @@
       "portfolio": "Портфолио",
       "workingHours": "Часы работы",
       "services": "Услуги",
+      "reviews": "Отзывы",
       "plan": "Тариф"
     },
     "errors": {
@@ -204,7 +205,11 @@
     "servicesTitle": "Услуги",
     "workingHoursTitle": "Часы работы",
     "noServices": "Услуги пока не указаны.",
-    "dayOff": "Выходной"
+    "dayOff": "Выходной",
+    "reviewsTitle": "Отзывы",
+    "reviewCount": "{count} отзывов",
+    "ratingAriaLabel": "{rating} из 5 звёзд",
+    "anonymousReviewer": "Анонимно"
   },
   "Booking": {
     "title": "Запись к {name}",
@@ -245,6 +250,13 @@
     "noAvailability": "Свободное время не найдено.",
     "dayOffMessage": "В этот день специалист не работает.",
     "noSlotsMessage": "На этот день свободного времени не осталось.",
+    "reviewTitle": "Оставить отзыв",
+    "reviewThanks": "Спасибо за ваш отзыв!",
+    "reviewCommentPlaceholder": "Расскажите пару слов о своём опыте (необязательно)",
+    "submitReview": "Отправить отзыв",
+    "submittingReview": "Отправка…",
+    "ratingStarLabel": "Оценить на {star} из 5 звёзд",
+    "ratingAriaLabel": "{rating} из 5 звёзд",
     "errors": {
       "serviceRequired": "Выберите услугу.",
       "serviceNotFound": "Эта услуга больше недоступна.",
@@ -261,6 +273,11 @@
       "notesTooLong": "Комментарий должен содержать не более 500 символов.",
       "notFound": "Эта запись не найдена.",
       "alreadyCancelled": "Эта запись уже отменена.",
+      "ratingRequired": "Выберите оценку в звёздах.",
+      "ratingInvalid": "Выберите оценку от 1 до 5 звёзд.",
+      "commentTooLong": "Комментарий должен содержать не более 1000 символов.",
+      "reviewNotEligibleYet": "Вы сможете оставить отзыв после того, как приём состоится.",
+      "alreadyReviewed": "Вы уже оставили отзыв для этой записи.",
       "generic": "Что-то пошло не так. Попробуйте ещё раз."
     }
   },
@@ -305,6 +322,14 @@
       "generic": "Что-то пошло не так. Попробуйте ещё раз."
     }
   },
+  "Reviews": {
+    "title": "Отзывы",
+    "empty": "У вас пока нет отзывов.",
+    "noneYet": "Пока нет отзывов",
+    "reviewCount": "{count} отзывов",
+    "ratingAriaLabel": "{rating} из 5 звёзд",
+    "upgradeNote": "Ваши отзывы пока не отображаются на публичной странице — доступно на тарифах Starter и выше."
+  },
   "Subscription": {
     "title": "Тариф и оплата",
     "currentPlanTitle": "Текущий тариф",
@@ -336,6 +361,7 @@
     "starterFeature2": "Полные уведомления-напоминания",
     "starterFeature3": "Заметки о клиентах",
     "starterFeature4": "Базовая аналитика",
+    "starterFeature5": "Отзывы клиентов на вашей публичной странице",
     "proFeature1": "Всё, что есть в Starter",
     "proFeature2": "CRM-lite и ежедневные отчёты",
     "contactToUpgrade": "Связаться для перехода на другой тариф",

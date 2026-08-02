@@ -1,7 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { isSlotAvailable } from "@/lib/booking/slots";
 import { isSlotConflictError } from "@/lib/booking/conflict-error";
-import { rescheduleReminderNotification, enqueueGuestRescheduledAlert } from "@/lib/notifications/queue";
+import {
+  rescheduleReminderNotification,
+  rescheduleReviewRequestNotification,
+  enqueueGuestRescheduledAlert,
+} from "@/lib/notifications/queue";
 import type { BookingActionResult } from "@/lib/booking/errors";
 import type { Appointment, Specialist } from "@/generated/prisma/client";
 
@@ -42,6 +46,7 @@ export async function rescheduleAppointment(
       data: { startAt: newStartAt, endAt: newEndAt },
     });
     await rescheduleReminderNotification(updated, specialist);
+    await rescheduleReviewRequestNotification(updated);
     if (initiatedBy === "guest") {
       await enqueueGuestRescheduledAlert(updated, specialist);
     }

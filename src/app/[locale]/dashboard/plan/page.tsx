@@ -15,8 +15,8 @@ import { PageHeading, SectionHeading } from "@/components/Heading";
 const CONTACT_EMAIL = "hello@ontime.am";
 
 // 02_PRD.md Section 14 (updated): three paid tiers, monthly billing only.
-// Reviews is deliberately left out of Starter's bullet list — not built
-// yet (see 08_Roadmap.md Phase 7 follow-up).
+// Reviews (08_Roadmap.md Phase 9) is back in Starter's bullet list now
+// that it's built — see src/lib/reviews.
 const PLAN_TIERS: { plan: Plan; nameKey: "planBasic" | "planStarter" | "planPro"; featureKeys: string[] }[] = [
   {
     plan: "basic",
@@ -26,7 +26,7 @@ const PLAN_TIERS: { plan: Plan; nameKey: "planBasic" | "planStarter" | "planPro"
   {
     plan: "starter",
     nameKey: "planStarter",
-    featureKeys: ["starterFeature1", "starterFeature2", "starterFeature3", "starterFeature4"],
+    featureKeys: ["starterFeature1", "starterFeature2", "starterFeature3", "starterFeature4", "starterFeature5"],
   },
   {
     plan: "pro",
