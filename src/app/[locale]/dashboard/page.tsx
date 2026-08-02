@@ -7,8 +7,10 @@ import { requireSpecialist } from "@/lib/dashboard/require-specialist";
 import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { utcToZonedDateStr, addDaysToDateStr, zonedTimeToUtc } from "@/lib/booking/timezone";
+import { getReviewStats } from "@/lib/reviews/queries";
 import { AppointmentRow } from "./appointments/AppointmentRow";
 import { PageHeading, SectionHeading } from "@/components/Heading";
+import { StarRating } from "@/components/StarRating";
 
 // 02_PRD.md Section 13 / 04_User_Flows.md Flow 3: dashboard home shows
 // today's appointments first, then the next 7 days. Both ranges are
@@ -29,6 +31,13 @@ export default async function DashboardPage({
   const specialist = await requireSpecialist(locale as AppLocale);
   const t = await getTranslations("Dashboard");
   const tAppointments = await getTranslations("Appointments");
+  const tReviews = await getTranslations("Reviews");
+
+  // 08_Roadmap.md Phase 9: shown regardless of plan — a specialist can see
+  // their own average rating even on Basic, where reviews still get
+  // collected (see src/lib/notifications/queue.ts) but aren't yet shown
+  // publicly (see src/app/[locale]/book/[slug]/page.tsx).
+  const reviewStats = await getReviewStats(specialist.id);
 
   const todayStr = utcToZonedDateStr(new Date(), specialist.timezone);
   const todayStart = zonedTimeToUtc(todayStr, "00:00", specialist.timezone);
@@ -93,6 +102,19 @@ export default async function DashboardPage({
           {t("viewAllAppointments")}
         </Link>
       </div>
+
+      <Link href="/dashboard/reviews" className="surface-card flex w-fit items-center gap-3">
+        {reviewStats.count > 0 && reviewStats.average !== null ? (
+          <>
+            <StarRating value={reviewStats.average} />
+            <span className="text-sm font-medium text-brand-charcoal">
+              {reviewStats.average.toFixed(1)} · {tReviews("reviewCount", { count: reviewStats.count })}
+            </span>
+          </>
+        ) : (
+          <span className="body-text text-sm">{tReviews("noneYet")}</span>
+        )}
+      </Link>
 
       <section className="flex flex-col gap-3">
         <SectionHeading>{t("todayTitle")}</SectionHeading>

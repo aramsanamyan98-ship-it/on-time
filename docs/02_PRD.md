@@ -228,7 +228,9 @@ ends. There is no permanent free option; all three are billed monthly
 - Client list (basic — appointment history visible, but **no notes
   field**)
 - No analytics/reports
-- No reviews (see "Reviews" note below)
+- No reviews shown on the public profile (guests can still leave one via
+  the specialist's booking-token link — see "Reviews" note below — it's
+  just not displayed until the specialist is on Starter or above)
 
 ### Starter — 6,000 AMD/month
 
@@ -239,8 +241,8 @@ Everything in Basic, plus:
   reminder)
 - Client notes field
 - Basic analytics (booking counts over time)
-
-Reviews is **not** included here yet — see the caveat below.
+- Guest reviews displayed on the public profile (average rating +
+  individual reviews — see "Reviews" note below)
 
 ### Pro — 12,000 AMD/month
 
@@ -251,13 +253,28 @@ Everything in Starter, plus:
   positioned as a Pro-tier feature if not made universal — decide at
   implementation time
 
-### Important implementation note — Reviews
+### Reviews (08_Roadmap.md Phase 9)
 
-Reviews is deliberately **not** part of the Starter feature list above —
-it hasn't been built yet (it was explicitly deferred in the original
-Section 15 "Out of Scope for v1" list). It's expected to be added to
-Starter as a separate future task once built; don't market or sell
-Starter with reviews as a live feature until then.
+Built: a guest who booked an appointment can leave a one-time,
+non-editable 1–5 star rating + optional comment once the appointment's
+time has passed, via the same private booking-token link used for
+self-service cancel/reschedule (also sent proactively as a "how was
+your appointment?" email once it's over). One review per appointment.
+
+Reviews are collected regardless of the specialist's plan — a Basic
+specialist still accumulates reviews, they just aren't shown on their
+public profile until they're on Starter or above; this is a deliberate
+upgrade incentive (their reviews are already visible to *them* on the
+dashboard the moment they upgrade, nothing has to backfill). Specialists
+can view every review from their dashboard but can never delete or hide
+one — this is what makes the review system trustworthy.
+
+The public profile shows an average rating prominently near the top and
+the full list of individual reviews below the portfolio/services
+section. Reviewer identity is reduced to a first name (or "Anonymous")
+on the public page — never phone or full name — even though the
+specialist's own dashboard view shows the full guest name for context
+(they already have that guest's full details via Clients/Appointments).
 
 ### Marketing/positioning note (for landing page and pricing page copy)
 

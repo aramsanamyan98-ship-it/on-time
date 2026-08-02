@@ -101,12 +101,34 @@ const REMINDER_COPY: Record<AppLocale, (p: AppointmentEmailParams) => EmailConte
   }),
 };
 
+const REVIEW_REQUEST_COPY: Record<AppLocale, (p: AppointmentEmailParams) => EmailContent> = {
+  en: (p) => ({
+    subject: `How was your appointment with ${p.specialistName}?`,
+    text: `Hi ${p.guestName},\n\nWe hope your appointment went well:\n\n${p.serviceName} with ${p.specialistName}\n${p.dateTime}\n\nMind leaving a quick review? It helps ${p.specialistName} and other clients:\n${p.manageLink}\n\nThank you!`,
+    html: `<p>Hi ${p.guestName},</p><p>We hope your appointment went well:</p><p><strong>${p.serviceName}</strong> with ${p.specialistName}<br>${p.dateTime}</p><p>Mind leaving a quick review? It helps ${p.specialistName} and other clients: <a href="${p.manageLink}">Leave a review</a>.</p><p>Thank you!</p>`,
+  }),
+  ru: (p) => ({
+    subject: `Как прошла ваша запись к ${p.specialistName}?`,
+    text: `Здравствуйте, ${p.guestName}!\n\nНадеемся, ваша запись прошла хорошо:\n\n${p.serviceName} у ${p.specialistName}\n${p.dateTime}\n\nНе могли бы вы оставить короткий отзыв? Это поможет ${p.specialistName} и другим клиентам:\n${p.manageLink}\n\nСпасибо!`,
+    html: `<p>Здравствуйте, ${p.guestName}!</p><p>Надеемся, ваша запись прошла хорошо:</p><p><strong>${p.serviceName}</strong> у ${p.specialistName}<br>${p.dateTime}</p><p>Не могли бы вы оставить короткий отзыв? Это поможет ${p.specialistName} и другим клиентам: <a href="${p.manageLink}">Оставить отзыв</a>.</p><p>Спасибо!</p>`,
+  }),
+  hy: (p) => ({
+    subject: `Ինչպե՞ս անցավ Ձեր այցը ${p.specialistName}-ի մոտ`,
+    text: `Բարև Ձեզ, ${p.guestName}։\n\nՀուսով ենք՝ Ձեր այցը լավ անցավ.\n\n${p.serviceName} — ${p.specialistName}\n${p.dateTime}\n\nԿկարողանա՞ք թողնել կարճ կարծիք։ Դա կօգնի ${p.specialistName}-ին և այլ հաճախորդների.\n${p.manageLink}\n\nՇնորհակալություն!`,
+    html: `<p>Բարև Ձեզ, ${p.guestName}։</p><p>Հուսով ենք՝ Ձեր այցը լավ անցավ.</p><p><strong>${p.serviceName}</strong> — ${p.specialistName}<br>${p.dateTime}</p><p>Կկարողանա՞ք թողնել կարճ կարծիք։ Դա կօգնի ${p.specialistName}-ին և այլ հաճախորդների. <a href="${p.manageLink}">Թողնել կարծիք</a>։</p><p>Շնորհակալություն!</p>`,
+  }),
+};
+
 export function buildBookingConfirmationEmail(locale: AppLocale, params: AppointmentEmailParams): EmailContent {
   return BOOKING_CONFIRMATION_COPY[locale](params);
 }
 
 export function buildReminderEmail(locale: AppLocale, params: AppointmentEmailParams): EmailContent {
   return REMINDER_COPY[locale](params);
+}
+
+export function buildReviewRequestEmail(locale: AppLocale, params: AppointmentEmailParams): EmailContent {
+  return REVIEW_REQUEST_COPY[locale](params);
 }
 
 // Specialist-facing alerts (02_PRD.md Section 9 "New booking notification

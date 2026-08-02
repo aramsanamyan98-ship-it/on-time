@@ -90,6 +90,31 @@ needing to guess. Update this file whenever a new ambiguous case comes up
 - Reminder timing before an appointment: **open decision** — e.g., 24
   hours and/or 2 hours before. Decide before Phase 6.
 
+## Reviews
+
+(See 02_PRD.md Section 14 and 08_Roadmap.md Phase 9.)
+
+- Only the guest who made a specific booking can review it, via the same
+  private booking-token link used for self-service cancel/reschedule.
+- A review can only be submitted once the appointment's time has passed
+  (there's no "completed" status transition anywhere in the app — this
+  is a straight comparison against `end_at`, not a status check) and only
+  if the appointment was never cancelled.
+- One review per appointment, enforced at the database level (a unique
+  constraint on `appointment_id`, not just an application check).
+- Reviews can never be edited after submission — there is no update path
+  in the app, only insert.
+- Reviews are collected on every plan, including Basic — only *displaying*
+  them on the public profile is Starter-tier and above. Basic specialists
+  still see their own reviews on their dashboard.
+- Specialists can view every review from their dashboard, on any plan,
+  but can never delete or hide one. This is deliberate: a review system a
+  specialist can curate isn't trustworthy to guests.
+- The public profile shows the guest as a first name (or "Anonymous") —
+  never phone or full name. The specialist's own dashboard view shows the
+  full guest name, since they already have full access to that guest's
+  details elsewhere (Clients/Appointments).
+
 ## Language Rules
 
 - A specialist's dashboard language is independent from a guest's booking

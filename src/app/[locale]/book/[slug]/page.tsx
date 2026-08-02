@@ -5,9 +5,12 @@ import Image from "next/image";
 import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { loadSchedule } from "@/lib/working-hours/load-schedule";
+import { hasFullAccess } from "@/lib/subscription/trial";
+import { getReviewStats, listReviewsForPublicProfile } from "@/lib/reviews/queries";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Link } from "@/i18n/navigation";
 import { PageHeading, SectionHeading } from "@/components/Heading";
+import { StarRating } from "@/components/StarRating";
 
 export default async function PublicProfilePage({
   params,
@@ -34,6 +37,8 @@ export default async function PublicProfilePage({
       instagramUrl: true,
       emailVerifiedAt: true,
       deletedAt: true,
+      plan: true,
+      trialEndsAt: true,
     },
   });
 
@@ -44,7 +49,14 @@ export default async function PublicProfilePage({
     notFound();
   }
 
-  const [services, schedule, portfolioPhotos] = await Promise.all([
+  // 02_PRD.md Section 14 (updated) / 08_Roadmap.md Phase 9: reviews are a
+  // Starter-tier-and-above feature. Basic-plan specialists (past trial)
+  // still collect reviews (see src/lib/notifications/queue.ts) — this only
+  // gates whether they're shown on the *public* page, not whether a guest
+  // can submit one.
+  const showReviews = hasFullAccess(specialist);
+
+  const [services, schedule, portfolioPhotos, reviewStats, reviews] = await Promise.all([
     prisma.service.findMany({
       where: { specialistId: specialist.id, isActive: true },
       orderBy: { createdAt: "asc" },
@@ -54,11 +66,15 @@ export default async function PublicProfilePage({
       where: { specialistId: specialist.id },
       orderBy: { sortOrder: "asc" },
     }),
+    showReviews ? getReviewStats(specialist.id) : Promise.resolve({ average: null, count: 0 }),
+    showReviews ? listReviewsForPublicProfile(specialist.id) : Promise.resolve([]),
   ]);
 
   const t = await getTranslations("PublicProfile");
   const tHours = await getTranslations("WorkingHours");
   const tServices = await getTranslations("Services");
+
+  const reviewDateFormatter = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" });
 
   return (
     <div className="flex flex-1 flex-col">
@@ -98,6 +114,19 @@ export default async function PublicProfilePage({
       <div className="flex flex-col gap-8 px-6 pb-10 pt-14 sm:pt-16">
         <div className="flex flex-col gap-3">
           <PageHeading>{specialist.displayName}</PageHeading>
+
+          {reviewStats.count > 0 && reviewStats.average !== null && (
+            <div className="flex items-center gap-2">
+              <StarRating
+                value={reviewStats.average}
+                className="text-lg"
+                ariaLabel={t("ratingAriaLabel", { rating: reviewStats.average.toFixed(1) })}
+              />
+              <span className="font-semibold text-brand-charcoal">{reviewStats.average.toFixed(1)}</span>
+              <span className="body-text text-sm">{t("reviewCount", { count: reviewStats.count })}</span>
+            </div>
+          )}
+
           {specialist.bio && <p className="body-text max-w-prose">{specialist.bio}</p>}
 
           {(specialist.phone || specialist.address || specialist.instagramUrl) && (
@@ -176,6 +205,31 @@ export default async function PublicProfilePage({
             </div>
           )}
         </section>
+
+        {reviewStats.count > 0 && (
+          <section className="flex flex-col gap-3">
+            <SectionHeading>{t("reviewsTitle")}</SectionHeading>
+            <div className="flex flex-col gap-3">
+              {reviews.map((review) => (
+                <div key={review.id} className="surface-card flex flex-col gap-1">
+                  <div className="flex items-center justify-between gap-4">
+                    <StarRating
+                      value={review.rating}
+                      ariaLabel={t("ratingAriaLabel", { rating: review.rating })}
+                    />
+                    <span className="text-xs text-brand-charcoal/50">
+                      {reviewDateFormatter.format(review.createdAt)}
+                    </span>
+                  </div>
+                  {review.comment && <p className="body-text text-sm">{review.comment}</p>}
+                  <span className="text-xs font-medium text-brand-charcoal/60">
+                    {review.firstName ?? t("anonymousReviewer")}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="flex flex-col gap-3">
           <SectionHeading>{t("workingHoursTitle")}</SectionHeading>

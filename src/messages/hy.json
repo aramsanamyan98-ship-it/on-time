@@ -106,6 +106,7 @@
       "portfolio": "Պորտֆոլիո",
       "workingHours": "Աշխատանքային ժամեր",
       "services": "Ծառայություններ",
+      "reviews": "Կարծիքներ",
       "plan": "Փաթեթ"
     },
     "errors": {
@@ -204,7 +205,11 @@
     "servicesTitle": "Ծառայություններ",
     "workingHoursTitle": "Աշխատանքային ժամեր",
     "noServices": "Ծառայություններ դեռ նշված չեն։",
-    "dayOff": "Հանգստյան օր"
+    "dayOff": "Հանգստյան օր",
+    "reviewsTitle": "Կարծիքներ",
+    "reviewCount": "{count} կարծիք",
+    "ratingAriaLabel": "{rating}՝ 5 աստղից",
+    "anonymousReviewer": "Անանուն"
   },
   "Booking": {
     "title": "Ամրագրել {name}-ի մոտ",
@@ -245,6 +250,13 @@
     "noAvailability": "Առաջիկա ազատ ժամեր չեն գտնվել։",
     "dayOffMessage": "Մասնագետը այս օրը չի աշխատում։",
     "noSlotsMessage": "Այս օրվա համար ազատ ժամեր չեն մնացել։",
+    "reviewTitle": "Թողնել կարծիք",
+    "reviewThanks": "Շնորհակալություն կարծիքի համար!",
+    "reviewCommentPlaceholder": "Կիսվեք մի քանի բառով ձեր փորձի մասին (ոչ պարտադիր)",
+    "submitReview": "Ուղարկել կարծիքը",
+    "submittingReview": "Ուղարկվում է…",
+    "ratingStarLabel": "Գնահատեք {star}՝ 5-ից աստղով",
+    "ratingAriaLabel": "{rating}՝ 5 աստղից",
     "errors": {
       "serviceRequired": "Ընտրեք ծառայություն։",
       "serviceNotFound": "Այս ծառայությունն այլևս հասանելի չէ։",
@@ -261,6 +273,11 @@
       "notesTooLong": "Մեկնաբանությունը պետք է լինի առավելագույնը 500 նիշ։",
       "notFound": "Այս ամրագրումը չի գտնվել։",
       "alreadyCancelled": "Այս ամրագրումն արդեն չեղարկվել է։",
+      "ratingRequired": "Ընտրեք աստղանիշ գնահատական։",
+      "ratingInvalid": "Ընտրեք 1-ից 5 աստղանիշ գնահատական։",
+      "commentTooLong": "Մեկնաբանությունը պետք է լինի առավելագույնը 1000 նիշ։",
+      "reviewNotEligibleYet": "Կարող եք թողնել կարծիք միայն ձեր այցից հետո։",
+      "alreadyReviewed": "Դուք արդեն թողել եք կարծիք այս ամրագրման համար։",
       "generic": "Ինչ-որ բան այն չէ։ Խնդրում ենք կրկին փորձել։"
     }
   },
@@ -305,6 +322,14 @@
       "generic": "Ինչ-որ բան այն չէ։ Խնդրում ենք կրկին փորձել։"
     }
   },
+  "Reviews": {
+    "title": "Կարծիքներ",
+    "empty": "Դուք դեռ կարծիքներ չունեք։",
+    "noneYet": "Կարծիքներ դեռ չկան",
+    "reviewCount": "{count} կարծիք",
+    "ratingAriaLabel": "{rating}՝ 5 աստղից",
+    "upgradeNote": "Ձեր կարծիքները դեռ ցուցադրված չեն ձեր հանրային էջում․ հասանելի են Starter և ավելի բարձր փաթեթներում։"
+  },
   "Subscription": {
     "title": "Փաթեթ և վճարում",
     "currentPlanTitle": "Ընթացիկ փաթեթ",
@@ -336,6 +361,7 @@
     "starterFeature2": "Լրիվ հիշեցումների ծանուցումներ",
     "starterFeature3": "Հաճախորդի նշումներ",
     "starterFeature4": "Հիմնական վերլուծություն",
+    "starterFeature5": "Հաճախորդների կարծիքներ ձեր հանրային էջում",
     "proFeature1": "Starter-ի ամեն ինչ",
     "proFeature2": "CRM-lite և օրական հաշվետվություններ",
     "contactToUpgrade": "Կապնվել՝ փաթեթը փոխելու համար",

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { utcToZonedDateStr } from "@/lib/booking/timezone";
+import { isAppointmentReviewable } from "@/lib/reviews/eligibility";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Link } from "@/i18n/navigation";
 import { ManageBooking } from "./ManageBooking";
@@ -12,6 +13,7 @@ import {
   getRescheduleEarliestAction,
   cancelBookingAction,
   rescheduleBookingAction,
+  submitReviewAction,
 } from "./actions";
 import { PageHeading } from "@/components/Heading";
 
@@ -37,6 +39,12 @@ export default async function ManageBookingPage({
     include: { specialist: true, service: true },
   });
   if (!appointment) notFound();
+
+  // 08_Roadmap.md Phase 9: the review section only ever shows once the
+  // appointment is actually over, and reflects an already-submitted review
+  // (if any) so reloading this link never shows the form again — see
+  // src/lib/reviews/eligibility.ts.
+  const existingReview = await prisma.review.findUnique({ where: { appointmentId: appointment.id } });
 
   const t = await getTranslations("Booking");
 
@@ -82,6 +90,9 @@ export default async function ManageBookingPage({
         getEarliestAvailableAction={getRescheduleEarliestAction}
         cancelBookingAction={cancelBookingAction}
         rescheduleBookingAction={rescheduleBookingAction}
+        canReview={isAppointmentReviewable(appointment)}
+        initialReview={existingReview ? { rating: existingReview.rating, comment: existingReview.comment } : null}
+        submitReviewAction={submitReviewAction}
       />
     </div>
   );

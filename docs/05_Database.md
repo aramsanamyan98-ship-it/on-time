@@ -105,7 +105,8 @@ appointments, and blocked time, however far into the future that extends
 ### `notifications_log`
 - id
 - appointment_id (FK)
-- type (booking_confirmation / reminder / cancellation / new_booking_alert)
+- type (booking_confirmation / reminder / cancellation / new_booking_alert
+  / reschedule_alert / review_request)
 - channel (email / whatsapp / telegram / sms)
 - recipient (email or phone)
 - status (queued / sent / failed)
@@ -123,12 +124,28 @@ corrupts a booking, and so failures can be retried/audited (see
 - status (invited / booked_first_appointment)
 - created_at
 
+### `reviews` (08_Roadmap.md Phase 9, 02_PRD.md Section 14 — Starter tier
+and above)
+- id
+- appointment_id (FK, unique — one review per appointment; no editing
+  after submission, so there's no update path, only insert)
+- specialist_id (FK — denormalized off `appointment_id` so specialist-
+  scoped reads/aggregates don't need to join through `appointments`)
+- rating (integer, 1–5)
+- comment (nullable)
+- created_at
+
+No `guest_name`/`guest_phone` columns here — the public profile only
+ever needs a first name for display, read from the related
+`appointments.guest_name` at query time (see src/lib/reviews/queries.ts),
+keeping the "no phone, no full name" privacy rule enforced by what's
+queried rather than by what's stored.
+
 ## Tables Deferred to Later Versions (do not build in v1)
 
 - `customers` (account-based customer history — v1 uses guest fields
   directly on `appointments` instead)
 - `payments` / `deposits`
-- `reviews`
 - `employees` / `shops` (multi-staff, multi-location)
 - `subscriptions_billing` (if billing is manual/off-platform initially,
   this can be a simple `plan` field on `specialists` for now)
