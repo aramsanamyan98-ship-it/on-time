@@ -3,7 +3,6 @@
 import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 import { SlotPicker } from "@/components/booking/SlotPicker";
-import { Link } from "@/i18n/navigation";
 import {
   createManualAppointmentAction,
   getManualBookingSlotsAction,
@@ -68,7 +67,7 @@ export function ManualBookingForm({
                 setSlotIso(null);
                 setStep("datetime");
               }}
-              className="flex items-center justify-between gap-4 rounded-lg border border-brand-charcoal/10 px-4 py-3 text-left transition hover:border-brand-gold"
+              className="surface-card flex items-center justify-between gap-4 text-left hover:border-brand-gold"
             >
               <span className="font-medium text-brand-charcoal">{service.name}</span>
               <span className="whitespace-nowrap text-sm text-brand-charcoal/70">
@@ -102,7 +101,7 @@ export function ManualBookingForm({
             type="button"
             disabled={!slotIso}
             onClick={() => setStep("details")}
-            className="w-fit rounded-md bg-brand-green px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-40"
+            className="btn-primary w-fit"
           >
             {t("continue")}
           </button>
@@ -119,7 +118,7 @@ export function ManualBookingForm({
             {t("changeTime")}
           </button>
 
-          <div className="rounded-lg border border-brand-charcoal/10 px-4 py-3 text-sm text-brand-charcoal">
+          <div className="panel text-sm text-brand-charcoal">
             <p className="font-medium">{selectedService.name}</p>
             <p className="text-brand-charcoal/70">{slotFormatter.format(new Date(slotIso))}</p>
           </div>
@@ -213,18 +212,13 @@ export function ManualBookingForm({
                   {t("pickAnotherTime")}
                 </button>
               )}
-              {state.formError === "bookingLimitReached" && (
-                <Link href="/dashboard/plan" className="underline">
-                  {tAppointments("viewPlan")}
-                </Link>
-              )}
             </p>
           )}
 
           <button
             type="submit"
             disabled={isPending}
-            className="mt-2 w-fit rounded-md bg-brand-gold px-6 py-3 text-sm font-semibold text-brand-charcoal transition hover:opacity-90 disabled:opacity-60"
+            className="btn-accent mt-2 w-fit"
           >
             {isPending ? t("confirming") : tAppointments("addAppointment")}
           </button>

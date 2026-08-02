@@ -7,6 +7,7 @@ import { requireSpecialist } from "@/lib/dashboard/require-specialist";
 import { prisma } from "@/lib/prisma";
 import { ServiceForm } from "../../ServiceForm";
 import { updateServiceAction } from "../../actions";
+import { PageHeading } from "@/components/Heading";
 
 export default async function EditServicePage({
   params,
@@ -25,17 +26,19 @@ export default async function EditServicePage({
 
   return (
     <div className="flex max-w-lg flex-col gap-6">
-      <h1 className="text-2xl font-semibold text-brand-charcoal">{t("editServiceTitle")}</h1>
-      <ServiceForm
-        action={updateServiceAction}
-        serviceId={service.id}
-        initialValues={{
-          name: service.name,
-          durationMinutes: String(service.durationMinutes),
-          priceAmd: String(service.priceAmd),
-          description: service.description ?? "",
-        }}
-      />
+      <PageHeading>{t("editServiceTitle")}</PageHeading>
+      <div className="panel">
+        <ServiceForm
+          action={updateServiceAction}
+          serviceId={service.id}
+          initialValues={{
+            name: service.name,
+            durationMinutes: String(service.durationMinutes),
+            priceAmd: String(service.priceAmd),
+            description: service.description ?? "",
+          }}
+        />
+      </div>
     </div>
   );
 }

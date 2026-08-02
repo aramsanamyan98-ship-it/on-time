@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { resendVerificationAction, type ResendState } from "../check-email/actions";
 import { loginAction, type LoginState } from "./actions";
+import { CardHeading } from "@/components/Heading";
 
 const initialState: LoginState = {};
 const initialResendState: ResendState = {};
@@ -40,8 +41,8 @@ export function LoginForm() {
     <div className="flex flex-col gap-4">
       <form action={formAction} className="flex flex-col gap-4" noValidate>
         <div>
-          <h1 className="text-xl font-semibold text-brand-charcoal">{t("title")}</h1>
-          <p className="mt-1 text-sm text-brand-charcoal/70">{t("subtitle")}</p>
+          <CardHeading>{t("title")}</CardHeading>
+          <p className="body-text mt-2 text-sm">{t("subtitle")}</p>
         </div>
 
         <div className="flex flex-col gap-1">
@@ -96,7 +97,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={isPending}
-          className="mt-2 rounded-md bg-brand-green px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-60"
+          className="btn-primary mt-2"
         >
           {isPending ? t("submitting") : t("submit")}
         </button>

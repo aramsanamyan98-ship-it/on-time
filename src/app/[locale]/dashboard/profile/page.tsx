@@ -6,6 +6,7 @@ import type { AppLocale } from "@/i18n/routing";
 import { requireSpecialist } from "@/lib/dashboard/require-specialist";
 import { PhotoUploadForm } from "./PhotoUploadForm";
 import { ProfileForm } from "./ProfileForm";
+import { PageHeading } from "@/components/Heading";
 
 export default async function ProfilePage({
   params,
@@ -21,17 +22,19 @@ export default async function ProfilePage({
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
-      <h1 className="text-2xl font-semibold text-brand-charcoal">{t("title")}</h1>
+      <PageHeading>{t("title")}</PageHeading>
 
       <PhotoUploadForm kind="cover" initialUrl={specialist.coverPhotoUrl} />
       <PhotoUploadForm kind="profile" initialUrl={specialist.profilePhotoUrl} />
 
-      <ProfileForm
-        bio={specialist.bio ?? ""}
-        phone={specialist.phone ?? ""}
-        address={specialist.address ?? ""}
-        instagramUrl={specialist.instagramUrl ?? ""}
-      />
+      <div className="panel">
+        <ProfileForm
+          bio={specialist.bio ?? ""}
+          phone={specialist.phone ?? ""}
+          address={specialist.address ?? ""}
+          instagramUrl={specialist.instagramUrl ?? ""}
+        />
+      </div>
     </div>
   );
 }

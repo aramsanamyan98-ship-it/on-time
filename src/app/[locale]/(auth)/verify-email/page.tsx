@@ -3,6 +3,7 @@ import { hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
+import { CardHeading } from "@/components/Heading";
 
 export default async function VerifyEmailPage({
   params,
@@ -20,8 +21,8 @@ export default async function VerifyEmailPage({
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-semibold text-brand-charcoal">{t("invalidTitle")}</h1>
-      <p className="text-sm text-brand-charcoal/70">{t("invalidMessage")}</p>
+      <CardHeading>{t("invalidTitle")}</CardHeading>
+      <p className="body-text text-sm">{t("invalidMessage")}</p>
       <Link href="/login" className="text-sm font-medium text-brand-green underline">
         {t("resendLink")}
       </Link>

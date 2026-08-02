@@ -41,7 +41,7 @@ export async function rescheduleAppointment(
       where: { id: appointment.id },
       data: { startAt: newStartAt, endAt: newEndAt },
     });
-    await rescheduleReminderNotification(updated);
+    await rescheduleReminderNotification(updated, specialist);
     if (initiatedBy === "guest") {
       await enqueueGuestRescheduledAlert(updated, specialist);
     }

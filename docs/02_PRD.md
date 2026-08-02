@@ -170,26 +170,109 @@ influence v1 architecture beyond leaving room for it later.
 
 Revenue reporting and analytics are v1.x/v2, not launch-blocking.
 
-## 14. Subscription / Billing Tiers
+## 14. Subscription / Billing Tiers (Updated)
 
-Per the original pricing model:
+### Rationale for this update
 
-| Plan | Price | Includes |
-|---|---|---|
-| Basic (Free) | 0 | Profile page, booking link, limited bookings (~30/month), basic availability |
-| Starter | 6,000 AMD/month | Unlimited bookings, notifications, calendar sync, basic analytics, reviews |
-| Pro (later) | 12,000 AMD/month | Everything in Starter + CRM-lite, daily reports |
+The original model gated the free tier by booking volume (~30
+bookings/month) and extended trials by booking count. In practice, the
+real adoption risk for a new specialist isn't booking volume — it's
+behavior change (getting clients to actually use the link instead of
+calling/DMing). A volume cap can penalize a slow-starting specialist at
+exactly the moment they need patience most. This update replaces the
+booking-count model with a flat time-based trial and feature-based tier
+gating instead — simpler to explain, and fairer to specialists who are
+still promoting their link.
 
-Trial logic:
-- 30-day full access on signup
-- +14 days if specialist reaches 10 bookings
-- +7 days per 5 invited clients (referral)
-- Push a subscription prompt once a specialist has received 5 bookings
-  through the app
+This also supersedes an earlier revision of this section that kept
+Basic as a permanent free tier with commitment-length (monthly/3-month/
+12-month) discount pricing on Starter/Pro. That approach is dropped:
+**there is no free tier once the trial ends, and billing is monthly
+only across all three paid plans** — see below.
 
-Billing itself (charging the specialist for Starter/Pro) is separate from
-Section 11 (guest payments) — this is On-Time charging the specialist, not
-the specialist charging their client. Payment method for this can be a
+This update was also informed by direct competitive analysis of InQ
+(inq.am), the main local competitor — see 09_Brand_Guidelines.md's
+"Naming & Positioning Notes" for the fuller comparison. Key takeaway
+driving this pricing structure: InQ caps portfolio photos even on its
+paid tiers (5/10/15/30 images depending on plan). On-Time should not
+replicate this — uncapped photos on Starter/Pro is a deliberate,
+statable differentiator.
+
+### Free Trial (all new specialists)
+
+- **3 months, flat, automatic, no card required** — replaces the old
+  30-day + booking-based extension model.
+- Full Starter-tier feature access during the trial.
+- Referral extensions still apply on top of the trial: **+7 days for
+  every 5 successful referrals** (unchanged from the original model —
+  this still rewards active promotion during the trial period).
+- No in-app upgrade paywall/prompt during the trial — let specialists
+  use the full feature set to actually experience the product's value
+  before being asked to pay.
+
+### After the trial ends: no free tier — three paid plans, monthly billing only
+
+Every specialist moves to one of the three plans below once their trial
+ends. There is no permanent free option; all three are billed monthly
+(no commitment-length discounts).
+
+### Basic — 4,000 AMD/month
+
+- Public profile page (`book.ontime.am/[slug]`)
+- **Portfolio: limited to 5 photos**
+- **Unlimited bookings** (no volume cap — this was the old model's
+  restriction; removed)
+- Booking confirmation notification only — **no reminder
+  notifications**
+- Dashboard: today's/upcoming appointments, manual appointment entry
+- Client list (basic — appointment history visible, but **no notes
+  field**)
+- No analytics/reports
+- No reviews (see "Reviews" note below)
+
+### Starter — 6,000 AMD/month
+
+Everything in Basic, plus:
+- **Unlimited portfolio photos** (explicit differentiator vs. InQ's
+  capped tiers)
+- Full reminder notifications (booking confirmation + pre-appointment
+  reminder)
+- Client notes field
+- Basic analytics (booking counts over time)
+
+Reviews is **not** included here yet — see the caveat below.
+
+### Pro — 12,000 AMD/month
+
+Everything in Starter, plus:
+- Daily reports and statistics
+- Deeper client management (CRM-lite, per original PRD intent)
+- (Future, once built) WhatsApp/Telegram notification delivery may be
+  positioned as a Pro-tier feature if not made universal — decide at
+  implementation time
+
+### Important implementation note — Reviews
+
+Reviews is deliberately **not** part of the Starter feature list above —
+it hasn't been built yet (it was explicitly deferred in the original
+Section 15 "Out of Scope for v1" list). It's expected to be added to
+Starter as a separate future task once built; don't market or sell
+Starter with reviews as a live feature until then.
+
+### Marketing/positioning note (for landing page and pricing page copy)
+
+This structure supports a direct, honest competitive claim against InQ:
+On-Time's Starter tier (6,000 AMD) sits between InQ's Individual (3,000
+AMD) and Basic (6,800 AMD) tiers, while including unlimited bookings,
+unlimited photos, and full notifications — features InQ gates behind
+its two most expensive tiers (12,200–15,500 AMD). This comparison can
+be stated plainly on a pricing page once built: "More than InQ's
+cheapest plan. Less than InQ's mid-tier plan. No caps on your growth,
+either way."
+
+Billing itself (charging the specialist for Basic/Starter/Pro) is separate
+from Section 11 (guest payments) — this is On-Time charging the specialist,
+not the specialist charging their client. Payment method for this can be a
 simple card/manual invoice process initially; it does not need to be
 automated in the very first version if it slows launch.
 

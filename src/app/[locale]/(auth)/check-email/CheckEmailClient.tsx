@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import { resendVerificationAction, type ResendState } from "./actions";
+import { CardHeading } from "@/components/Heading";
 
 const initialState: ResendState = {};
 
@@ -12,14 +13,14 @@ export function CheckEmailClient({ email }: { email: string }) {
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <h1 className="text-xl font-semibold text-brand-charcoal">{t("title")}</h1>
-      <p className="text-sm text-brand-charcoal/70">{t("message", { email })}</p>
+      <CardHeading>{t("title")}</CardHeading>
+      <p className="body-text text-sm">{t("message", { email })}</p>
       <input type="hidden" name="email" value={email} />
 
       {state.sent ? (
         <p className="text-sm text-brand-green">{t("resendSent")}</p>
       ) : (
-        <p className="text-sm text-brand-charcoal/70">
+        <p className="body-text text-sm">
           {t("resendPrompt")}{" "}
           <button
             type="submit"

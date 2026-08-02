@@ -5,8 +5,6 @@ import { generateUniqueBookingToken } from "@/lib/booking/token";
 import { isSlotConflictError } from "@/lib/booking/conflict-error";
 import { enqueueBookingNotifications, enqueueNewBookingAlert } from "@/lib/notifications/queue";
 import { routingLocaleToLanguage } from "@/lib/locale";
-import { hasReachedBasicBookingLimit } from "@/lib/subscription/plan-limits";
-import { applyBookingMilestoneExtension } from "@/lib/subscription/trial";
 import { recordReferralBookingIfEligible } from "@/lib/subscription/referrals";
 import type { BookingActionResult } from "@/lib/booking/errors";
 import type { Appointment } from "@/generated/prisma/client";
@@ -51,14 +49,6 @@ export async function createGuestBooking(
   });
   if (!service) return { ok: false, formError: "serviceNotFound" };
 
-  // 02_PRD.md Section 14: Basic-plan specialists (past trial, not
-  // upgraded) are capped at ~30 bookings/month. Kept generic/plan-neutral
-  // for the guest-facing message — a guest shouldn't learn the specialist's
-  // billing status, just that no more slots can be taken right now.
-  if (await hasReachedBasicBookingLimit(specialist)) {
-    return { ok: false, formError: "bookingLimitReached" };
-  }
-
   const available = await isSlotAvailable(specialist, service.durationMinutes, input.startAt);
   if (!available) return { ok: false, formError: "slotTaken" };
 
@@ -81,16 +71,15 @@ export async function createGuestBooking(
         guestLocale: routingLocaleToLanguage[input.guestLocale],
       },
     });
-    await enqueueBookingNotifications(appointment);
+    await enqueueBookingNotifications(appointment, specialist);
     // Guest-initiated only — createManualBooking (Phase 5) doesn't alert
     // the specialist about their own walk-in/phone entry (02_PRD.md
     // Section 9: "New booking notification sent to specialist").
     await enqueueNewBookingAlert(appointment, specialist);
 
     // Phase 7 trial mechanics (08_Roadmap.md) — best-effort bookkeeping
-    // that must never affect a booking that has already succeeded; both
-    // helpers swallow their own errors.
-    await applyBookingMilestoneExtension(specialist.id);
+    // that must never affect a booking that has already succeeded;
+    // recordReferralBookingIfEligible swallows its own errors.
     await recordReferralBookingIfEligible({
       referralCode: input.referralCode,
       specialistId: specialist.id,

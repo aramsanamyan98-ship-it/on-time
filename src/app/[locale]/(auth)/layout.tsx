@@ -19,5 +19,5 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
 function AppName() {
   const t = useTranslations("Common");
-  return <span className="text-lg font-semibold text-brand-green">{t("appName")}</span>;
+  return <span className="text-lg font-bold tracking-tight text-brand-green">{t("appName")}</span>;
 }

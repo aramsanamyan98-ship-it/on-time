@@ -3,15 +3,23 @@
 :root {
   /* On-Time brand palette (docs/09_Brand_Guidelines.md) */
   --color-brand-green: #1f3d2b;
+  /* Hover shade for primary (green) actions: ~20% darker than brand-green,
+     picked deliberately rather than relying on opacity so white button
+     text doesn't wash out on hover. */
+  --color-brand-green-hover: #193122;
   --color-brand-charcoal: #121212;
   --color-brand-gold: #c8a96a;
+  /* Hover shade for gold CTAs: ~12% darker than brand-gold. */
+  --color-brand-gold-hover: #b0955d;
   --color-brand-warm-white: #f7f5f2;
 }
 
 @theme inline {
   --color-brand-green: var(--color-brand-green);
+  --color-brand-green-hover: var(--color-brand-green-hover);
   --color-brand-charcoal: var(--color-brand-charcoal);
   --color-brand-gold: var(--color-brand-gold);
+  --color-brand-gold-hover: var(--color-brand-gold-hover);
   --color-brand-warm-white: var(--color-brand-warm-white);
 
   --color-warm-white: var(--color-brand-warm-white);
@@ -22,4 +30,52 @@
 
 body {
   font-family: var(--font-sans);
+}
+
+@layer components {
+  /* Type scale (docs/09_Brand_Guidelines.md): larger bold page titles,
+     calmer/lighter body copy, consistent spacing. Shared so every page
+     reads as one system rather than ad hoc font sizes. */
+  .heading-page {
+    @apply text-3xl font-bold tracking-tight text-brand-charcoal;
+  }
+  .heading-section {
+    @apply text-lg font-semibold text-brand-charcoal;
+  }
+  .heading-card {
+    @apply text-xl font-bold tracking-tight text-brand-charcoal;
+  }
+  .body-text {
+    @apply text-brand-charcoal/70;
+  }
+
+  /* Small gold underline signature under section/page headings. */
+  .heading-accent {
+    @apply mt-2 block h-1 w-10 rounded-full bg-brand-gold;
+  }
+  .heading-accent-sm {
+    @apply mt-1.5 block h-0.5 w-8 rounded-full bg-brand-gold;
+  }
+
+  /* Card treatment for list rows / grid items (appointments, services,
+     portfolio, clients): soft shadow + rounded corners instead of flat
+     bordered lists, so the app reads as organized/professional. */
+  .surface-card {
+    @apply rounded-xl border border-brand-charcoal/10 bg-white p-4 shadow-sm transition hover:shadow-md;
+  }
+  /* Same card look, no hover lift — for static containers (forms, info
+     panels) rather than interactive list rows. */
+  .panel {
+    @apply rounded-xl border border-brand-charcoal/10 bg-white p-4 shadow-sm;
+  }
+
+  .btn-primary {
+    @apply rounded-md bg-brand-green px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-green-hover disabled:opacity-60;
+  }
+  .btn-accent {
+    @apply rounded-md bg-brand-gold px-6 py-3 text-sm font-semibold text-brand-charcoal transition hover:bg-brand-gold-hover disabled:opacity-60;
+  }
+  .btn-outline {
+    @apply rounded-md border border-brand-charcoal/20 px-4 py-2 text-sm font-medium text-brand-charcoal transition hover:border-brand-charcoal/40 hover:bg-brand-charcoal/5 disabled:opacity-60;
+  }
 }

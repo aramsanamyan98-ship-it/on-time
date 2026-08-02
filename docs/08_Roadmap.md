@@ -72,7 +72,8 @@ the dashboard without needing any other tool.
 **Exit criteria:** guests reliably receive a confirmation and a reminder;
 failures are logged and retryable, not silent.
 
-## Phase 7 — Trial & Subscription Logic
+## Phase 7 — Trial & Subscription Logic (COMPLETED, needed a follow-up
+update — see below)
 
 - Trial countdown, extension logic (bookings + referrals)
 - Plan display and upgrade prompts
@@ -80,6 +81,35 @@ failures are logged and retryable, not silent.
 
 **Exit criteria:** trial mechanics work automatically without manual
 intervention.
+
+Phase 7 was originally built against the old booking-count-based trial
+model (30 days + booking/referral extensions, ~30 bookings/month Basic
+cap). This has since been revised twice — see 02_PRD.md Section 14
+(updated). The current (final) model drops the permanent free Basic tier
+and the commitment-length discount pricing that a prior revision had
+added: **Basic is now a paid tier (4,000 AMD/month), and all three plans
+bill monthly only.** Follow-up work:
+
+1. ~~Update trial logic from 30-day + booking-extension model to a flat
+   3-month trial (referral extensions stay, booking-count extensions
+   removed).~~ Done.
+2. ~~Update Basic plan enforcement: remove the ~30 booking/month cap; add
+   a 5-photo portfolio cap instead.~~ Done.
+3. ~~Add feature gating for reminder notifications (Basic = confirmation
+   only, Starter+ = full reminders).~~ Done — gated in
+   src/lib/notifications/queue.ts via the same hasFullAccess boundary
+   used everywhere else (plan !== "basic", or an active trial).
+4. ~~Add commitment-length pricing (monthly / 3-month / 12-month) to the
+   plan/subscription page.~~ Superseded: the final model removed
+   commitment-length pricing entirely in favor of a single monthly price
+   per tier (Basic/Starter/Pro), shown side by side on the Plan page.
+5. Do NOT enable real billing/payment collection for Starter until
+   Reviews (see "Later / Explicitly Deferred" below) is either built or
+   removed from the advertised feature list. **Still applies** — Reviews
+   is not built; the Starter feature list already omits it (see the Plan
+   page), so this blocker only applies once/if Reviews gets marketed
+   again. Basic and Pro billing aren't blocked by this (neither has ever
+   listed Reviews).
 
 ## Phase 8 — Marketing Site Connection
 
@@ -94,9 +124,21 @@ intervention.
 - Marketplace search/discovery (browsing all specialists, not just direct
   links)
 - Multi-staff/multi-location support
-- Reviews
+- Reviews — not yet built. 02_PRD.md Section 14 deliberately leaves it
+  out of the Starter feature list for now; it's expected to be added to
+  Starter as a separate future task once built (see Section 14's
+  "Important implementation note — Reviews"). Don't market or sell
+  Starter with reviews as a live feature until then.
 - CRM-lite / advanced analytics (Pro plan features)
 - SMS notifications (if WhatsApp/Telegram prove sufficient)
+
+### New item — Pricing page comparison table
+
+Once ready to build the public pricing page (part of Phase 8 / Webflow,
+or an in-app page), include a direct feature/price comparison against
+InQ, per the marketing note in 02_PRD.md Section 14. This was identified
+as a legitimate, honest differentiator worth stating plainly rather than
+a hidden competitive angle.
 
 ## Working Principle Throughout
 

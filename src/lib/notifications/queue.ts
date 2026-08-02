@@ -2,6 +2,7 @@ import "server-only";
 import { after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { processQueuedNotifications } from "@/lib/notifications/process";
+import { hasFullAccess } from "@/lib/subscription/trial";
 import type { Appointment, NotificationType, Specialist } from "@/generated/prisma/client";
 
 // 07_Business_Rules.md leaves reminder timing as an open decision ("e.g.,
@@ -57,10 +58,15 @@ async function enqueueNow(appointmentId: string, type: NotificationType, recipie
  * be sent synchronously during the booking request; `enqueueNow`'s
  * `after()` defers the actual send until the response has gone out to the
  * guest, and the cron-triggered route remains the durable path regardless.
+ *
+ * 02_PRD.md Section 14 (updated): reminders are a Starter/Pro (and
+ * active-trial) feature — Basic only gets the booking confirmation.
+ * `hasFullAccess` is the same tier boundary used everywhere else.
  */
-export async function enqueueBookingNotifications(appointment: Appointment): Promise<void> {
+export async function enqueueBookingNotifications(appointment: Appointment, specialist: Specialist): Promise<void> {
   if (!appointment.guestEmail) return; // only channel implemented this phase is email (02_PRD.md Section 9); nothing to queue without an address
   await enqueueNow(appointment.id, "booking_confirmation", appointment.guestEmail);
+  if (!hasFullAccess(specialist)) return;
   try {
     await enqueueReminderIfNeeded(appointment);
   } catch (err) {
@@ -92,13 +98,16 @@ export async function enqueueGuestRescheduledAlert(appointment: Appointment, spe
 /**
  * Called after a reschedule (guest self-service or specialist-initiated) —
  * keeps the reminder pointed at the appointment's new time instead of
- * firing for the slot it no longer occupies.
+ * firing for the slot it no longer occupies. Basic-plan specialists (past
+ * trial) never get a reminder re-queued, same gating as the initial
+ * booking (see enqueueBookingNotifications).
  */
-export async function rescheduleReminderNotification(appointment: Appointment): Promise<void> {
+export async function rescheduleReminderNotification(appointment: Appointment, specialist: Specialist): Promise<void> {
   try {
     await prisma.notificationLog.deleteMany({
       where: { appointmentId: appointment.id, type: "reminder", status: "queued" },
     });
+    if (!hasFullAccess(specialist)) return;
     await enqueueReminderIfNeeded(appointment);
   } catch (err) {
     console.error("[notifications] failed to reschedule reminder notification:", err);

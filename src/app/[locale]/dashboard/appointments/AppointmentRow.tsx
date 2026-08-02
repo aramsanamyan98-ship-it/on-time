@@ -29,10 +29,10 @@ export function AppointmentRow({
   const [state, formAction, isPending] = useActionState(cancelAppointmentAction, initialState);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+    <div className="surface-card flex flex-wrap items-center justify-between gap-3">
       <div>
         <p className="text-sm font-medium text-brand-charcoal">{appointment.formattedDateTime}</p>
-        <p className="text-sm text-brand-charcoal/70">{appointment.serviceName}</p>
+        <p className="body-text text-sm">{appointment.serviceName}</p>
         <p className="text-xs text-brand-charcoal/60">
           {appointment.guestName} · {appointment.guestPhone}
         </p>
@@ -59,7 +59,7 @@ export function AppointmentRow({
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-md border border-brand-charcoal/20 px-3 py-1.5 text-sm font-medium text-red-700 transition hover:border-red-700 disabled:opacity-40"
+            className="rounded-md border border-brand-charcoal/20 px-3 py-1.5 text-sm font-medium text-red-700 transition hover:border-red-700 hover:bg-red-50 disabled:opacity-40"
           >
             {isPending ? t("cancelling") : t("cancel")}
           </button>

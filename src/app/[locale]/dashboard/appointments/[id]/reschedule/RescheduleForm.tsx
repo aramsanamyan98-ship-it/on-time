@@ -67,7 +67,7 @@ export function RescheduleForm({
       <button
         type="submit"
         disabled={!slotIso || isPending}
-        className="w-fit rounded-md bg-brand-green px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-40"
+        className="btn-primary w-fit"
       >
         {isPending ? t("confirming") : t("confirmReschedule")}
       </button>

@@ -6,6 +6,7 @@ import type { AppLocale } from "@/i18n/routing";
 import { requireSpecialist } from "@/lib/dashboard/require-specialist";
 import { ServiceForm } from "../ServiceForm";
 import { createServiceAction } from "../actions";
+import { PageHeading } from "@/components/Heading";
 
 export default async function NewServicePage({
   params,
@@ -21,8 +22,10 @@ export default async function NewServicePage({
 
   return (
     <div className="flex max-w-lg flex-col gap-6">
-      <h1 className="text-2xl font-semibold text-brand-charcoal">{t("addServiceTitle")}</h1>
-      <ServiceForm action={createServiceAction} />
+      <PageHeading>{t("addServiceTitle")}</PageHeading>
+      <div className="panel">
+        <ServiceForm action={createServiceAction} />
+      </div>
     </div>
   );
 }
