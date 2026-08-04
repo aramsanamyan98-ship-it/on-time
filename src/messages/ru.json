@@ -107,6 +107,7 @@
       "workingHours": "Часы работы",
       "services": "Услуги",
       "reviews": "Отзывы",
+      "analytics": "Аналитика",
       "plan": "Тариф"
     },
     "errors": {
@@ -329,6 +330,32 @@
     "reviewCount": "{count} отзывов",
     "ratingAriaLabel": "{rating} из 5 звёзд",
     "upgradeNote": "Ваши отзывы пока не отображаются на публичной странице — доступно на тарифах Starter и выше."
+  },
+  "Analytics": {
+    "title": "Аналитика",
+    "lockedMessage": "Аналитика и отчёты доступны на тарифах Starter и выше.",
+    "lockedCta": "Посмотреть тарифы",
+    "thisMonthLabel": "Записи в этом месяце",
+    "comparedToLastMonth": "{delta} по сравнению с {count} в прошлом месяце",
+    "mostBookedServiceTitle": "Самая популярная услуга",
+    "mostBookedServiceCount": "{count} записей",
+    "noDataYet": "Пока недостаточно данных.",
+    "chartTitle": "Записи — последние 30 дней",
+    "chartAriaLabel": "Столбчатая диаграмма записей по дням за последние 30 дней",
+    "chartTooltip": "{date}: {count}",
+    "statusBreakdownTitle": "Последние 30 дней",
+    "completed": "Завершено",
+    "cancelled": "Отменено",
+    "noShow": "Неявка",
+    "proSectionTitle": "Аналитика Pro",
+    "proBadge": "Pro",
+    "repeatClientRateTitle": "Доля повторных клиентов",
+    "repeatClientRateDetail": "{repeat} из {total} клиентов записывались более одного раза",
+    "ratingTrendTitle": "Динамика среднего рейтинга",
+    "ratingTrendNoData": "Нет отзывов",
+    "dailyBreakdownTitle": "Разбивка по дням",
+    "dailyBreakdownDate": "Дата",
+    "dailyBreakdownCount": "Записи"
   },
   "Subscription": {
     "title": "Тариф и оплата",

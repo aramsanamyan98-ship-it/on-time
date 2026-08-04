@@ -107,6 +107,7 @@
       "workingHours": "Working hours",
       "services": "Services",
       "reviews": "Reviews",
+      "analytics": "Analytics",
       "plan": "Plan"
     },
     "errors": {
@@ -329,6 +330,32 @@
     "reviewCount": "{count} reviews",
     "ratingAriaLabel": "{rating} out of 5 stars",
     "upgradeNote": "Reviews aren't shown on your public profile yet — available on Starter and above."
+  },
+  "Analytics": {
+    "title": "Analytics",
+    "lockedMessage": "Analytics and reports are available on Starter and above.",
+    "lockedCta": "View plans",
+    "thisMonthLabel": "Bookings this month",
+    "comparedToLastMonth": "{delta} vs {count} last month",
+    "mostBookedServiceTitle": "Most-booked service",
+    "mostBookedServiceCount": "{count} bookings",
+    "noDataYet": "Not enough data yet.",
+    "chartTitle": "Bookings — last 30 days",
+    "chartAriaLabel": "Bar chart of bookings per day over the last 30 days",
+    "chartTooltip": "{date}: {count}",
+    "statusBreakdownTitle": "Last 30 days",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "noShow": "No-show",
+    "proSectionTitle": "Pro insights",
+    "proBadge": "Pro",
+    "repeatClientRateTitle": "Repeat client rate",
+    "repeatClientRateDetail": "{repeat} of {total} clients have booked more than once",
+    "ratingTrendTitle": "Average rating trend",
+    "ratingTrendNoData": "No reviews",
+    "dailyBreakdownTitle": "Daily breakdown",
+    "dailyBreakdownDate": "Date",
+    "dailyBreakdownCount": "Bookings"
   },
   "Subscription": {
     "title": "Plan & billing",

@@ -77,3 +77,10 @@ export function addDaysToDateStr(dateStr: string, days: number): string {
   d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().slice(0, 10);
 }
+
+/** The 1st of the month `dateStr` falls in, shifted by `monthOffset` whole months (e.g. -1 = 1st of the previous month). Used for calendar-month boundaries (analytics month-over-month comparison). */
+export function firstOfMonthDateStr(dateStr: string, monthOffset = 0): string {
+  const [year, month] = dateStr.split("-").map(Number);
+  const d = new Date(Date.UTC(year, month - 1 + monthOffset, 1));
+  return d.toISOString().slice(0, 10);
+}
