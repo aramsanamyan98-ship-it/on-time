@@ -107,6 +107,7 @@
       "workingHours": "Աշխատանքային ժամեր",
       "services": "Ծառայություններ",
       "reviews": "Կարծիքներ",
+      "analytics": "Վերլուծություն",
       "plan": "Փաթեթ"
     },
     "errors": {
@@ -329,6 +330,32 @@
     "reviewCount": "{count} կարծիք",
     "ratingAriaLabel": "{rating}՝ 5 աստղից",
     "upgradeNote": "Ձեր կարծիքները դեռ ցուցադրված չեն ձեր հանրային էջում․ հասանելի են Starter և ավելի բարձր փաթեթներում։"
+  },
+  "Analytics": {
+    "title": "Վերլուծություն",
+    "lockedMessage": "Վերլուծություն և հաշվետվություններ հասանելի են Starter և ավելի բարձր փաթեթներում։",
+    "lockedCta": "Դիտել փաթեթները",
+    "thisMonthLabel": "Ամրագրումներ այս ամիս",
+    "comparedToLastMonth": "{delta}՝ նախորդ ամսվա {count}-ի համեմատ",
+    "mostBookedServiceTitle": "Ամենապահանջված ծառայությունը",
+    "mostBookedServiceCount": "{count} ամրագրում",
+    "noDataYet": "Դեռ բավարար տվյալներ չկան։",
+    "chartTitle": "Ամրագրումներ — վերջին 30 օր",
+    "chartAriaLabel": "Օրական ամրագրումների սյունակավոր գծապատկեր՝ վերջին 30 օրվա համար",
+    "chartTooltip": "{date}՝ {count}",
+    "statusBreakdownTitle": "Վերջին 30 օր",
+    "completed": "Ավարտված",
+    "cancelled": "Չեղարկված",
+    "noShow": "Չներկայացած",
+    "proSectionTitle": "Pro վերլուծություն",
+    "proBadge": "Pro",
+    "repeatClientRateTitle": "Կրկնվող հաճախորդների տոկոս",
+    "repeatClientRateDetail": "{total} հաճախորդից {repeat}-ը ամրագրել են մեկից ավելի անգամ",
+    "ratingTrendTitle": "Միջին գնահատականի դինամիկա",
+    "ratingTrendNoData": "Կարծիքներ չկան",
+    "dailyBreakdownTitle": "Օրական բաշխում",
+    "dailyBreakdownDate": "Ամսաթիվ",
+    "dailyBreakdownCount": "Ամրագրումներ"
   },
   "Subscription": {
     "title": "Փաթեթ և վճարում",
