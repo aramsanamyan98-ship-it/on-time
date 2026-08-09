@@ -115,6 +115,7 @@
       "phoneInvalid": "Մուտքագրեք վավեր հեռախոսահամար։",
       "addressTooLong": "Հասցեն պետք է լինի առավելագույնը 200 նիշ։",
       "instagramInvalid": "Մուտքագրեք վավեր Instagram հաշիվ կամ հղում։",
+      "facebookInvalid": "Մուտքագրեք վավեր Facebook էջ կամ հղում։",
       "fileRequired": "Ընտրեք վերբեռնվող նկարը։",
       "fileTooLarge": "Նկարը պետք է լինի 5ՄԲ-ից փոքր։",
       "fileTypeInvalid": "Նկարը պետք է լինի JPEG, PNG կամ WebP ձևաչափով։",
@@ -146,6 +147,7 @@
     "phoneLabel": "Հեռախոսահամար",
     "addressLabel": "Հասցե",
     "instagramLabel": "Instagram",
+    "facebookLabel": "Facebook",
     "save": "Պահպանել փոփոխությունները",
     "saving": "Պահպանվում է…",
     "saved": "Պրոֆիլը թարմացվել է։"
@@ -202,6 +204,7 @@
   },
   "PublicProfile": {
     "bookButton": "Ամրագրել",
+    "contactTitle": "Կապ",
     "portfolioTitle": "Պորտֆոլիո",
     "servicesTitle": "Ծառայություններ",
     "workingHoursTitle": "Աշխատանքային ժամեր",

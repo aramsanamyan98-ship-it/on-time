@@ -19,8 +19,9 @@ export async function updateProfileAction(_prevState: ProfileState, formData: Fo
   const phone = String(formData.get("phone") ?? "");
   const address = String(formData.get("address") ?? "");
   const instagram = String(formData.get("instagram") ?? "");
+  const facebook = String(formData.get("facebook") ?? "");
 
-  const result = await updateSpecialistProfile(session.specialistId, { bio, phone, address, instagram });
+  const result = await updateSpecialistProfile(session.specialistId, { bio, phone, address, instagram, facebook });
   if (!result.ok) {
     return { fieldErrors: result.fieldErrors, formError: result.formError };
   }

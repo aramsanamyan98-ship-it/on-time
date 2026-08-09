@@ -10,6 +10,7 @@ export type DashboardErrorCode =
   | "phoneInvalid"
   | "addressTooLong"
   | "instagramInvalid"
+  | "facebookInvalid"
   | "fileRequired"
   | "fileTooLarge"
   | "fileTypeInvalid"

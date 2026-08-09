@@ -33,6 +33,7 @@ export default async function ProfilePage({
           phone={specialist.phone ?? ""}
           address={specialist.address ?? ""}
           instagramUrl={specialist.instagramUrl ?? ""}
+          facebookUrl={specialist.facebookUrl ?? ""}
         />
       </div>
     </div>
