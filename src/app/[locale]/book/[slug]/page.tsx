@@ -11,6 +11,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Link } from "@/i18n/navigation";
 import { PageHeading, SectionHeading } from "@/components/Heading";
 import { StarRating } from "@/components/StarRating";
+import { PhoneIcon, PinIcon, InstagramIcon, FacebookIcon } from "@/components/ContactIcons";
 
 export default async function PublicProfilePage({
   params,
@@ -35,6 +36,7 @@ export default async function PublicProfilePage({
       phone: true,
       address: true,
       instagramUrl: true,
+      facebookUrl: true,
       emailVerifiedAt: true,
       deletedAt: true,
       plan: true,
@@ -111,7 +113,11 @@ export default async function PublicProfilePage({
         </div>
       </div>
 
-      <div className="flex flex-col gap-8 px-6 pb-10 pt-14 sm:pt-16">
+      <div
+        className={`flex flex-col gap-8 px-6 pt-14 sm:pt-16 ${
+          services.length > 0 ? "pb-24" : "pb-10"
+        }`}
+      >
         <div className="flex flex-col gap-3">
           <PageHeading>{specialist.displayName}</PageHeading>
 
@@ -129,27 +135,6 @@ export default async function PublicProfilePage({
 
           {specialist.bio && <p className="body-text max-w-prose">{specialist.bio}</p>}
 
-          {(specialist.phone || specialist.address || specialist.instagramUrl) && (
-            <div className="body-text flex flex-wrap gap-x-4 gap-y-1 text-sm">
-              {specialist.phone && (
-                <a href={`tel:${specialist.phone}`} className="underline">
-                  {specialist.phone}
-                </a>
-              )}
-              {specialist.address && <span>{specialist.address}</span>}
-              {specialist.instagramUrl && (
-                <a
-                  href={specialist.instagramUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline"
-                >
-                  Instagram
-                </a>
-              )}
-            </div>
-          )}
-
           {services.length > 0 && (
             <Link
               href={ref ? `/book/${slug}/new?ref=${encodeURIComponent(ref)}` : `/book/${slug}/new`}
@@ -160,91 +145,157 @@ export default async function PublicProfilePage({
           )}
         </div>
 
-        {portfolioPhotos.length > 0 && (
-          <section className="flex flex-col gap-3">
-            <SectionHeading>{t("portfolioTitle")}</SectionHeading>
-            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-              {portfolioPhotos.map((photo) => (
-                <div
-                  key={photo.id}
-                  className="aspect-square overflow-hidden rounded-lg bg-brand-charcoal/5 shadow-sm"
+        {(specialist.phone || specialist.address || specialist.instagramUrl || specialist.facebookUrl) && (
+          <section className="flex max-w-sm flex-col gap-3">
+            <SectionHeading>{t("contactTitle")}</SectionHeading>
+            <div className="panel flex flex-col gap-3">
+              {specialist.phone && (
+                <a
+                  href={`tel:${specialist.phone}`}
+                  className="flex items-center gap-3 text-sm text-brand-charcoal transition hover:text-brand-green"
                 >
-                  <Image
-                    src={photo.imageUrl}
-                    alt=""
-                    width={200}
-                    height={200}
-                    className="h-full w-full object-cover"
-                  />
+                  <PhoneIcon className="h-5 w-5 shrink-0 text-brand-gold" />
+                  <span>{specialist.phone}</span>
+                </a>
+              )}
+              {specialist.address && (
+                <div className="flex items-center gap-3 text-sm text-brand-charcoal">
+                  <PinIcon className="h-5 w-5 shrink-0 text-brand-gold" />
+                  <span>{specialist.address}</span>
                 </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        <section className="flex flex-col gap-3">
-          <SectionHeading>{t("servicesTitle")}</SectionHeading>
-          {services.length === 0 ? (
-            <p className="body-text text-sm">{t("noServices")}</p>
-          ) : (
-            <div className="flex flex-col gap-3">
-              {services.map((service) => (
-                <div key={service.id} className="surface-card flex flex-col gap-1">
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="font-medium text-brand-charcoal">{service.name}</span>
-                    <span className="body-text whitespace-nowrap text-sm">
-                      {tServices("durationValue", { minutes: service.durationMinutes })} ·{" "}
-                      {tServices("priceValue", { price: service.priceAmd })}
-                    </span>
-                  </div>
-                  {service.description && (
-                    <p className="text-sm text-brand-charcoal/60">{service.description}</p>
+              )}
+              {(specialist.instagramUrl || specialist.facebookUrl) && (
+                <div className="flex items-center gap-3 pt-1">
+                  {specialist.instagramUrl && (
+                    <a
+                      href={specialist.instagramUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Instagram"
+                      className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-charcoal/5 text-brand-charcoal transition hover:bg-brand-gold hover:text-brand-charcoal"
+                    >
+                      <InstagramIcon className="h-4 w-4" />
+                    </a>
+                  )}
+                  {specialist.facebookUrl && (
+                    <a
+                      href={specialist.facebookUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Facebook"
+                      className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-charcoal/5 text-brand-charcoal transition hover:bg-brand-gold hover:text-brand-charcoal"
+                    >
+                      <FacebookIcon className="h-4 w-4" />
+                    </a>
                   )}
                 </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {reviewStats.count > 0 && (
-          <section className="flex flex-col gap-3">
-            <SectionHeading>{t("reviewsTitle")}</SectionHeading>
-            <div className="flex flex-col gap-3">
-              {reviews.map((review) => (
-                <div key={review.id} className="surface-card flex flex-col gap-1">
-                  <div className="flex items-center justify-between gap-4">
-                    <StarRating
-                      value={review.rating}
-                      ariaLabel={t("ratingAriaLabel", { rating: review.rating })}
-                    />
-                    <span className="text-xs text-brand-charcoal/50">
-                      {reviewDateFormatter.format(review.createdAt)}
-                    </span>
-                  </div>
-                  {review.comment && <p className="body-text text-sm">{review.comment}</p>}
-                  <span className="text-xs font-medium text-brand-charcoal/60">
-                    {review.firstName ?? t("anonymousReviewer")}
-                  </span>
-                </div>
-              ))}
+              )}
             </div>
           </section>
         )}
 
-        <section className="flex flex-col gap-3">
-          <SectionHeading>{t("workingHoursTitle")}</SectionHeading>
-          <div className="panel flex flex-col divide-y divide-brand-charcoal/10 p-0">
-            {schedule.map((day) => (
-              <div key={day.dayOfWeek} className="flex items-center justify-between px-4 py-2 text-sm">
-                <span className="text-brand-charcoal">{tHours(`days.${day.dayOfWeek}`)}</span>
-                <span className="body-text">
-                  {day.isDayOff ? t("dayOff") : `${day.startTime} – ${day.endTime}`}
-                </span>
+        <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-10">
+          <div className="flex flex-col gap-8">
+            {reviewStats.count > 0 && (
+              <section className="flex flex-col gap-3">
+                <SectionHeading>{t("reviewsTitle")}</SectionHeading>
+                <div className="flex flex-col gap-3">
+                  {reviews.map((review) => (
+                    <div key={review.id} className="surface-card flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-4">
+                        <StarRating
+                          value={review.rating}
+                          ariaLabel={t("ratingAriaLabel", { rating: review.rating })}
+                        />
+                        <span className="text-xs text-brand-charcoal/50">
+                          {reviewDateFormatter.format(review.createdAt)}
+                        </span>
+                      </div>
+                      {review.comment && <p className="body-text text-sm">{review.comment}</p>}
+                      <span className="text-xs font-medium text-brand-charcoal/60">
+                        {review.firstName ?? t("anonymousReviewer")}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <section className="flex flex-col gap-3">
+              <SectionHeading>{t("servicesTitle")}</SectionHeading>
+              {services.length === 0 ? (
+                <p className="body-text text-sm">{t("noServices")}</p>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {services.map((service) => (
+                    <div key={service.id} className="surface-card flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="font-medium text-brand-charcoal">{service.name}</span>
+                        <span className="body-text whitespace-nowrap text-sm">
+                          {tServices("durationValue", { minutes: service.durationMinutes })} ·{" "}
+                          {tServices("priceValue", { price: service.priceAmd })}
+                        </span>
+                      </div>
+                      {service.description && (
+                        <p className="text-sm text-brand-charcoal/60">{service.description}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="flex max-w-sm flex-col gap-3">
+              <SectionHeading>{t("workingHoursTitle")}</SectionHeading>
+              <div className="panel flex flex-col divide-y divide-brand-charcoal/10 p-0">
+                {schedule.map((day) => (
+                  <div key={day.dayOfWeek} className="flex items-center justify-between px-4 py-2 text-sm">
+                    <span className="text-brand-charcoal">{tHours(`days.${day.dayOfWeek}`)}</span>
+                    <span className="body-text">
+                      {day.isDayOff ? t("dayOff") : `${day.startTime} – ${day.endTime}`}
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
+            </section>
           </div>
-        </section>
+
+          {portfolioPhotos.length > 0 && (
+            <section className="flex flex-col gap-3">
+              <SectionHeading>{t("portfolioTitle")}</SectionHeading>
+              {/* Real per-photo aspect ratios aren't stored, so a plain <img>
+                  (rather than next/image, which needs known dimensions) lets
+                  each thumbnail keep its natural proportions in the masonry
+                  layout instead of being cropped to a fixed box. */}
+              <div className="columns-2 gap-3">
+                {portfolioPhotos.map((photo) => (
+                  <div
+                    key={photo.id}
+                    className="mb-3 break-inside-avoid overflow-hidden rounded-lg bg-brand-charcoal/5 shadow-sm"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={photo.imageUrl} alt="" loading="lazy" className="w-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
       </div>
+
+      {services.length > 0 && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-brand-charcoal/10 bg-brand-warm-white/95 backdrop-blur">
+          <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-6 py-3">
+            <span className="truncate text-sm font-medium text-brand-charcoal">{specialist.displayName}</span>
+            <Link
+              href={ref ? `/book/${slug}/new?ref=${encodeURIComponent(ref)}` : `/book/${slug}/new`}
+              className="btn-accent shrink-0"
+            >
+              {t("bookButton")}
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -115,6 +115,7 @@
       "phoneInvalid": "Введите корректный номер телефона.",
       "addressTooLong": "Адрес должен быть не длиннее 200 символов.",
       "instagramInvalid": "Введите корректный аккаунт или ссылку Instagram.",
+      "facebookInvalid": "Введите корректную страницу или ссылку Facebook.",
       "fileRequired": "Выберите изображение для загрузки.",
       "fileTooLarge": "Изображение должно быть меньше 5МБ.",
       "fileTypeInvalid": "Изображение должно быть в формате JPEG, PNG или WebP.",
@@ -146,6 +147,7 @@
     "phoneLabel": "Номер телефона",
     "addressLabel": "Адрес",
     "instagramLabel": "Instagram",
+    "facebookLabel": "Facebook",
     "save": "Сохранить изменения",
     "saving": "Сохраняем…",
     "saved": "Профиль обновлён."
@@ -202,6 +204,7 @@
   },
   "PublicProfile": {
     "bookButton": "Записаться",
+    "contactTitle": "Контакты",
     "portfolioTitle": "Портфолио",
     "servicesTitle": "Услуги",
     "workingHoursTitle": "Часы работы",

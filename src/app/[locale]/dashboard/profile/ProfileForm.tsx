@@ -11,11 +11,13 @@ export function ProfileForm({
   phone,
   address,
   instagramUrl,
+  facebookUrl,
 }: {
   bio: string;
   phone: string;
   address: string;
   instagramUrl: string;
+  facebookUrl: string;
 }) {
   const t = useTranslations("Profile");
   const tErrors = useTranslations("Dashboard.errors");
@@ -93,6 +95,25 @@ export function ProfileForm({
         {state.fieldErrors?.instagramUrl && (
           <p role="alert" className="text-sm text-red-700">
             {tErrors(state.fieldErrors.instagramUrl)}
+          </p>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="facebook" className="text-sm font-medium text-brand-charcoal">
+          {t("facebookLabel")}
+        </label>
+        <input
+          id="facebook"
+          name="facebook"
+          type="text"
+          placeholder="facebook.com/yourpage"
+          defaultValue={facebookUrl}
+          className="rounded-md border border-brand-charcoal/20 px-3 py-2 text-sm focus:border-brand-gold focus:outline-none"
+        />
+        {state.fieldErrors?.facebookUrl && (
+          <p role="alert" className="text-sm text-red-700">
+            {tErrors(state.fieldErrors.facebookUrl)}
           </p>
         )}
       </div>

@@ -1,17 +1,21 @@
 import { prisma } from "@/lib/prisma";
 import { saveUploadedImage, deleteUploadedImage } from "@/lib/storage";
-import { validateProfileFields, normalizeInstagram } from "@/lib/profile/validation";
+import { validateProfileFields, normalizeInstagram, normalizeFacebook } from "@/lib/profile/validation";
 import type { ActionResult } from "@/lib/dashboard/errors";
 import type { Specialist } from "@/generated/prisma/client";
 
 export async function updateSpecialistProfile(
   specialistId: string,
-  fields: { bio: string; phone: string; address: string; instagram: string },
+  fields: { bio: string; phone: string; address: string; instagram: string; facebook: string },
 ): Promise<ActionResult<Specialist>> {
   const fieldErrors = validateProfileFields(fields);
   const instagramResult = normalizeInstagram(fields.instagram);
   if ("error" in instagramResult) {
     fieldErrors.instagramUrl = instagramResult.error;
+  }
+  const facebookResult = normalizeFacebook(fields.facebook);
+  if ("error" in facebookResult) {
+    fieldErrors.facebookUrl = facebookResult.error;
   }
 
   if (Object.keys(fieldErrors).length > 0) {
@@ -25,6 +29,7 @@ export async function updateSpecialistProfile(
       phone: fields.phone.trim() || null,
       address: fields.address.trim() || null,
       instagramUrl: "url" in instagramResult && instagramResult.url ? instagramResult.url : null,
+      facebookUrl: "url" in facebookResult && facebookResult.url ? facebookResult.url : null,
     },
   });
 

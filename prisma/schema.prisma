@@ -161,6 +161,7 @@ model Specialist {
   address                       String?
   timezone                      String    @default("Asia/Yerevan")
   instagramUrl                  String?   @map("instagram_url")
+  facebookUrl                   String?   @map("facebook_url")
   languagePreference            Language  @default(am) @map("language_preference")
   plan                          Plan      @default(basic)
   trialEndsAt                   DateTime? @map("trial_ends_at")
