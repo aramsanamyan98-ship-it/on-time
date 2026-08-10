@@ -71,7 +71,7 @@ export async function createGuestBooking(
         guestLocale: routingLocaleToLanguage[input.guestLocale],
       },
     });
-    await enqueueBookingNotifications(appointment, specialist);
+    await enqueueBookingNotifications(appointment);
     // Guest-initiated only — createManualBooking (Phase 5) doesn't alert
     // the specialist about their own walk-in/phone entry (02_PRD.md
     // Section 9: "New booking notification sent to specialist").

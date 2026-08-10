@@ -19,14 +19,17 @@ export function isTrialActive(specialist: TrialFields): boolean {
 }
 
 /**
- * Whether a specialist currently gets Starter-level access — either because
- * they've actually upgraded, or because their trial (base 3 months plus any
- * referral extensions) hasn't run out yet. `plan` itself is never written to
- * "basic" on trial expiry (see prisma/schema.prisma header comment); this
- * is the one place that "drop" is expressed.
+ * Whether a specialist currently gets Pro-level access — either because
+ * they've actually upgraded to Pro, or because their trial (base 3 months
+ * plus any referral extensions) hasn't run out yet (02_PRD.md Section 14:
+ * the free trial grants full Pro-level access). Every other paid-plan
+ * feature (public profile, unlimited bookings/photos, reminders, reviews,
+ * basic analytics) is available on Starter — the baseline paid plan — so
+ * this is only ever checked to gate the two Pro-exclusive features: client
+ * notes and full analytics.
  */
-export function hasFullAccess(specialist: TrialFields): boolean {
-  return specialist.plan !== "basic" || isTrialActive(specialist);
+export function hasProAccess(specialist: TrialFields): boolean {
+  return specialist.plan === "pro" || isTrialActive(specialist);
 }
 
 /** Whole days remaining, rounded up so "a few hours left" still reads as 1, not 0. */

@@ -4,21 +4,18 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import type { AppLocale } from "@/i18n/routing";
 import { requireSpecialist } from "@/lib/dashboard/require-specialist";
-import { hasFullAccess } from "@/lib/subscription/trial";
+import { hasProAccess } from "@/lib/subscription/trial";
 import { getAnalyticsOverview, getRepeatClientStats, getRatingTrend } from "@/lib/analytics/queries";
-import { Link } from "@/i18n/navigation";
 import { PageHeading, SectionHeading } from "@/components/Heading";
 import { StarRating } from "@/components/StarRating";
 import { BookingsChart } from "./BookingsChart";
 
-// 02_PRD.md Section 14: analytics is a Starter+ feature (the free trial
-// grants Starter-level access — see hasFullAccess). Basic sees a locked
-// upgrade prompt instead of the page's data, the same pattern the public
-// profile uses to hide reviews on Basic (src/app/[locale]/book/[slug]/page.tsx).
-// The Pro-only section below checks `specialist.plan === "pro"` directly
-// rather than hasFullAccess, since a trialing specialist only ever gets
-// Starter-level access, never Pro (02_PRD.md Section 14: "Full Starter-tier
-// feature access during the trial").
+// 02_PRD.md Section 14: basic analytics (this month vs. last, 30-day chart,
+// status breakdown, most-booked service) is a baseline feature of every
+// paid plan. The Pro-only section below (repeat-client rate, rating trend,
+// daily breakdown table) is gated by hasProAccess, which also grants Pro
+// access to anyone still on their free trial (02_PRD.md Section 14: the
+// trial grants full Pro-level access).
 export default async function AnalyticsPage({
   params,
 }: {
@@ -31,21 +28,7 @@ export default async function AnalyticsPage({
   const specialist = await requireSpecialist(locale as AppLocale);
   const t = await getTranslations("Analytics");
 
-  if (!hasFullAccess(specialist)) {
-    return (
-      <div className="flex max-w-2xl flex-col gap-6">
-        <PageHeading>{t("title")}</PageHeading>
-        <div className="panel flex flex-col items-start gap-3">
-          <p className="body-text text-sm">{t("lockedMessage")}</p>
-          <Link href="/dashboard/plan" className="btn-accent">
-            {t("lockedCta")}
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  const isPro = specialist.plan === "pro";
+  const isPro = hasProAccess(specialist);
   const [overview, repeatStats, ratingTrend] = await Promise.all([
     getAnalyticsOverview(specialist),
     isPro ? getRepeatClientStats(specialist.id) : Promise.resolve(null),

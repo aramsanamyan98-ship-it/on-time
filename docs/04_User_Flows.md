@@ -93,5 +93,5 @@ under 5 minutes, then fill in the rest later.
 4. At every 5 successful referrals: trial extended +7 days
 5. At 5 bookings received: in-app prompt introduces paid plans
    (non-blocking — informational, not a paywall yet)
-6. At trial expiry: specialist is moved to Basic (Free) plan automatically
-   — never locked out entirely — with an upgrade prompt to Starter/Pro
+6. At trial expiry: specialist reads at Starter-level access automatically
+   — never locked out entirely — with an upgrade prompt to Pro

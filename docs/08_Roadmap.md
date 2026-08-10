@@ -107,6 +107,18 @@ bill monthly only.** Follow-up work:
    Reviews is either built or removed from the advertised feature
    list.~~ Resolved — Reviews is now built (Phase 9 below) and back in
    the Starter feature list.
+6. ~~Finalize tier naming and structure: collapse Basic/Starter/Pro into
+   two paid tiers, Starter and Pro.~~ Done — see 02_PRD.md Section 14
+   (Final). Basic is retired entirely (its former feature set — profile,
+   unlimited bookings/photos, reminders, reviews, basic analytics — is
+   now the Starter baseline). Starter is 900 AMD/month, Pro is 3,000
+   AMD/month. The free trial now grants full **Pro-level** access
+   (previously Starter-level) — the only two Pro-exclusive features are
+   client notes and full analytics (daily breakdown, repeat-client rate,
+   rating trend). `hasFullAccess` in src/lib/subscription/trial.ts was
+   renamed to `hasProAccess` to reflect this; reminders/reviews/basic
+   analytics are no longer plan-gated at all since every paid plan gets
+   them.
 
 ## Phase 8 — Marketing Site Connection
 
@@ -125,9 +137,8 @@ bill monthly only.** Follow-up work:
   appointment?" email pointing at that same link
   (`review_request` notification type)
 - Public profile (`book/[slug]`): average rating near the top, full
-  review list below the portfolio/services section — Starter tier and
-  above only (02_PRD.md Section 14); Basic still collects reviews, they
-  just aren't displayed publicly yet
+  review list below the portfolio/services section — shown for every
+  paid plan, Starter and above (02_PRD.md Section 14), not tier-gated
 - Dashboard: specialists can view every review (average + full list,
   with full guest name for context) on any plan, with no delete/hide
   action anywhere — reviews can't be edited or removed once submitted,
@@ -136,9 +147,9 @@ bill monthly only.** Follow-up work:
   never phone or full name
 
 **Exit criteria:** a guest can leave one review per completed
-appointment; it shows up correctly (right average, right list) on a
-Starter+ specialist's public profile, and is visible to the specialist
-on their dashboard regardless of plan.
+appointment; it shows up correctly (right average, right list) on the
+specialist's public profile, and is visible to the specialist on their
+dashboard regardless of plan.
 
 ## Later / Explicitly Deferred (v2+)
 

@@ -35,14 +35,18 @@
 //   can't express EXCLUDE constraints, so it's added by hand-editing the
 //   generated migration SQL (see prisma/migrations).
 // - Phase 7 (02_PRD.md Section 14 / 08_Roadmap.md): `specialists.plan`
-//   deliberately never gets written to "starter"/"pro" by any code in this
-//   phase (no billing integration exists yet to justify it) and the trial
-//   "drop to Basic" on expiry is likewise never a write — every read site
-//   computes effective access from `plan` + `trialEndsAt` together (see
-//   src/lib/subscription/trial.ts `hasFullAccess`) rather than mutating
-//   `plan`, so trial expiry needs no cron/background job to "downgrade"
-//   anyone (08_Roadmap.md Phase 7 exit criteria: "works automatically
-//   without manual intervention").
+//   deliberately never gets written to "pro" by any code in this phase (no
+//   billing integration exists yet to justify it) — it stays at its
+//   registration-time default of "starter" until a specialist is manually
+//   upgraded. The free trial's Pro-level access is likewise never a write
+//   to `plan` itself: every read site computes effective access from `plan`
+//   + `trialEndsAt` together (see src/lib/subscription/trial.ts
+//   `hasProAccess`) rather than mutating `plan`, so trial expiry needs no
+//   cron/background job to "downgrade" anyone (08_Roadmap.md Phase 7 exit
+//   criteria: "works automatically without manual intervention"). There is
+//   no free/Basic tier to drop down to on expiry — a specialist whose trial
+//   has ended simply reads at Starter-level (their `plan` default) unless
+//   they've been upgraded to Pro.
 // - `referralExtensionsGranted` exists because the referral trial
 //   extension is stated as an incremental grant (07_Business_Rules.md: "+7
 //   days per 5 referrals" repeats per block of 5) — it needs a persisted
@@ -54,8 +58,9 @@
 //   `booking_milestone_extended_at` column were removed (see the
 //   `remove_booking_milestone_phase7_update` migration) rather than kept
 //   as a dead field.
-// - `reviews` (08_Roadmap.md Phase 9, 02_PRD.md Section 14 Starter
-//   feature): `appointmentId` is `@unique` rather than a plain FK — that's
+// - `reviews` (08_Roadmap.md Phase 9, 02_PRD.md Section 14 — displayed on
+//   every paid plan, Starter and above): `appointmentId` is `@unique`
+//   rather than a plain FK — that's
 //   the entire enforcement of "one review per appointment, no editing" (a
 //   second insert for the same appointment simply violates the unique
 //   constraint; there's no update path in the app at all, matching "no
@@ -86,7 +91,6 @@ enum Language {
 }
 
 enum Plan {
-  basic
   starter
   pro
 }
@@ -163,7 +167,7 @@ model Specialist {
   instagramUrl                  String?   @map("instagram_url")
   facebookUrl                   String?   @map("facebook_url")
   languagePreference            Language  @default(am) @map("language_preference")
-  plan                          Plan      @default(basic)
+  plan                          Plan      @default(starter)
   trialEndsAt                   DateTime? @map("trial_ends_at")
   // Phase 7 (08_Roadmap.md / 02_PRD.md Section 14) — see schema header
   // comment for why these are additive markers rather than derived values.

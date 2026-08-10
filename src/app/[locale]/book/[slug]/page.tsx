@@ -5,7 +5,6 @@ import Image from "next/image";
 import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { loadSchedule } from "@/lib/working-hours/load-schedule";
-import { hasFullAccess } from "@/lib/subscription/trial";
 import { getReviewStats, listReviewsForPublicProfile } from "@/lib/reviews/queries";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Link } from "@/i18n/navigation";
@@ -39,8 +38,6 @@ export default async function PublicProfilePage({
       facebookUrl: true,
       emailVerifiedAt: true,
       deletedAt: true,
-      plan: true,
-      trialEndsAt: true,
     },
   });
 
@@ -51,13 +48,9 @@ export default async function PublicProfilePage({
     notFound();
   }
 
-  // 02_PRD.md Section 14 (updated) / 08_Roadmap.md Phase 9: reviews are a
-  // Starter-tier-and-above feature. Basic-plan specialists (past trial)
-  // still collect reviews (see src/lib/notifications/queue.ts) — this only
-  // gates whether they're shown on the *public* page, not whether a guest
-  // can submit one.
-  const showReviews = hasFullAccess(specialist);
-
+  // 02_PRD.md Section 14 / 08_Roadmap.md Phase 9: guest reviews are shown
+  // on the public profile for every paid plan — a baseline Starter feature,
+  // not gated by tier.
   const [services, schedule, portfolioPhotos, reviewStats, reviews] = await Promise.all([
     prisma.service.findMany({
       where: { specialistId: specialist.id, isActive: true },
@@ -68,8 +61,8 @@ export default async function PublicProfilePage({
       where: { specialistId: specialist.id },
       orderBy: { sortOrder: "asc" },
     }),
-    showReviews ? getReviewStats(specialist.id) : Promise.resolve({ average: null, count: 0 }),
-    showReviews ? listReviewsForPublicProfile(specialist.id) : Promise.resolve([]),
+    getReviewStats(specialist.id),
+    listReviewsForPublicProfile(specialist.id),
   ]);
 
   const t = await getTranslations("PublicProfile");

@@ -4,16 +4,15 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import type { AppLocale } from "@/i18n/routing";
 import { requireSpecialist } from "@/lib/dashboard/require-specialist";
-import { hasFullAccess } from "@/lib/subscription/trial";
 import { getReviewStats, listReviewsForDashboard } from "@/lib/reviews/queries";
 import { StarRating } from "@/components/StarRating";
 import { PageHeading } from "@/components/Heading";
 
 // 08_Roadmap.md Phase 9: a specialist can always see every review left for
-// them, on any plan — only the *public* profile display is Starter+ gated
-// (see src/app/[locale]/book/[slug]/page.tsx). Reviews can never be
-// deleted or hidden from here (02_PRD.md Section 14) — this page has no
-// delete/hide action at all, by design, to preserve trust in the system.
+// them — reviews (submission and public display alike) are a baseline
+// feature of every paid plan (02_PRD.md Section 14). Reviews can never be
+// deleted or hidden from here — this page has no delete/hide action at
+// all, by design, to preserve trust in the system.
 export default async function ReviewsPage({
   params,
 }: {
@@ -48,10 +47,6 @@ export default async function ReviewsPage({
           <span className="font-semibold text-brand-charcoal">{stats.average.toFixed(1)}</span>
           <span className="body-text text-sm">{t("reviewCount", { count: stats.count })}</span>
         </div>
-      )}
-
-      {!hasFullAccess(specialist) && (
-        <p className="rounded-md bg-brand-charcoal/5 px-4 py-3 text-sm text-brand-charcoal">{t("upgradeNote")}</p>
       )}
 
       {reviews.length === 0 ? (
