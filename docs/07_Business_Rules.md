@@ -74,9 +74,10 @@ needing to guess. Update this file whenever a new ambiguous case comes up
   required.
 - Trial extensions (+14 days at 10 bookings, +7 days per 5 referrals) are
   additive and can both apply to the same specialist.
-- When a trial expires without upgrade, the specialist drops to the Basic
-  (Free) plan automatically — they are never fully locked out of their
-  account or data.
+- When a trial expires without upgrade, the specialist reads at
+  Starter-level access (their plan's default) automatically — they are
+  never fully locked out of their account or data, and can upgrade to
+  Pro at any time.
 - The "5 bookings received" subscription prompt is informational and
   non-blocking; it must never prevent the specialist from continuing to
   use the app.
@@ -104,9 +105,8 @@ needing to guess. Update this file whenever a new ambiguous case comes up
   constraint on `appointment_id`, not just an application check).
 - Reviews can never be edited after submission — there is no update path
   in the app, only insert.
-- Reviews are collected on every plan, including Basic — only *displaying*
-  them on the public profile is Starter-tier and above. Basic specialists
-  still see their own reviews on their dashboard.
+- Reviews are collected and publicly displayed on every plan, Starter and
+  above — not tier-gated.
 - Specialists can view every review from their dashboard, on any plan,
   but can never delete or hide one. This is deliberate: a review system a
   specialist can curate isn't trustworthy to guests.

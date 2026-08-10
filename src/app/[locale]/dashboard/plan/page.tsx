@@ -14,24 +14,24 @@ import { PageHeading, SectionHeading } from "@/components/Heading";
 
 const CONTACT_EMAIL = "hello@ontime.am";
 
-// 02_PRD.md Section 14 (updated): three paid tiers, monthly billing only.
-// Reviews (08_Roadmap.md Phase 9) is back in Starter's bullet list now
-// that it's built — see src/lib/reviews.
-const PLAN_TIERS: { plan: Plan; nameKey: "planBasic" | "planStarter" | "planPro"; featureKeys: string[] }[] = [
-  {
-    plan: "basic",
-    nameKey: "planBasic",
-    featureKeys: ["basicFeature1", "basicFeature2", "basicFeature3", "basicFeature4"],
-  },
+// 02_PRD.md Section 14: two paid tiers, monthly billing only.
+const PLAN_TIERS: { plan: Plan; nameKey: "planStarter" | "planPro"; featureKeys: string[] }[] = [
   {
     plan: "starter",
     nameKey: "planStarter",
-    featureKeys: ["starterFeature1", "starterFeature2", "starterFeature3", "starterFeature4", "starterFeature5"],
+    featureKeys: [
+      "starterFeature1",
+      "starterFeature2",
+      "starterFeature3",
+      "starterFeature4",
+      "starterFeature5",
+      "starterFeature6",
+    ],
   },
   {
     plan: "pro",
     nameKey: "planPro",
-    featureKeys: ["proFeature1", "proFeature2"],
+    featureKeys: ["proFeature1", "proFeature2", "proFeature3"],
   },
 ];
 
@@ -51,8 +51,7 @@ export default async function PlanPage({
   const referralLink = `${process.env.APP_URL}/${locale}/book/${specialist.slug}?ref=${specialist.referralCode}`;
   const formatAmd = (amount: number) => new Intl.NumberFormat(locale).format(amount);
 
-  const planLabel =
-    specialist.plan === "starter" ? t("planStarter") : specialist.plan === "pro" ? t("planPro") : t("planBasic");
+  const planLabel = specialist.plan === "pro" ? t("planPro") : t("planStarter");
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
@@ -75,14 +74,6 @@ export default async function PlanPage({
             {t("planPriceMonthly", { price: formatAmd(status.currentPlanPriceAmd) })}
           </p>
         )}
-        {status.basicPortfolioPhotosUsed !== null && (
-          <p className="body-text text-sm">
-            {t("basicPortfolioUsage", {
-              used: status.basicPortfolioPhotosUsed,
-              limit: status.basicPortfolioPhotoLimit,
-            })}
-          </p>
-        )}
         <p className="body-text text-sm">
           {t("referralProgress", { count: status.successfulReferralCount, block: REFERRAL_BLOCK_SIZE })}
         </p>
@@ -97,7 +88,7 @@ export default async function PlanPage({
 
       <section className="panel flex flex-col gap-4">
         <SectionHeading>{t("upgradeTitle")}</SectionHeading>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           {PLAN_TIERS.map(({ plan, nameKey, featureKeys }) => {
             const isCurrent = !status.isTrialActive && specialist.plan === plan;
             return (

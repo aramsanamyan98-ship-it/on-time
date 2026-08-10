@@ -33,10 +33,9 @@ export default async function DashboardPage({
   const tAppointments = await getTranslations("Appointments");
   const tReviews = await getTranslations("Reviews");
 
-  // 08_Roadmap.md Phase 9: shown regardless of plan — a specialist can see
-  // their own average rating even on Basic, where reviews still get
-  // collected (see src/lib/notifications/queue.ts) but aren't yet shown
-  // publicly (see src/app/[locale]/book/[slug]/page.tsx).
+  // 08_Roadmap.md Phase 9: a specialist's own average rating, shown here
+  // regardless of plan (review display is a baseline feature of every paid
+  // plan — see src/app/[locale]/book/[slug]/page.tsx).
   const reviewStats = await getReviewStats(specialist.id);
 
   const todayStr = utcToZonedDateStr(new Date(), specialist.timezone);

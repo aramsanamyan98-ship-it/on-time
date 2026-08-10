@@ -68,7 +68,7 @@ export async function createManualBooking(
         guestLocale: routingLocaleToLanguage[input.guestLocale],
       },
     });
-    await enqueueBookingNotifications(appointment, input.specialist);
+    await enqueueBookingNotifications(appointment);
     return { ok: true, data: appointment };
   } catch (err) {
     // Same race-condition backstop as createGuestBooking: the specialist's

@@ -4,6 +4,7 @@ import { getLocale } from "next-intl/server";
 import { getSession } from "@/lib/session";
 import { redirect } from "@/i18n/navigation";
 import { prisma } from "@/lib/prisma";
+import { hasProAccess } from "@/lib/subscription/trial";
 import type { AppLocale } from "@/i18n/routing";
 
 const NOTES_MAX_LENGTH = 2000;
@@ -28,6 +29,12 @@ export async function saveClientNoteAction(
   const notes = String(formData.get("notes") ?? "").trim();
   if (!guestPhone) return { error: "notFound" };
   if (notes.length > NOTES_MAX_LENGTH) return { error: "notesTooLong" };
+
+  // 02_PRD.md Section 14: client notes are a Pro-only feature. The form is
+  // already hidden from Starter specialists (see [phone]/page.tsx); this
+  // re-checks server-side since a server action is directly callable.
+  const specialist = await prisma.specialist.findUnique({ where: { id: session.specialistId } });
+  if (!specialist || !hasProAccess(specialist)) return { error: "generic" };
 
   const hasAppointment = await prisma.appointment.findFirst({
     where: { specialistId: session.specialistId, guestPhone },

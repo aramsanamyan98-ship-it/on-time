@@ -170,88 +170,67 @@ influence v1 architecture beyond leaving room for it later.
 
 Revenue reporting and analytics are v1.x/v2, not launch-blocking.
 
-## 14. Subscription / Billing Tiers (Updated)
+## 14. Subscription / Billing Tiers (Final)
 
 ### Rationale for this update
+
+This is the final tier naming and structure, collapsing the prior
+three-tier Basic/Starter/Pro model into two paid tiers: **Starter** and
+**Pro**. There is no free/Basic tier: every specialist who isn't inside
+their trial pays for Starter or Pro. The free trial itself is
+unaffected in length or mechanics, but now grants **Pro-level** access
+(previously it granted the mid-tier's access level) — new specialists
+get to experience the full product, including client notes and full
+analytics, before ever being asked to pay or choose a tier.
 
 The original model gated the free tier by booking volume (~30
 bookings/month) and extended trials by booking count. In practice, the
 real adoption risk for a new specialist isn't booking volume — it's
 behavior change (getting clients to actually use the link instead of
 calling/DMing). A volume cap can penalize a slow-starting specialist at
-exactly the moment they need patience most. This update replaces the
-booking-count model with a flat time-based trial and feature-based tier
-gating instead — simpler to explain, and fairer to specialists who are
-still promoting their link.
-
-This also supersedes an earlier revision of this section that kept
-Basic as a permanent free tier with commitment-length (monthly/3-month/
-12-month) discount pricing on Starter/Pro. That approach is dropped:
-**there is no free tier once the trial ends, and billing is monthly
-only across all three paid plans** — see below.
-
-This update was also informed by direct competitive analysis of InQ
-(inq.am), the main local competitor — see 09_Brand_Guidelines.md's
-"Naming & Positioning Notes" for the fuller comparison. Key takeaway
-driving this pricing structure: InQ caps portfolio photos even on its
-paid tiers (5/10/15/30 images depending on plan). On-Time should not
-replicate this — uncapped photos on Starter/Pro is a deliberate,
-statable differentiator.
+exactly the moment they need patience most. That's why the trial itself
+stays a flat time-based grant rather than reintroducing a volume cap.
 
 ### Free Trial (all new specialists)
 
-- **3 months, flat, automatic, no card required** — replaces the old
-  30-day + booking-based extension model.
-- Full Starter-tier feature access during the trial.
+- **3 months, flat, automatic, no card required** — unchanged.
+- **Full Pro-level feature access during the trial** — every feature
+  described under Pro below, including client notes and full analytics.
 - Referral extensions still apply on top of the trial: **+7 days for
-  every 5 successful referrals** (unchanged from the original model —
-  this still rewards active promotion during the trial period).
+  every 5 successful referrals** (unchanged — this still rewards active
+  promotion during the trial period).
 - No in-app upgrade paywall/prompt during the trial — let specialists
   use the full feature set to actually experience the product's value
   before being asked to pay.
 
-### After the trial ends: no free tier — three paid plans, monthly billing only
+### After the trial ends: no free tier — two paid plans, monthly billing only
 
-Every specialist moves to one of the three plans below once their trial
-ends. There is no permanent free option; all three are billed monthly
-(no commitment-length discounts).
+Every specialist moves to Starter or Pro once their trial ends (Starter
+is the default until a specialist is upgraded). There is no permanent
+free option; both plans are billed monthly (no commitment-length
+discounts).
 
-### Basic — 4,000 AMD/month
+### Starter — 900 AMD/month
 
 - Public profile page (`book.ontime.am/[slug]`)
-- **Portfolio: limited to 5 photos**
-- **Unlimited bookings** (no volume cap — this was the old model's
-  restriction; removed)
-- Booking confirmation notification only — **no reminder
-  notifications**
-- Dashboard: today's/upcoming appointments, manual appointment entry
-- Client list (basic — appointment history visible, but **no notes
-  field**)
-- No analytics/reports
-- No reviews shown on the public profile (guests can still leave one via
-  the specialist's booking-token link — see "Reviews" note below — it's
-  just not displayed until the specialist is on Starter or above)
-
-### Starter — 6,000 AMD/month
-
-Everything in Basic, plus:
-- **Unlimited portfolio photos** (explicit differentiator vs. InQ's
-  capped tiers)
+- **Unlimited bookings and unlimited portfolio photos** (no volume
+  caps)
 - Full reminder notifications (booking confirmation + pre-appointment
   reminder)
-- Client notes field
-- Basic analytics (booking counts over time)
 - Guest reviews displayed on the public profile (average rating +
   individual reviews — see "Reviews" note below)
+- Client list (basic — appointment history visible, but **no notes
+  field**)
+- Basic analytics: month-over-month comparison, 30-day bookings chart,
+  status breakdown, most-booked service
 
-### Pro — 12,000 AMD/month
+### Pro — 3,000 AMD/month
 
 Everything in Starter, plus:
-- Daily reports and statistics
-- Deeper client management (CRM-lite, per original PRD intent)
-- (Future, once built) WhatsApp/Telegram notification delivery may be
-  positioned as a Pro-tier feature if not made universal — decide at
-  implementation time
+- **Client notes field**
+- **Full analytics**: daily breakdown table, repeat-client rate,
+  average-rating trend (on top of everything in Starter's basic
+  analytics)
 
 ### Reviews (08_Roadmap.md Phase 9)
 
@@ -261,13 +240,11 @@ time has passed, via the same private booking-token link used for
 self-service cancel/reschedule (also sent proactively as a "how was
 your appointment?" email once it's over). One review per appointment.
 
-Reviews are collected regardless of the specialist's plan — a Basic
-specialist still accumulates reviews, they just aren't shown on their
-public profile until they're on Starter or above; this is a deliberate
-upgrade incentive (their reviews are already visible to *them* on the
-dashboard the moment they upgrade, nothing has to backfill). Specialists
-can view every review from their dashboard but can never delete or hide
-one — this is what makes the review system trustworthy.
+Reviews are a baseline feature of every paid plan (Starter and above) —
+guest-submitted and publicly displayed regardless of tier, not gated
+between Starter and Pro. Specialists can view every review from their
+dashboard but can never delete or hide one — this is what makes the
+review system trustworthy.
 
 The public profile shows an average rating prominently near the top and
 the full list of individual reviews below the portfolio/services
@@ -276,18 +253,7 @@ on the public page — never phone or full name — even though the
 specialist's own dashboard view shows the full guest name for context
 (they already have that guest's full details via Clients/Appointments).
 
-### Marketing/positioning note (for landing page and pricing page copy)
-
-This structure supports a direct, honest competitive claim against InQ:
-On-Time's Starter tier (6,000 AMD) sits between InQ's Individual (3,000
-AMD) and Basic (6,800 AMD) tiers, while including unlimited bookings,
-unlimited photos, and full notifications — features InQ gates behind
-its two most expensive tiers (12,200–15,500 AMD). This comparison can
-be stated plainly on a pricing page once built: "More than InQ's
-cheapest plan. Less than InQ's mid-tier plan. No caps on your growth,
-either way."
-
-Billing itself (charging the specialist for Basic/Starter/Pro) is separate
+Billing itself (charging the specialist for Starter/Pro) is separate
 from Section 11 (guest payments) — this is On-Time charging the specialist,
 not the specialist charging their client. Payment method for this can be a
 simple card/manual invoice process initially; it does not need to be

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import type { AppLocale } from "@/i18n/routing";
 import { requireSpecialist } from "@/lib/dashboard/require-specialist";
+import { hasProAccess } from "@/lib/subscription/trial";
 import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { ClientNoteForm } from "./ClientNoteForm";
@@ -24,6 +25,7 @@ export default async function ClientDetailPage({
   const specialist = await requireSpecialist(locale as AppLocale);
   const t = await getTranslations("Clients");
   const guestPhone = decodeURIComponent(phone);
+  const canUseNotes = hasProAccess(specialist);
 
   const [appointments, note] = await Promise.all([
     prisma.appointment.findMany({
@@ -31,9 +33,11 @@ export default async function ClientDetailPage({
       include: { service: true },
       orderBy: { startAt: "desc" },
     }),
-    prisma.clientNote.findUnique({
-      where: { specialistId_guestPhone: { specialistId: specialist.id, guestPhone } },
-    }),
+    canUseNotes
+      ? prisma.clientNote.findUnique({
+          where: { specialistId_guestPhone: { specialistId: specialist.id, guestPhone } },
+        })
+      : Promise.resolve(null),
   ]);
   if (appointments.length === 0) notFound();
 
@@ -63,7 +67,11 @@ export default async function ClientDetailPage({
       </div>
 
       <div className="panel">
-        <ClientNoteForm guestPhone={guestPhone} initialNotes={note?.notes ?? ""} justSaved={saved === "1"} />
+        {canUseNotes ? (
+          <ClientNoteForm guestPhone={guestPhone} initialNotes={note?.notes ?? ""} justSaved={saved === "1"} />
+        ) : (
+          <p className="body-text text-sm">{t("notesUpgradeNote")}</p>
+        )}
       </div>
 
       <div className="flex flex-col gap-3">
