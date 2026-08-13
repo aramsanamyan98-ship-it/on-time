@@ -7,6 +7,7 @@ import {
   buildNewBookingAlertEmail,
   buildGuestCancelledAlertEmail,
   buildGuestRescheduledAlertEmail,
+  buildRebookingNoticeEmail,
   type AppointmentEmailParams,
   type SpecialistAlertEmailParams,
 } from "@/lib/email-templates";
@@ -86,6 +87,9 @@ export async function sendNotification(row: NotificationLog, appointment: Appoin
       break;
     case "reschedule_alert":
       content = buildGuestRescheduledAlertEmail(specialistLocale, specialistParams(appointment, specialistLocale));
+      break;
+    case "rebooking_notice":
+      content = buildRebookingNoticeEmail(guestLocale, guestParams(appointment, guestLocale));
       break;
     default:
       throw new Error(`No email template wired up for notification type: ${row.type}`);

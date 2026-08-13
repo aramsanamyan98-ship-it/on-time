@@ -129,6 +129,15 @@ enum ReferralStatus {
 // `new_booking_alert` for a reschedule would make the audit log say "new
 // booking" for something that wasn't one. Non-email channels remain
 // documented-but-not-yet-triggered (see `NotificationChannel`).
+//
+// `rebooking_notice` (rebooking-assist feature): the guest-facing
+// counterpart of a *specialist*-initiated cancellation — whether from a
+// direct dashboard cancel or a blocked-time conflict — prompting the guest
+// to pick a new slot themselves via their existing booking_token link
+// (see src/lib/booking/cancel-booking.ts). Deliberately not reusing
+// `cancellation` (that type is specialist-facing, for guest-initiated
+// cancels) for the same reason `reschedule_alert` isn't reused for
+// `new_booking_alert` above — same rationale, opposite direction.
 enum NotificationType {
   booking_confirmation
   reminder
@@ -136,6 +145,7 @@ enum NotificationType {
   new_booking_alert
   reschedule_alert
   review_request
+  rebooking_notice
 }
 
 enum NotificationChannel {
@@ -244,9 +254,10 @@ model PortfolioPhoto {
 
 // Specialist-private unavailable time (lunch, personal errands, etc.) that
 // blocks slot generation the same way an appointment does, without being
-// one (07_Business_Rules.md / 05_Database.md). No management UI ships in
-// Phase 4 — see 08_Roadmap.md Phase 4 scope — but the availability engine
-// already reads this table so it's ready for that UI later.
+// one (07_Business_Rules.md / 05_Database.md). Management UI (create/list/
+// delete, with a conflict-confirmation step against existing confirmed
+// appointments) ships with the rebooking-assist feature — see
+// src/lib/booking/blocked-time.ts and src/app/[locale]/dashboard/blocked-time.
 model BlockedTime {
   id           String     @id @default(uuid())
   specialistId String     @map("specialist_id")

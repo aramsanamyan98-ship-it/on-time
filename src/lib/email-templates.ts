@@ -131,6 +131,35 @@ export function buildReviewRequestEmail(locale: AppLocale, params: AppointmentEm
   return REVIEW_REQUEST_COPY[locale](params);
 }
 
+// Rebooking-assist feature: sent to the guest when a *specialist* cancels
+// their appointment (direct cancel, or a blocked-time conflict) instead of
+// a plain "your appointment was cancelled" notice — `manageLink` points at
+// the guest's existing booking_token page (Phase 4), which now offers a
+// "pick a new time" flow for a cancelled appointment (same service,
+// same guest details) rather than a bare confirmation/cancel view. See
+// src/lib/booking/cancel-booking.ts / src/lib/booking/rebook-booking.ts.
+const REBOOKING_NOTICE_COPY: Record<AppLocale, (p: AppointmentEmailParams) => EmailContent> = {
+  en: (p) => ({
+    subject: `Your appointment with ${p.specialistName} was cancelled — pick a new time`,
+    text: `Hi ${p.guestName},\n\n${p.specialistName} had to cancel your appointment:\n\n${p.serviceName}\n${p.dateTime}\n\nYou can pick a new time in a couple of taps:\n${p.manageLink}\n\nSorry for the inconvenience!`,
+    html: `<p>Hi ${p.guestName},</p><p>${p.specialistName} had to cancel your appointment:</p><p><strong>${p.serviceName}</strong><br>${p.dateTime}</p><p>You can pick a new time in a couple of taps: <a href="${p.manageLink}">Choose a new time</a>.</p><p>Sorry for the inconvenience!</p>`,
+  }),
+  ru: (p) => ({
+    subject: `Ваша запись к ${p.specialistName} отменена — выберите новое время`,
+    text: `Здравствуйте, ${p.guestName}!\n\n${p.specialistName} был вынужден отменить вашу запись:\n\n${p.serviceName}\n${p.dateTime}\n\nВы можете выбрать новое время в пару касаний:\n${p.manageLink}\n\nПриносим извинения за неудобства!`,
+    html: `<p>Здравствуйте, ${p.guestName}!</p><p>${p.specialistName} был вынужден отменить вашу запись:</p><p><strong>${p.serviceName}</strong><br>${p.dateTime}</p><p>Вы можете выбрать новое время в пару касаний: <a href="${p.manageLink}">Выбрать новое время</a>.</p><p>Приносим извинения за неудобства!</p>`,
+  }),
+  hy: (p) => ({
+    subject: `Ձեր ամրագրումը ${p.specialistName}-ի մոտ չեղարկվել է․ ընտրեք նոր ժամ`,
+    text: `Բարև Ձեզ, ${p.guestName}։\n\n${p.specialistName}-ը ստիպված է եղել չեղարկել Ձեր ամրագրումը.\n\n${p.serviceName}\n${p.dateTime}\n\nԴուք կարող եք ընտրել նոր ժամ ընդամենը մի քանի հպումով.\n${p.manageLink}\n\nՆերողություն անհարմարության համար!`,
+    html: `<p>Բարև Ձեզ, ${p.guestName}։</p><p>${p.specialistName}-ը ստիպված է եղել չեղարկել Ձեր ամրագրումը.</p><p><strong>${p.serviceName}</strong><br>${p.dateTime}</p><p>Դուք կարող եք ընտրել նոր ժամ ընդամենը մի քանի հպումով. <a href="${p.manageLink}">Ընտրել նոր ժամ</a>։</p><p>Ներողություն անհարմարության համար!</p>`,
+  }),
+};
+
+export function buildRebookingNoticeEmail(locale: AppLocale, params: AppointmentEmailParams): EmailContent {
+  return REBOOKING_NOTICE_COPY[locale](params);
+}
+
 // Specialist-facing alerts (02_PRD.md Section 9 "New booking notification
 // sent to specialist"; 07_Business_Rules.md "the specialist is notified
 // whenever a guest cancels or reschedules via their link, the same as if

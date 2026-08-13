@@ -33,11 +33,13 @@ export function ManageBooking({
   justBooked,
   justCancelled,
   justRescheduled,
+  justRebooked,
   initialDateStr,
   getSlotsForDateAction,
   getEarliestAvailableAction,
   cancelBookingAction,
   rescheduleBookingAction,
+  rebookBookingAction,
   canReview,
   initialReview,
   submitReviewAction,
@@ -48,11 +50,14 @@ export function ManageBooking({
   justBooked: boolean;
   justCancelled: boolean;
   justRescheduled: boolean;
+  justRebooked: boolean;
   initialDateStr: string;
   getSlotsForDateAction: (token: string, dateStr: string) => Promise<{ isWorkingDay: boolean; slots: string[] }>;
   getEarliestAvailableAction: (token: string) => Promise<{ dateStr: string; slot: string } | null>;
   cancelBookingAction: (prevState: ManageBookingState, formData: FormData) => Promise<ManageBookingState>;
   rescheduleBookingAction: (prevState: ManageBookingState, formData: FormData) => Promise<ManageBookingState>;
+  /** Rebooking-assist feature: picking a new time for an appointment the specialist already cancelled — see src/lib/booking/rebook-booking.ts. */
+  rebookBookingAction: (prevState: ManageBookingState, formData: FormData) => Promise<ManageBookingState>;
   /** 08_Roadmap.md Phase 9: whether the appointment has passed (and wasn't cancelled) — see src/lib/reviews/eligibility.ts. */
   canReview: boolean;
   initialReview: SubmittedReview | null;
@@ -69,6 +74,8 @@ export function ManageBooking({
     rescheduleBookingAction,
     initialState,
   );
+  const [rebookMode, setRebookMode] = useState<"view" | "pick">("view");
+  const [rebookState, rebookFormAction, isRebooking] = useActionState(rebookBookingAction, initialState);
   const [selectedRating, setSelectedRating] = useState(0);
   const [reviewState, reviewFormAction, isSubmittingReview] = useActionState(
     submitReviewAction,
@@ -76,8 +83,8 @@ export function ManageBooking({
   );
 
   // Safe to format client-side: `slotIso` is only ever set from a client
-  // interaction (picking a reschedule slot) after hydration, so this text
-  // never has to match anything the server rendered.
+  // interaction (picking a reschedule/rebook slot) after hydration, so this
+  // text never has to match anything the server rendered.
   const slotFormatter = new Intl.DateTimeFormat(locale, {
     weekday: "long",
     month: "long",
@@ -89,9 +96,73 @@ export function ManageBooking({
 
   if (appointment.status === "cancelled") {
     return (
-      <div className="panel flex max-w-lg flex-col gap-3">
-        <p className="font-medium text-brand-charcoal">{t("alreadyCancelledTitle")}</p>
-        <p className="body-text text-sm">{t("alreadyCancelledMessage")}</p>
+      <div className="flex max-w-lg flex-col gap-6">
+        <div className="panel flex flex-col gap-3">
+          <p className="font-medium text-brand-charcoal">{t("alreadyCancelledTitle")}</p>
+          <p className="body-text text-sm">{t("alreadyCancelledMessage")}</p>
+        </div>
+
+        <div className="panel flex flex-col gap-2">
+          <p className="text-sm text-brand-charcoal/60">{t("withSpecialist", { name: appointment.specialistName })}</p>
+          <p className="text-lg font-semibold text-brand-charcoal">{appointment.serviceName}</p>
+          <p className="body-text text-sm">
+            {tServices("durationValue", { minutes: appointment.durationMinutes })} ·{" "}
+            {tServices("priceValue", { price: appointment.priceAmd })}
+          </p>
+        </div>
+
+        {rebookMode === "view" && (
+          <button type="button" onClick={() => setRebookMode("pick")} className="btn-accent w-fit">
+            {t("rebook")}
+          </button>
+        )}
+
+        {rebookMode === "pick" && (
+          <form action={rebookFormAction} className="flex flex-col gap-4">
+            <input type="hidden" name="token" value={token} />
+            <input type="hidden" name="startAt" value={slotIso ?? ""} />
+
+            <p className="body-text text-sm">{t("rebookIntro", { service: appointment.serviceName })}</p>
+
+            <SlotPicker
+              initialDateStr={initialDateStr}
+              timezone={appointment.timezone}
+              locale={locale}
+              getSlots={(dateStr) => getSlotsForDateAction(token, dateStr)}
+              getEarliest={() => getEarliestAvailableAction(token)}
+              onSelect={setSlotIso}
+              selectedSlot={slotIso}
+            />
+
+            {slotIso && (
+              <p className="body-text text-sm">
+                {t("newTimePreview", { time: slotFormatter.format(new Date(slotIso)) })}
+              </p>
+            )}
+
+            {rebookState.formError && (
+              <p role="alert" className="text-sm text-red-700">
+                {tErrors(rebookState.formError)}
+              </p>
+            )}
+
+            <div className="flex gap-3">
+              <button type="submit" disabled={!slotIso || isRebooking} className="btn-accent w-fit">
+                {isRebooking ? t("confirming") : t("confirmRebook")}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setRebookMode("view");
+                  setSlotIso(null);
+                }}
+                className="btn-outline w-fit"
+              >
+                {t("neverMind")}
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     );
   }
@@ -113,6 +184,11 @@ export function ManageBooking({
       {justRescheduled && (
         <p role="status" className="rounded-md bg-brand-green/10 px-4 py-3 text-sm font-medium text-brand-green">
           {t("rescheduleSuccess")}
+        </p>
+      )}
+      {justRebooked && (
+        <p role="status" className="rounded-md bg-brand-green/10 px-4 py-3 text-sm font-medium text-brand-green">
+          {t("rebookSuccess")}
         </p>
       )}
       {justCancelled && (

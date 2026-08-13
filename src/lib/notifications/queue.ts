@@ -121,6 +121,21 @@ export async function enqueueGuestRescheduledAlert(appointment: Appointment, spe
 }
 
 /**
+ * Rebooking-assist feature: the guest-facing counterpart of a
+ * *specialist*-initiated cancellation (direct dashboard cancel, or a
+ * blocked-time conflict — see cancelAppointment in cancel-booking.ts and
+ * src/lib/booking/blocked-time.ts) — prompts the guest to pick a new slot
+ * themselves via their existing booking_token link, rather than a bare
+ * cancellation notice. Silently a no-op without a guest email, matching
+ * every other guest-facing enqueue in this file (only email is wired up —
+ * 02_PRD.md Section 9).
+ */
+export async function enqueueGuestRebookingNotice(appointment: Appointment): Promise<void> {
+  if (!appointment.guestEmail) return;
+  await enqueueNow(appointment.id, "rebooking_notice", appointment.guestEmail);
+}
+
+/**
  * Called after a reschedule (guest self-service or specialist-initiated) —
  * keeps the reminder pointed at the appointment's new time instead of
  * firing for the slot it no longer occupies.

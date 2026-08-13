@@ -13,6 +13,7 @@ import {
   getRescheduleEarliestAction,
   cancelBookingAction,
   rescheduleBookingAction,
+  rebookBookingAction,
   submitReviewAction,
 } from "./actions";
 import { PageHeading } from "@/components/Heading";
@@ -27,7 +28,7 @@ export default async function ManageBookingPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; token: string }>;
-  searchParams: Promise<{ justBooked?: string; cancelled?: string; rescheduled?: string }>;
+  searchParams: Promise<{ justBooked?: string; cancelled?: string; rescheduled?: string; rebooked?: string }>;
 }) {
   const { locale, token } = await params;
   const sp = await searchParams;
@@ -85,11 +86,13 @@ export default async function ManageBookingPage({
         justBooked={sp.justBooked === "1"}
         justCancelled={sp.cancelled === "1"}
         justRescheduled={sp.rescheduled === "1"}
+        justRebooked={sp.rebooked === "1"}
         initialDateStr={utcToZonedDateStr(new Date(), appointment.specialist.timezone)}
         getSlotsForDateAction={getRescheduleSlotsAction}
         getEarliestAvailableAction={getRescheduleEarliestAction}
         cancelBookingAction={cancelBookingAction}
         rescheduleBookingAction={rescheduleBookingAction}
+        rebookBookingAction={rebookBookingAction}
         canReview={isAppointmentReviewable(appointment)}
         initialReview={existingReview ? { rating: existingReview.rating, comment: existingReview.comment } : null}
         submitReviewAction={submitReviewAction}
