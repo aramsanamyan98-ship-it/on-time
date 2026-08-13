@@ -10,6 +10,7 @@ const TABS = [
   { href: "/dashboard/profile", key: "profile" },
   { href: "/dashboard/portfolio", key: "portfolio" },
   { href: "/dashboard/working-hours", key: "workingHours" },
+  { href: "/dashboard/blocked-time", key: "blockedTime" },
   { href: "/dashboard/services", key: "services" },
   { href: "/dashboard/reviews", key: "reviews" },
   { href: "/dashboard/analytics", key: "analytics" },
