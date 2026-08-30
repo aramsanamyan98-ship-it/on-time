@@ -2,7 +2,6 @@
 
 import { getLocale } from "next-intl/server";
 import { registerSpecialist } from "@/lib/auth/register";
-import { setSessionCookie } from "@/lib/session";
 import { redirect } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import type { FieldErrors, AuthErrorCode } from "@/lib/auth/errors";
@@ -30,11 +29,6 @@ export async function registerAction(
   const result = await registerSpecialist(email, password, confirmPassword, locale);
   if (!result.ok) {
     return { fieldErrors: result.fieldErrors, formError: result.formError };
-  }
-
-  if (!result.data.verificationRequired) {
-    await setSessionCookie(result.data.specialistId);
-    return redirect({ href: "/dashboard", locale });
   }
 
   return redirect({ href: `/check-email?email=${encodeURIComponent(result.data.email)}`, locale });

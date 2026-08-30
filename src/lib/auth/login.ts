@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
 import { setSessionCookie } from "@/lib/session";
 import { normalizeEmail, validateEmail, validatePassword } from "@/lib/auth/validation";
-import { emailVerificationRequired } from "@/lib/auth/email-verification";
 import type { AuthResult, FieldErrors } from "@/lib/auth/errors";
 
 // A hash of a password nobody will ever type, used to keep the bcrypt
@@ -28,7 +27,7 @@ export async function loginSpecialist(
     return { ok: false, formError: "invalidCredentials" };
   }
 
-  if (emailVerificationRequired() && !specialist.emailVerifiedAt) {
+  if (!specialist.emailVerifiedAt) {
     return { ok: false, formError: "emailNotVerified" };
   }
 

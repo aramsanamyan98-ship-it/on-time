@@ -5,7 +5,6 @@ import { generateUniqueSlug } from "@/lib/slug";
 import { sendEmail } from "@/lib/mailer";
 import { buildVerificationEmail } from "@/lib/email-templates";
 import { normalizeEmail, validateRegistration } from "@/lib/auth/validation";
-import { emailVerificationRequired } from "@/lib/auth/email-verification";
 import { routingLocaleToLanguage } from "@/lib/locale";
 import { generateUniqueReferralCode } from "@/lib/subscription/referrals";
 import { TRIAL_LENGTH_MS } from "@/lib/subscription/trial";
@@ -41,7 +40,7 @@ export async function registerSpecialist(
   password: string,
   confirmPassword: string,
   locale: AppLocale,
-): Promise<AuthResult<{ email: string; specialistId: string; verificationRequired: boolean }>> {
+): Promise<AuthResult<{ email: string }>> {
   const fieldErrors = validateRegistration(rawEmail, password, confirmPassword);
   if (Object.keys(fieldErrors).length > 0) {
     return { ok: false, fieldErrors };
@@ -59,8 +58,6 @@ export async function registerSpecialist(
   const slug = await generateUniqueSlug(displayName);
   const referralCode = await generateUniqueReferralCode();
 
-  const requireVerification = emailVerificationRequired();
-
   const specialist = await prisma.specialist.create({
     data: {
       email,
@@ -70,18 +67,12 @@ export async function registerSpecialist(
       referralCode,
       languagePreference: routingLocaleToLanguage[locale],
       trialEndsAt: new Date(Date.now() + TRIAL_LENGTH_MS),
-      emailVerifiedAt: requireVerification ? null : new Date(),
     },
   });
 
-  if (requireVerification) {
-    await issueVerificationEmail(specialist.id, specialist.email, locale);
-  }
+  await issueVerificationEmail(specialist.id, specialist.email, locale);
 
-  return {
-    ok: true,
-    data: { email: specialist.email, specialistId: specialist.id, verificationRequired: requireVerification },
-  };
+  return { ok: true, data: { email: specialist.email } };
 }
 
 export async function resendVerificationEmail(rawEmail: string, locale: AppLocale): Promise<void> {
