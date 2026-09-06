@@ -11,6 +11,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Default is 1MB. Profile/cover/portfolio photo uploads are compressed
+  // client-side (src/lib/uploads/compressImage.ts) to fit the ~10MB cap
+  // enforced in src/lib/storage.ts, so this needs enough headroom above
+  // that for multipart/form-data boundary and field overhead.
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "12mb",
+    },
+  },
 };
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");

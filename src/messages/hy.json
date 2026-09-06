@@ -118,7 +118,7 @@
       "instagramInvalid": "Մուտքագրեք վավեր Instagram հաշիվ կամ հղում։",
       "facebookInvalid": "Մուտքագրեք վավեր Facebook էջ կամ հղում։",
       "fileRequired": "Ընտրեք վերբեռնվող նկարը։",
-      "fileTooLarge": "Նկարը պետք է լինի 5ՄԲ-ից փոքր։",
+      "fileTooLarge": "Նկարը պետք է լինի 10ՄԲ-ից փոքր։",
       "fileTypeInvalid": "Նկարը պետք է լինի JPEG, PNG կամ WebP ձևաչափով։",
       "nameRequired": "Մուտքագրեք ծառայության անվանումը։",
       "nameTooLong": "Ծառայության անվանումը պետք է լինի առավելագույնը 100 նիշ։",

@@ -10,7 +10,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 // Every caller only depends on saveUploadedImage/deleteUploadedImage, not on
 // how or where the file is actually stored.
 
-const MAX_BYTES = 5 * 1024 * 1024; // 5MB
+const MAX_BYTES = 10 * 1024 * 1024; // 10MB — matches the client-side compression target
 const ALLOWED_TYPES: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/png": "png",

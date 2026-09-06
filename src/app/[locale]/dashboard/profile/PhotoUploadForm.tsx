@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useRef } from "react";
+import { useActionState, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { submitCompressedFile } from "@/lib/uploads/compressImage";
 import { uploadProfilePhotoAction, uploadCoverPhotoAction, type PhotoState } from "./actions";
 
 const initialState: PhotoState = {};
@@ -18,9 +19,11 @@ export function PhotoUploadForm({
   const tErrors = useTranslations("Dashboard.errors");
   const action = kind === "profile" ? uploadProfilePhotoAction : uploadCoverPhotoAction;
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const [isCompressing, setIsCompressing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const src = state.url ?? initialUrl;
   const isProfile = kind === "profile";
+  const isBusy = isPending || isCompressing;
 
   return (
     <div className="flex flex-col gap-2">
@@ -56,15 +59,15 @@ export function PhotoUploadForm({
           accept="image/jpeg,image/png,image/webp"
           required
           className="sr-only"
-          onChange={(e) => e.currentTarget.form?.requestSubmit()}
+          onChange={(e) => submitCompressedFile(e.currentTarget, setIsCompressing)}
         />
         <button
           type="button"
-          disabled={isPending}
+          disabled={isBusy}
           onClick={() => fileInputRef.current?.click()}
           className="btn-outline px-3 py-1.5"
         >
-          {isPending ? t("uploading") : t("upload")}
+          {isBusy ? t("uploading") : t("upload")}
         </button>
       </form>
       {state.formError && (
