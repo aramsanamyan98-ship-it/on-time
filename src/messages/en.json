@@ -118,7 +118,7 @@
       "instagramInvalid": "Enter a valid Instagram handle or link.",
       "facebookInvalid": "Enter a valid Facebook page or link.",
       "fileRequired": "Choose an image to upload.",
-      "fileTooLarge": "Image must be smaller than 5MB.",
+      "fileTooLarge": "Image must be smaller than 10MB.",
       "fileTypeInvalid": "Image must be a JPEG, PNG, or WebP file.",
       "nameRequired": "Enter a service name.",
       "nameTooLong": "Service name must be 100 characters or fewer.",
