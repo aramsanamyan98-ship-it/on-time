@@ -1,15 +1,14 @@
 import "server-only";
-import { mkdir, unlink, writeFile } from "fs/promises";
-import path from "path";
 import { randomBytes } from "crypto";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-// Local-disk storage for specialist-uploaded images (profile/cover photos).
-// Files land in public/uploads/{specialistId}/ so they're served as static
-// assets without a dedicated route handler. This is fine for local dev and
-// a single-instance deploy; if this app ever runs on infrastructure with an
-// ephemeral or read-only filesystem (e.g. Vercel serverless), swap this
-// module for an object-storage backed one — every caller only depends on
-// saveUploadedImage/deleteUploadedImage, not on the disk layout.
+// Supabase Storage-backed storage for specialist-uploaded images (profile,
+// cover, and portfolio photos). Vercel's serverless filesystem is ephemeral
+// (and read-only outside /tmp), so files can't live on local disk the way
+// they could in a single-instance deploy — they're uploaded to a public
+// Storage bucket instead, and callers get back the bucket's public URL.
+// Every caller only depends on saveUploadedImage/deleteUploadedImage, not on
+// how or where the file is actually stored.
 
 const MAX_BYTES = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES: Record<string, string> = {
@@ -18,13 +17,37 @@ const ALLOWED_TYPES: Record<string, string> = {
   "image/webp": "webp",
 };
 
+// Matches the bucket name as created in Supabase (case-sensitive).
+const BUCKET = process.env.SUPABASE_STORAGE_BUCKET ?? "Uploads";
+
 export type UploadErrorCode = "fileRequired" | "fileTooLarge" | "fileTypeInvalid";
 
 export type UploadResult =
   | { ok: true; url: string }
   | { ok: false; error: UploadErrorCode };
 
-const UPLOADS_ROOT = path.join(process.cwd(), "public", "uploads");
+let cachedClient: SupabaseClient | null = null;
+
+function getSupabaseClient(): SupabaseClient {
+  if (cachedClient) return cachedClient;
+
+  const url = process.env.SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceRoleKey) {
+    throw new Error(
+      "SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set to upload files to Supabase Storage.",
+    );
+  }
+
+  // Server-only client using the service role key, which bypasses Storage
+  // RLS. That's safe here because every caller already checks the caller's
+  // session before reaching this module — the bucket itself has no public
+  // write access.
+  cachedClient = createClient(url, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+  return cachedClient;
+}
 
 export async function saveUploadedImage(
   file: File | null,
@@ -42,26 +65,45 @@ export async function saveUploadedImage(
     return { ok: false, error: "fileTypeInvalid" };
   }
 
-  const dir = path.join(UPLOADS_ROOT, specialistId);
-  await mkdir(dir, { recursive: true });
-
-  const filename = `${kind}-${Date.now()}-${randomBytes(4).toString("hex")}.${extension}`;
+  const objectPath = `${specialistId}/${kind}-${Date.now()}-${randomBytes(4).toString("hex")}.${extension}`;
   const bytes = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(dir, filename), bytes);
 
-  return { ok: true, url: `/uploads/${specialistId}/${filename}` };
+  const supabase = getSupabaseClient();
+  const { error } = await supabase.storage.from(BUCKET).upload(objectPath, bytes, {
+    contentType: file.type,
+    upsert: false,
+  });
+  if (error) {
+    throw new Error(`Failed to upload ${objectPath} to Supabase Storage: ${error.message}`);
+  }
+
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(objectPath);
+  return { ok: true, url: data.publicUrl };
 }
 
 // Best-effort cleanup of a previously uploaded file when it's replaced.
-// Failures are swallowed: a stray orphaned file on disk is harmless, but
-// failing to save the new photo because the old one couldn't be deleted
+// Failures are swallowed: a stray orphaned object in the bucket is harmless,
+// but failing to save the new photo because the old one couldn't be deleted
 // would not be.
 export async function deleteUploadedImage(url: string | null): Promise<void> {
-  if (!url || !url.startsWith("/uploads/")) return;
-  const filePath = path.join(process.cwd(), "public", url);
+  const objectPath = toObjectPath(url);
+  if (!objectPath) return;
+
   try {
-    await unlink(filePath);
+    await getSupabaseClient().storage.from(BUCKET).remove([objectPath]);
   } catch {
     // ignore
   }
+}
+
+// Recovers the bucket-relative object path from a public Storage URL, e.g.
+// "https://<project>.supabase.co/storage/v1/object/public/Uploads/<path>"
+// -> "<path>". Returns null for anything else (already-deleted files,
+// legacy local-disk "/uploads/..." URLs from before this migration, etc.).
+function toObjectPath(url: string | null): string | null {
+  if (!url) return null;
+  const marker = `/object/public/${BUCKET}/`;
+  const index = url.indexOf(marker);
+  if (index === -1) return null;
+  return decodeURIComponent(url.slice(index + marker.length));
 }
