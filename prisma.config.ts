@@ -8,7 +8,12 @@ export default defineConfig({
   migrations: {
     path: "prisma/migrations",
   },
+  // CLI commands (migrate, db pull, studio) use DIRECT_URL, not DATABASE_URL:
+  // the app's DATABASE_URL points at Supabase's transaction-mode pooler
+  // (see src/lib/prisma.ts), which doesn't support the DDL/advisory-lock
+  // behavior migrations need. Locally, both env vars point at the same
+  // docker Postgres, so this has no effect in dev.
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url: process.env["DIRECT_URL"],
   },
 });
