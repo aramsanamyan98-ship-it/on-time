@@ -187,7 +187,7 @@ export default async function PublicProfilePage({
           </section>
         )}
 
-        <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-10">
+        <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:items-start lg:gap-10">
           <div className="flex flex-col gap-8">
             {reviewStats.count > 0 && (
               <section className="flex flex-col gap-3">
@@ -219,9 +219,9 @@ export default async function PublicProfilePage({
               {services.length === 0 ? (
                 <p className="body-text text-sm">{t("noServices")}</p>
               ) : (
-                <div className="flex flex-col gap-3">
+                <div className="panel flex flex-col divide-y divide-brand-charcoal/10 p-0">
                   {services.map((service) => (
-                    <div key={service.id} className="surface-card flex flex-col gap-1">
+                    <div key={service.id} className="flex flex-col gap-0.5 px-4 py-3">
                       <div className="flex items-center justify-between gap-4">
                         <span className="font-medium text-brand-charcoal">{service.name}</span>
                         <span className="body-text whitespace-nowrap text-sm">
@@ -260,11 +260,11 @@ export default async function PublicProfilePage({
                   (rather than next/image, which needs known dimensions) lets
                   each thumbnail keep its natural proportions in the masonry
                   layout instead of being cropped to a fixed box. */}
-              <div className="columns-2 gap-3">
+              <div className="columns-2 gap-4">
                 {portfolioPhotos.map((photo) => (
                   <div
                     key={photo.id}
-                    className="mb-3 break-inside-avoid overflow-hidden rounded-lg bg-brand-charcoal/5 shadow-sm"
+                    className="mb-4 break-inside-avoid overflow-hidden rounded-xl bg-brand-charcoal/5 shadow-sm transition hover:shadow-md"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={photo.imageUrl} alt="" loading="lazy" className="w-full object-cover" />
