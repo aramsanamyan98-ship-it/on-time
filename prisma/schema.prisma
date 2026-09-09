@@ -157,6 +157,11 @@ model Specialist {
   // specialist has ever subscribed.
   subscriptionCommitmentMonths  Int?      @map("subscription_commitment_months")
   subscriptionActiveUntil       DateTime? @map("subscription_active_until")
+  // Drives the dashboard nav's unread-appointments badge (see
+  // src/lib/dashboard/appointments-badge.ts): null means "never viewed",
+  // so every guest-initiated appointment event counts as unread until the
+  // specialist's first visit to the Appointments page.
+  appointmentsLastViewedAt      DateTime? @map("appointments_last_viewed_at")
   createdAt                     DateTime  @default(now()) @map("created_at")
   updatedAt                     DateTime  @updatedAt @map("updated_at")
   deletedAt                     DateTime? @map("deleted_at")
