@@ -7,6 +7,7 @@ import { requireSpecialist } from "@/lib/dashboard/require-specialist";
 import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { AppointmentRow } from "./AppointmentRow";
+import { MarkAppointmentsViewed } from "./MarkAppointmentsViewed";
 import { PageHeading } from "@/components/Heading";
 
 export default async function AppointmentsPage({
@@ -44,6 +45,7 @@ export default async function AppointmentsPage({
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">
+      <MarkAppointmentsViewed />
       <div className="flex items-center justify-between gap-4">
         <PageHeading>{t("title")}</PageHeading>
         <Link href="/dashboard/appointments/new" className="btn-primary">

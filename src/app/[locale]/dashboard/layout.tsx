@@ -5,6 +5,7 @@ import { routing } from "@/i18n/routing";
 import type { AppLocale } from "@/i18n/routing";
 import { requireSpecialist } from "@/lib/dashboard/require-specialist";
 import { getPlanStatus } from "@/lib/subscription/status";
+import { getUnviewedAppointmentEventsCount } from "@/lib/dashboard/appointments-badge";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LogoutButton } from "./LogoutButton";
 import { DashboardNav } from "./DashboardNav";
@@ -25,6 +26,9 @@ export default async function DashboardLayout({
   const planStatus = getPlanStatus(specialist);
 
   const t = await getTranslations("Dashboard");
+  const unviewedAppointmentsCount = planStatus.hasActiveAccess
+    ? await getUnviewedAppointmentEventsCount(specialist)
+    : 0;
 
   return (
     <div className="flex flex-1 flex-col">
@@ -37,7 +41,7 @@ export default async function DashboardLayout({
       </header>
       {planStatus.hasActiveAccess ? (
         <>
-          <DashboardNav />
+          <DashboardNav unviewedAppointmentsCount={unviewedAppointmentsCount} />
           <main className="flex flex-1 flex-col px-6 py-8">{children}</main>
         </>
       ) : (

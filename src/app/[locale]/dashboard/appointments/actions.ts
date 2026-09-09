@@ -1,6 +1,7 @@
 "use server";
 
 import { getLocale } from "next-intl/server";
+import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/session";
 import { redirect } from "@/i18n/navigation";
 import { prisma } from "@/lib/prisma";
@@ -182,4 +183,28 @@ export async function createManualAppointmentAction(
   if (!result.ok) return { fieldErrors: result.fieldErrors, formError: result.formError };
 
   return redirect({ href: "/dashboard/appointments?added=1", locale });
+}
+
+/**
+ * Called once when the Appointments page mounts (see
+ * MarkAppointmentsViewed.tsx) to clear the dashboard nav's unread badge
+ * (src/lib/dashboard/appointments-badge.ts). Not a <form> action — fired
+ * automatically on page view rather than a user click, so there's no
+ * useActionState/redirect ceremony here, just the write plus a
+ * revalidation so the nav (rendered by the shared dashboard layout, which
+ * App Router doesn't otherwise re-render on a same-layout navigation)
+ * picks up the cleared count without a full page reload.
+ */
+export async function markAppointmentsViewedAction(): Promise<void> {
+  const session = await getSession();
+  if (!session) return;
+
+  await prisma.specialist.update({
+    where: { id: session.specialistId },
+    data: { appointmentsLastViewedAt: new Date() },
+  });
+  // The literal dynamic-segment template (matching the layout's filesystem
+  // path), not a resolved locale — required by revalidatePath for `type:
+  // "layout"` so it revalidates the layout for every locale, not one path.
+  revalidatePath("/[locale]/dashboard", "layout");
 }

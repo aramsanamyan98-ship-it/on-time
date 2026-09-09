@@ -109,7 +109,8 @@
       "services": "Services",
       "reviews": "Reviews",
       "analytics": "Analytics",
-      "plan": "Plan"
+      "plan": "Plan",
+      "unviewedBadgeLabel": "{count, plural, one {# unread appointment update} other {# unread appointment updates}}"
     },
     "errors": {
       "bioTooLong": "Bio must be 500 characters or fewer.",
