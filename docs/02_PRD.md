@@ -170,67 +170,81 @@ influence v1 architecture beyond leaving room for it later.
 
 Revenue reporting and analytics are v1.x/v2, not launch-blocking.
 
-## 14. Subscription / Billing Tiers (Final)
+## 14. Subscription / Billing (Final)
 
 ### Rationale for this update
 
-This is the final tier naming and structure, collapsing the prior
-three-tier Basic/Starter/Pro model into two paid tiers: **Starter** and
-**Pro**. There is no free/Basic tier: every specialist who isn't inside
-their trial pays for Starter or Pro. The free trial itself is
-unaffected in length or mechanics, but now grants **Pro-level** access
-(previously it granted the mid-tier's access level) — new specialists
-get to experience the full product, including client notes and full
-analytics, before ever being asked to pay or choose a tier.
+This replaces the prior tiered model (Basic/Starter/Pro, and the later
+two-tier Starter/Pro collapse) entirely. There is now **one plan**: every
+paying specialist gets every feature identically. The only thing that
+varies is **commitment length**, and commitment length affects price
+only — never feature access. This removes the need for any
+feature-gating logic keyed off a plan name; the app now only ever asks
+"does this specialist have active access right now" (trial or paid,
+regardless of which commitment length they chose).
 
-The original model gated the free tier by booking volume (~30
-bookings/month) and extended trials by booking count. In practice, the
-real adoption risk for a new specialist isn't booking volume — it's
-behavior change (getting clients to actually use the link instead of
-calling/DMing). A volume cap can penalize a slow-starting specialist at
-exactly the moment they need patience most. That's why the trial itself
-stays a flat time-based grant rather than reintroducing a volume cap.
+The referral-driven trial-extension mechanic (+7 days per 5 successful
+referrals) is also removed. The trial is now a flat, fixed length with
+no extensions of any kind — simpler to explain to specialists and to
+reason about in the app, and it removes an entire growth mechanic
+(referral codes/links, invite tracking) that existed solely to feed that
+extension.
 
 ### Free Trial (all new specialists)
 
-- **3 months, flat, automatic, no card required** — unchanged.
-- **Full Pro-level feature access during the trial** — every feature
-  described under Pro below, including client notes and full analytics.
-- Referral extensions still apply on top of the trial: **+7 days for
-  every 5 successful referrals** (unchanged — this still rewards active
-  promotion during the trial period).
+- **3 months, flat, automatic, no card required.**
+- **Full feature access during the trial** — identical to what a paying
+  specialist gets: unlimited bookings, unlimited portfolio photos, full
+  reminder notifications, reviews, client notes, and full analytics.
+- **No extensions of any kind.** The trial is exactly 3 months from
+  registration, always.
 - No in-app upgrade paywall/prompt during the trial — let specialists
   use the full feature set to actually experience the product's value
   before being asked to pay.
 
-### After the trial ends: no free tier — two paid plans, monthly billing only
+### After the trial: one plan, priced by commitment length
 
-Every specialist moves to Starter or Pro once their trial ends (Starter
-is the default until a specialist is upgraded). There is no permanent
-free option; both plans are billed monthly (no commitment-length
-discounts).
+Once the trial ends, a specialist subscribes to keep access. There is no
+free tier and no feature difference by commitment length — every paying
+specialist gets the exact same feature set the trial already gave them.
+Price per month gets cheaper the longer the commitment:
 
-### Starter — 900 AMD/month
+| Commitment | Price / month | Billed upfront |
+|---|---|---|
+| Monthly | 2,900 AMD | 2,900 AMD |
+| 3 months | 2,610 AMD | 7,830 AMD |
+| 6 months | 2,320 AMD | 13,920 AMD |
+| 12 months | 2,030 AMD | 24,360 AMD |
 
+Every commitment length includes, identically:
 - Public profile page (`book.ontime.am/[slug]`)
-- **Unlimited bookings and unlimited portfolio photos** (no volume
-  caps)
+- Unlimited bookings and unlimited portfolio photos (no volume caps)
 - Full reminder notifications (booking confirmation + pre-appointment
   reminder)
 - Guest reviews displayed on the public profile (average rating +
   individual reviews — see "Reviews" note below)
-- Client list (basic — appointment history visible, but **no notes
-  field**)
-- Basic analytics: month-over-month comparison, 30-day bookings chart,
-  status breakdown, most-booked service
+- Client list with private notes per client
+- Full analytics: month-over-month comparison, 30-day bookings chart,
+  status breakdown, most-booked service, daily breakdown table,
+  repeat-client rate, average-rating trend
 
-### Pro — 3,000 AMD/month
+### Access model: trial-active OR paid-active, nothing in between
 
-Everything in Starter, plus:
-- **Client notes field**
-- **Full analytics**: daily breakdown table, repeat-client rate,
-  average-rating trend (on top of everything in Starter's basic
-  analytics)
+The app computes a single boolean — does this specialist have active
+access — as: an active trial, **or** an active paid subscription of any
+commitment length. There is no partial/degraded state and no
+feature distinction based on which commitment length was chosen.
+
+**Once the trial ends with no active paid subscription:** the dashboard
+and all booking-management functionality are blocked entirely, replaced
+by a clear "subscribe to continue" state (not a degraded/limited
+dashboard) showing the commitment-length options and how to subscribe.
+
+The public profile page (`book.ontime.am/[slug]`) stays reachable to
+guests regardless — it never 404s just because a specialist's
+trial/subscription lapsed. Attempting to book shows a message ("This
+specialist isn't currently accepting bookings") instead of allowing a
+booking to complete.
 
 ### Reviews (08_Roadmap.md Phase 9)
 
@@ -240,9 +254,9 @@ time has passed, via the same private booking-token link used for
 self-service cancel/reschedule (also sent proactively as a "how was
 your appointment?" email once it's over). One review per appointment.
 
-Reviews are a baseline feature of every paid plan (Starter and above) —
-guest-submitted and publicly displayed regardless of tier, not gated
-between Starter and Pro. Specialists can view every review from their
+Reviews are a baseline feature of every paying specialist —
+guest-submitted and publicly displayed the same way regardless of
+commitment length. Specialists can view every review from their
 dashboard but can never delete or hide one — this is what makes the
 review system trustworthy.
 
@@ -253,11 +267,15 @@ on the public page — never phone or full name — even though the
 specialist's own dashboard view shows the full guest name for context
 (they already have that guest's full details via Clients/Appointments).
 
-Billing itself (charging the specialist for Starter/Pro) is separate
-from Section 11 (guest payments) — this is On-Time charging the specialist,
-not the specialist charging their client. Payment method for this can be a
-simple card/manual invoice process initially; it does not need to be
-automated in the very first version if it slows launch.
+### Billing mechanics
+
+Billing itself (charging the specialist for their subscription) is
+separate from Section 11 (guest payments) — this is On-Time charging the
+specialist, not the specialist charging their client. There is no
+payment-processor integration yet: a specialist's paid access is
+activated by a simple manual/invoice process off-platform, then recorded
+in the app (commitment length + paid-through date). This does not need
+to be automated in the very first version if it slows launch.
 
 ## 15. Explicitly Out of Scope for v1
 

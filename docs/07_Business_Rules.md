@@ -70,17 +70,24 @@ needing to guess. Update this file whenever a new ambiguous case comes up
 
 (See 02_PRD.md Section 14 for the source values.)
 
-- Every new specialist starts with 30 days of full access, no card
-  required.
-- Trial extensions (+14 days at 10 bookings, +7 days per 5 referrals) are
-  additive and can both apply to the same specialist.
-- When a trial expires without upgrade, the specialist reads at
-  Starter-level access (their plan's default) automatically — they are
-  never fully locked out of their account or data, and can upgrade to
-  Pro at any time.
-- The "5 bookings received" subscription prompt is informational and
-  non-blocking; it must never prevent the specialist from continuing to
-  use the app.
+- Every new specialist starts with a flat 3-month (90-day) trial, full
+  access, no card required. The trial length is fixed — there are no
+  extensions of any kind (no referral mechanic, no booking-count
+  milestone).
+- There is no tiered plan. Every paying specialist gets identical
+  features regardless of commitment length (monthly / 3 / 6 / 12
+  months) — commitment length only affects price.
+- Access is a single binary check: an active trial **or** an active paid
+  subscription of any commitment length. When neither applies (trial
+  expired, no active subscription), the specialist **is** locked out of
+  the dashboard and booking-management functionality — replaced by a
+  clear "subscribe to continue" state, not a degraded dashboard. Their
+  public profile page stays reachable to guests regardless, but new
+  bookings are blocked with a clear message instead of completing.
+- A paid subscription is activated by writing a paid-through date
+  (`subscription_active_until`) via a manual/admin action once payment is
+  arranged off-platform — there is no automated billing-processor
+  integration yet, so this is never set on a schedule.
 
 ## Notifications
 
@@ -105,11 +112,12 @@ needing to guess. Update this file whenever a new ambiguous case comes up
   constraint on `appointment_id`, not just an application check).
 - Reviews can never be edited after submission — there is no update path
   in the app, only insert.
-- Reviews are collected and publicly displayed on every plan, Starter and
-  above — not tier-gated.
-- Specialists can view every review from their dashboard, on any plan,
-  but can never delete or hide one. This is deliberate: a review system a
-  specialist can curate isn't trustworthy to guests.
+- Reviews are collected and publicly displayed for every paying
+  specialist — not gated by commitment length.
+- Specialists can view every review from their dashboard, regardless of
+  commitment length, but can never delete or hide one. This is
+  deliberate: a review system a specialist can curate isn't trustworthy
+  to guests.
 - The public profile shows the guest as a first name (or "Anonymous") —
   never phone or full name. The specialist's own dashboard view shows the
   full guest name, since they already have full access to that guest's

@@ -26,7 +26,7 @@ export type PublicReview = {
 };
 
 /**
- * Public profile display (02_PRD.md Section 14, Starter+): deliberately
+ * Public profile display (02_PRD.md Section 14): deliberately
  * selects only `guestName` off the related appointment — no phone, no
  * full name — and reduces even that down to a first name/null, so the
  * privacy boundary is enforced by what this query reads, not by trusting

@@ -72,23 +72,25 @@ the dashboard without needing any other tool.
 **Exit criteria:** guests reliably receive a confirmation and a reminder;
 failures are logged and retryable, not silent.
 
-## Phase 7 — Trial & Subscription Logic (COMPLETED, needed a follow-up
-update — see below)
+## Phase 7 — Trial & Subscription Logic (COMPLETED, needed several
+follow-up updates — see below)
 
-- Trial countdown, extension logic (bookings + referrals)
-- Plan display and upgrade prompts
-- Basic/Starter/Pro gating of features per 02_PRD.md Section 14
+- Flat, fixed-length trial countdown (no extensions)
+- Plan/subscription display with commitment-length pricing
+- A single trial-active-or-subscription-active access gate per
+  02_PRD.md Section 14 — no tiered feature gating of any kind
 
 **Exit criteria:** trial mechanics work automatically without manual
 intervention.
 
 Phase 7 was originally built against the old booking-count-based trial
 model (30 days + booking/referral extensions, ~30 bookings/month Basic
-cap). This has since been revised twice — see 02_PRD.md Section 14
-(updated). The current (final) model drops the permanent free Basic tier
-and the commitment-length discount pricing that a prior revision had
-added: **Basic is now a paid tier (4,000 AMD/month), and all three plans
-bill monthly only.** Follow-up work:
+cap). This has since been revised several times — see 02_PRD.md
+Section 14 (Final). **The current (final) model has a single plan: every
+paying specialist gets identical features, and price varies only by
+commitment length (monthly / 3 / 6 / 12 months). There is no tiered plan
+name (Basic/Starter/Pro) anywhere, and no referral-based trial
+extension.** Follow-up work, in order:
 
 1. ~~Update trial logic from 30-day + booking-extension model to a flat
    3-month trial (referral extensions stay, booking-count extensions
@@ -100,25 +102,45 @@ bill monthly only.** Follow-up work:
    src/lib/notifications/queue.ts via the same hasFullAccess boundary
    used everywhere else (plan !== "basic", or an active trial).
 4. ~~Add commitment-length pricing (monthly / 3-month / 12-month) to the
-   plan/subscription page.~~ Superseded: the final model removed
-   commitment-length pricing entirely in favor of a single monthly price
-   per tier (Basic/Starter/Pro), shown side by side on the Plan page.
+   plan/subscription page.~~ Superseded at the time by a flat
+   per-tier monthly price (see item 6) — then reinstated for good in
+   item 7 below, now as the single plan's only price variable.
 5. ~~Do NOT enable real billing/payment collection for Starter until
    Reviews is either built or removed from the advertised feature
-   list.~~ Resolved — Reviews is now built (Phase 9 below) and back in
-   the Starter feature list.
+   list.~~ Resolved — Reviews is now built (Phase 9 below) and part of
+   the baseline feature set.
 6. ~~Finalize tier naming and structure: collapse Basic/Starter/Pro into
-   two paid tiers, Starter and Pro.~~ Done — see 02_PRD.md Section 14
-   (Final). Basic is retired entirely (its former feature set — profile,
-   unlimited bookings/photos, reminders, reviews, basic analytics — is
-   now the Starter baseline). Starter is 900 AMD/month, Pro is 3,000
-   AMD/month. The free trial now grants full **Pro-level** access
-   (previously Starter-level) — the only two Pro-exclusive features are
+   two paid tiers, Starter and Pro.~~ Done at the time — see item 7
+   below for the final collapse to a single plan. Basic was retired
+   entirely (its former feature set — profile, unlimited bookings/
+   photos, reminders, reviews, basic analytics — became the Starter
+   baseline). The free trial granted full **Pro-level** access
+   (previously Starter-level) — the only two Pro-exclusive features were
    client notes and full analytics (daily breakdown, repeat-client rate,
    rating trend). `hasFullAccess` in src/lib/subscription/trial.ts was
    renamed to `hasProAccess` to reflect this; reminders/reviews/basic
-   analytics are no longer plan-gated at all since every paid plan gets
+   analytics were no longer plan-gated at all since every paid plan got
    them.
+7. ~~Collapse Starter/Pro into a single plan; replace tier-based feature
+   gating with one `hasActiveAccess` check (trial-active OR
+   subscription-active); replace flat per-tier monthly pricing with
+   commitment-length pricing (monthly / 3 / 6 / 12 months, 2,900 → 2,030
+   AMD/month, price only — no feature difference).~~ Done — see
+   02_PRD.md Section 14 (Final). `plan` (the `Starter`/`Pro` enum),
+   `referralCode`, and `referralExtensionsGranted` are dropped from the
+   schema; `subscriptionCommitmentMonths` + `subscriptionActiveUntil`
+   replace them. `hasProAccess` was renamed again, to `hasActiveAccess`.
+8. ~~Remove the referral trial-extension mechanic (+7 days per 5
+   referrals) and everything that only existed to support it — the
+   `referrals` table, the referral link/invite-by-email UI, the `?ref=`
+   query param through the booking flow.~~ Done — the trial is now a
+   flat, non-extendable 3 months with no growth mechanic attached to it.
+9. ~~Block the dashboard and booking-management entirely once the trial
+   ends with no active subscription (previously a specialist just read
+   at Starter-level access forever, never locked out).~~ Done — a clear
+   "subscribe to continue" state replaces the dashboard; the public
+   profile page stays reachable to guests regardless, but attempting to
+   book shows a message instead of completing.
 
 ## Phase 8 — Marketing Site Connection
 
@@ -138,18 +160,19 @@ bill monthly only.** Follow-up work:
   (`review_request` notification type)
 - Public profile (`book/[slug]`): average rating near the top, full
   review list below the portfolio/services section — shown for every
-  paid plan, Starter and above (02_PRD.md Section 14), not tier-gated
+  paying specialist (02_PRD.md Section 14), not gated by commitment
+  length
 - Dashboard: specialists can view every review (average + full list,
-  with full guest name for context) on any plan, with no delete/hide
-  action anywhere — reviews can't be edited or removed once submitted,
-  by design, to keep the system trustworthy
+  with full guest name for context), with no delete/hide action
+  anywhere — reviews can't be edited or removed once submitted, by
+  design, to keep the system trustworthy
 - Public-page reviewer identity is reduced to first name/"Anonymous" —
   never phone or full name
 
 **Exit criteria:** a guest can leave one review per completed
 appointment; it shows up correctly (right average, right list) on the
 specialist's public profile, and is visible to the specialist on their
-dashboard regardless of plan.
+dashboard.
 
 ## Later / Explicitly Deferred (v2+)
 
@@ -158,7 +181,7 @@ dashboard regardless of plan.
 - Marketplace search/discovery (browsing all specialists, not just direct
   links)
 - Multi-staff/multi-location support
-- CRM-lite / advanced analytics (Pro plan features)
+- CRM-lite / advanced analytics beyond what's already built
 - SMS notifications (if WhatsApp/Telegram prove sufficient)
 
 ### New item — Pricing page comparison table

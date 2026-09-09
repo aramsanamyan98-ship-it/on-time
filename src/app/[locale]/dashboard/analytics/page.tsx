@@ -4,18 +4,17 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import type { AppLocale } from "@/i18n/routing";
 import { requireSpecialist } from "@/lib/dashboard/require-specialist";
-import { hasProAccess } from "@/lib/subscription/trial";
 import { getAnalyticsOverview, getRepeatClientStats, getRatingTrend } from "@/lib/analytics/queries";
 import { PageHeading, SectionHeading } from "@/components/Heading";
 import { StarRating } from "@/components/StarRating";
 import { BookingsChart } from "./BookingsChart";
 
-// 02_PRD.md Section 14: basic analytics (this month vs. last, 30-day chart,
-// status breakdown, most-booked service) is a baseline feature of every
-// paid plan. The Pro-only section below (repeat-client rate, rating trend,
-// daily breakdown table) is gated by hasProAccess, which also grants Pro
-// access to anyone still on their free trial (02_PRD.md Section 14: the
-// trial grants full Pro-level access).
+// 02_PRD.md Section 14: full analytics (month-over-month, 30-day chart,
+// status breakdown, most-booked service, repeat-client rate, rating trend,
+// daily breakdown) is identical for every specialist who can reach this
+// page at all — the dashboard layout already blocks the whole dashboard
+// for anyone without active trial/subscription access, so there's no
+// further per-feature gating here.
 export default async function AnalyticsPage({
   params,
 }: {
@@ -28,11 +27,10 @@ export default async function AnalyticsPage({
   const specialist = await requireSpecialist(locale as AppLocale);
   const t = await getTranslations("Analytics");
 
-  const isPro = hasProAccess(specialist);
   const [overview, repeatStats, ratingTrend] = await Promise.all([
     getAnalyticsOverview(specialist),
-    isPro ? getRepeatClientStats(specialist.id) : Promise.resolve(null),
-    isPro ? getRatingTrend(specialist) : Promise.resolve(null),
+    getRepeatClientStats(specialist.id),
+    getRatingTrend(specialist),
   ]);
 
   const numberFormatter = new Intl.NumberFormat(locale);
@@ -112,14 +110,9 @@ export default async function AnalyticsPage({
         </div>
       </section>
 
-      {isPro && repeatStats && ratingTrend && (
+      {repeatStats && ratingTrend && (
         <section className="flex flex-col gap-6 border-t border-brand-charcoal/10 pt-6">
-          <div className="flex items-center gap-2">
-            <SectionHeading>{t("proSectionTitle")}</SectionHeading>
-            <span className="rounded-full bg-brand-gold/20 px-2 py-0.5 text-xs font-semibold text-brand-gold-hover">
-              {t("proBadge")}
-            </span>
-          </div>
+          <SectionHeading>{t("moreInsightsTitle")}</SectionHeading>
 
           <div className="panel flex flex-col gap-1">
             <p className="text-xs font-medium uppercase tracking-wide text-brand-charcoal/50">{t("repeatClientRateTitle")}</p>

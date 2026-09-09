@@ -8,7 +8,7 @@ import { getPlanStatus } from "@/lib/subscription/status";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LogoutButton } from "./LogoutButton";
 import { DashboardNav } from "./DashboardNav";
-import { SubscriptionPromptBanner } from "./SubscriptionPromptBanner";
+import { SubscribeToContinue } from "./SubscribeToContinue";
 
 export default async function DashboardLayout({
   children,
@@ -22,7 +22,7 @@ export default async function DashboardLayout({
   setRequestLocale(locale);
 
   const specialist = await requireSpecialist(locale as AppLocale);
-  const planStatus = await getPlanStatus(specialist);
+  const planStatus = getPlanStatus(specialist);
 
   const t = await getTranslations("Dashboard");
 
@@ -35,9 +35,14 @@ export default async function DashboardLayout({
           <LogoutButton />
         </div>
       </header>
-      <SubscriptionPromptBanner initiallyVisible={planStatus.showSubscriptionPrompt} />
-      <DashboardNav />
-      <main className="flex flex-1 flex-col px-6 py-8">{children}</main>
+      {planStatus.hasActiveAccess ? (
+        <>
+          <DashboardNav />
+          <main className="flex flex-1 flex-col px-6 py-8">{children}</main>
+        </>
+      ) : (
+        <SubscribeToContinue locale={locale} />
+      )}
     </div>
   );
 }
