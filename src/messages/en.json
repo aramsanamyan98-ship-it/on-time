@@ -154,7 +154,11 @@
     "facebookLabel": "Facebook",
     "save": "Save changes",
     "saving": "Saving…",
-    "saved": "Profile updated."
+    "saved": "Profile updated.",
+    "publicLinkTitle": "Your booking page",
+    "publicLinkHint": "Share this link with clients so they can book with you directly.",
+    "copyLink": "Copy link",
+    "copied": "Copied!"
   },
   "WorkingHours": {
     "title": "Working hours",
