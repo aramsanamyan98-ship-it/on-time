@@ -6,6 +6,7 @@ import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { loadSchedule } from "@/lib/working-hours/load-schedule";
 import { getReviewStats, listReviewsForPublicProfile } from "@/lib/reviews/queries";
+import { hasActiveAccess } from "@/lib/subscription/trial";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Link } from "@/i18n/navigation";
 import { PageHeading, SectionHeading } from "@/components/Heading";
@@ -14,13 +15,10 @@ import { PhoneIcon, PinIcon, InstagramIcon, FacebookIcon } from "@/components/Co
 
 export default async function PublicProfilePage({
   params,
-  searchParams,
 }: {
   params: Promise<{ locale: string; slug: string }>;
-  searchParams: Promise<{ ref?: string }>;
 }) {
   const { locale, slug } = await params;
-  const { ref } = await searchParams;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
 
@@ -38,6 +36,8 @@ export default async function PublicProfilePage({
       facebookUrl: true,
       emailVerifiedAt: true,
       deletedAt: true,
+      trialEndsAt: true,
+      subscriptionActiveUntil: true,
     },
   });
 
@@ -48,9 +48,12 @@ export default async function PublicProfilePage({
     notFound();
   }
 
-  // 02_PRD.md Section 14 / 08_Roadmap.md Phase 9: guest reviews are shown
-  // on the public profile for every paid plan — a baseline Starter feature,
-  // not gated by tier.
+  // 02_PRD.md Section 14: the public profile itself stays reachable to
+  // guests even once a specialist's trial/subscription lapses — only the
+  // ability to book is gated (below), same as every other feature (reviews
+  // included) which is now identical across every paying specialist.
+  const canAcceptBookings = hasActiveAccess(specialist);
+
   const [services, schedule, portfolioPhotos, reviewStats, reviews] = await Promise.all([
     prisma.service.findMany({
       where: { specialistId: specialist.id, isActive: true },
@@ -128,14 +131,14 @@ export default async function PublicProfilePage({
 
           {specialist.bio && <p className="body-text max-w-prose">{specialist.bio}</p>}
 
-          {services.length > 0 && (
-            <Link
-              href={ref ? `/book/${slug}/new?ref=${encodeURIComponent(ref)}` : `/book/${slug}/new`}
-              className="btn-accent mt-2 w-fit"
-            >
-              {t("bookButton")}
-            </Link>
-          )}
+          {services.length > 0 &&
+            (canAcceptBookings ? (
+              <Link href={`/book/${slug}/new`} className="btn-accent mt-2 w-fit">
+                {t("bookButton")}
+              </Link>
+            ) : (
+              <p className="body-text text-sm">{t("notAcceptingBookings")}</p>
+            ))}
         </div>
 
         {(specialist.phone || specialist.address || specialist.instagramUrl || specialist.facebookUrl) && (
@@ -276,14 +279,11 @@ export default async function PublicProfilePage({
         </div>
       </div>
 
-      {services.length > 0 && (
+      {services.length > 0 && canAcceptBookings && (
         <div className="fixed inset-x-0 bottom-0 z-30 border-t border-brand-charcoal/10 bg-brand-warm-white/95 backdrop-blur">
           <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-6 py-3">
             <span className="truncate text-sm font-medium text-brand-charcoal">{specialist.displayName}</span>
-            <Link
-              href={ref ? `/book/${slug}/new?ref=${encodeURIComponent(ref)}` : `/book/${slug}/new`}
-              className="btn-accent shrink-0"
-            >
+            <Link href={`/book/${slug}/new`} className="btn-accent shrink-0">
               {t("bookButton")}
             </Link>
           </div>

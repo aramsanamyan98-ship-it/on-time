@@ -16,13 +16,11 @@ export type AnalyticsOverview = {
 };
 
 /**
- * Starter+ analytics (02_PRD.md Section 14). Every figure is scoped to the
- * last 30 days (the chart's own window) except the month-over-month
- * comparison, which is explicitly calendar-month. "Bookings" excludes
- * cancelled appointments, the same convention
- * src/lib/subscription/trial.ts's countBookings uses; the status breakdown
- * is the one place cancelled still needs to be counted, so it's tallied
- * from the same fetch rather than a second query.
+ * 02_PRD.md Section 14. Every figure is scoped to the last 30 days (the
+ * chart's own window) except the month-over-month comparison, which is
+ * explicitly calendar-month. "Bookings" excludes cancelled appointments;
+ * the status breakdown is the one place cancelled still needs to be
+ * counted, so it's tallied from the same fetch rather than a second query.
  */
 export async function getAnalyticsOverview(specialist: Specialist): Promise<AnalyticsOverview> {
   const { id: specialistId, timezone } = specialist;
@@ -85,9 +83,9 @@ export async function getAnalyticsOverview(specialist: Specialist): Promise<Anal
 export type RepeatClientStats = { totalClients: number; repeatClients: number; repeatRatePercent: number };
 
 /**
- * Pro tier (02_PRD.md Section 14): a lifetime rate, not scoped to the
- * 30-day window above — repeat behavior is a longer-horizon signal than a
- * monthly snapshot. Grouped by guest phone, the same identity key
+ * 02_PRD.md Section 14: a lifetime rate, not scoped to the 30-day window
+ * above — repeat behavior is a longer-horizon signal than a monthly
+ * snapshot. Grouped by guest phone, the same identity key
  * src/lib/dashboard/clients.ts's listClients uses; every appointment counts
  * toward "has booked" regardless of status, since a later cancellation
  * doesn't erase that the client made a booking.
@@ -117,7 +115,7 @@ export async function getRepeatClientStats(specialistId: string): Promise<Repeat
 export type MonthlyRating = { month: string; average: number | null; count: number };
 
 /**
- * Pro tier: average rating per calendar month, oldest first, for the most
+ * 02_PRD.md Section 14: average rating per calendar month, oldest first, for the most
  * recent RATING_TREND_MONTHS months — a simple trend rather than per-review
  * detail (already available on the Reviews page). Months with no reviews
  * still appear, with `average: null`, so the trend's shape (including gaps)

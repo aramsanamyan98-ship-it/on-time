@@ -12,6 +12,7 @@ export type BookingErrorCode =
   | "slotRequired"
   | "slotInvalid"
   | "slotTaken"
+  | "notAcceptingBookings"
   | "nameRequired"
   | "nameTooLong"
   | "phoneRequired"

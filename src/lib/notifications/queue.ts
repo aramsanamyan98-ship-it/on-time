@@ -80,7 +80,7 @@ async function enqueueNow(appointmentId: string, type: NotificationType, recipie
  * guest, and the cron-triggered route remains the durable path regardless.
  *
  * 02_PRD.md Section 14: full reminder notifications are a baseline feature
- * of every paid plan (Starter and above) — not tier-gated.
+ * of every paying specialist — there's no tier to gate them by.
  */
 export async function enqueueBookingNotifications(appointment: Appointment): Promise<void> {
   if (!appointment.guestEmail) return; // only channel implemented this phase is email (02_PRD.md Section 9); nothing to queue without an address

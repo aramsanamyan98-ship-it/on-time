@@ -40,8 +40,13 @@ this as the required minimum, not the ceiling.
 - timezone
 - instagram_url (nullable)
 - language_preference (am / ru / en)
-- plan (basic / starter / pro)
 - trial_ends_at
+- subscription_commitment_months (nullable — 1 / 3 / 6 / 12; see
+  02_PRD.md Section 14. There is no tiered `plan` field: every paying
+  specialist gets identical features, so this only ever affects price)
+- subscription_active_until (nullable — paid-through date; null until a
+  specialist has ever subscribed, and only ever written by a manual/admin
+  action since there's no billing-processor integration yet)
 - created_at, updated_at, deleted_at
 
 ### `services`
@@ -117,15 +122,8 @@ This table exists specifically so a failed notification never blocks or
 corrupts a booking, and so failures can be retried/audited (see
 10_Risks.md).
 
-### `referrals` (supports trial-extension logic)
-- id
-- specialist_id (FK — the referrer)
-- referred_email or referred_phone
-- status (invited / booked_first_appointment)
-- created_at
-
-### `reviews` (08_Roadmap.md Phase 9, 02_PRD.md Section 14 — Starter tier
-and above)
+### `reviews` (08_Roadmap.md Phase 9, 02_PRD.md Section 14 — every paying
+specialist)
 - id
 - appointment_id (FK, unique — one review per appointment; no editing
   after submission, so there's no update path, only insert)
@@ -147,8 +145,10 @@ queried rather than by what's stored.
   directly on `appointments` instead)
 - `payments` / `deposits`
 - `employees` / `shops` (multi-staff, multi-location)
-- `subscriptions_billing` (if billing is manual/off-platform initially,
-  this can be a simple `plan` field on `specialists` for now)
+- `subscriptions_billing` (billing is manual/off-platform for now —
+  `subscription_commitment_months` + `subscription_active_until` on
+  `specialists` is enough to record the current paid-access state without
+  a separate table; see 02_PRD.md Section 14)
 
 ## Open Question to Resolve Before Phase 4
 

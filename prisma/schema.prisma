@@ -3,8 +3,8 @@
 // Build stage: auth (specialists + token tables), Phase 2 specialist-profile
 // tables (services, working_hours), Phase 3 portfolio_photos, Phase 4
 // booking-engine tables (appointments, blocked_time), Phase 5 client_notes,
-// Phase 6 notifications_log, and Phase 7 referrals + trial/subscription
-// fields on `specialists`, per docs/08_Roadmap.md.
+// Phase 6 notifications_log, and Phase 7 trial/subscription fields on
+// `specialists`, per docs/08_Roadmap.md.
 //
 // Deviations from the literal field list in 05_Database.md, and why:
 // - `display_name` and `slug` are populated automatically at registration
@@ -34,32 +34,20 @@
 //   rejected, not just exact duplicate start times. Prisma's schema DSL
 //   can't express EXCLUDE constraints, so it's added by hand-editing the
 //   generated migration SQL (see prisma/migrations).
-// - Phase 7 (02_PRD.md Section 14 / 08_Roadmap.md): `specialists.plan`
-//   deliberately never gets written to "pro" by any code in this phase (no
-//   billing integration exists yet to justify it) — it stays at its
-//   registration-time default of "starter" until a specialist is manually
-//   upgraded. The free trial's Pro-level access is likewise never a write
-//   to `plan` itself: every read site computes effective access from `plan`
-//   + `trialEndsAt` together (see src/lib/subscription/trial.ts
-//   `hasProAccess`) rather than mutating `plan`, so trial expiry needs no
-//   cron/background job to "downgrade" anyone (08_Roadmap.md Phase 7 exit
-//   criteria: "works automatically without manual intervention"). There is
-//   no free/Basic tier to drop down to on expiry — a specialist whose trial
-//   has ended simply reads at Starter-level (their `plan` default) unless
-//   they've been upgraded to Pro.
-// - `referralExtensionsGranted` exists because the referral trial
-//   extension is stated as an incremental grant (07_Business_Rules.md: "+7
-//   days per 5 referrals" repeats per block of 5) — it needs a persisted
-//   marker so re-evaluating after every referral can't double-grant when a
-//   count later dips (e.g. a cancellation) and climbs back up.
-// - 02_PRD.md Section 14 was revised post-Phase-7 (see 08_Roadmap.md):
-//   flat 3-month trial replaces the old 30-day + booking-milestone
-//   extension, so `bookingMilestoneExtendedAt` and the old
-//   `booking_milestone_extended_at` column were removed (see the
-//   `remove_booking_milestone_phase7_update` migration) rather than kept
-//   as a dead field.
+// - 02_PRD.md Section 14 (final pricing model): there is no tiered `plan`
+//   anymore — every paying specialist gets identical features, and only
+//   commitment length varies price. `subscriptionActiveUntil` is the single
+//   source of truth for "paid access through this date"; there's no
+//   billing integration yet, so it's only ever written by a manual/admin
+//   action once payment is arranged off-platform (same "simple invoice
+//   process" the doc always allowed) — never by app code on a schedule.
+//   Effective dashboard/booking access is computed by ORing this against
+//   `trialEndsAt` (see src/lib/subscription/trial.ts `hasActiveAccess`),
+//   so trial expiry needs no cron/downgrade job: a specialist whose trial
+//   has ended and has no `subscriptionActiveUntil` in the future simply
+//   reads as blocked.
 // - `reviews` (08_Roadmap.md Phase 9, 02_PRD.md Section 14 — displayed on
-//   every paid plan, Starter and above): `appointmentId` is `@unique`
+//   every paid plan): `appointmentId` is `@unique`
 //   rather than a plain FK — that's
 //   the entire enforcement of "one review per appointment, no editing" (a
 //   second insert for the same appointment simply violates the unique
@@ -90,11 +78,6 @@ enum Language {
   en
 }
 
-enum Plan {
-  starter
-  pro
-}
-
 enum AppointmentStatus {
   confirmed
   cancelled
@@ -105,17 +88,6 @@ enum AppointmentStatus {
 enum AppointmentSource {
   guest_booking
   manual_specialist_entry
-}
-
-// See 05_Database.md `referrals` and 07_Business_Rules.md Trial & Billing
-// Rules. `invited` is set when a specialist proactively sends an invite
-// (Referral.referredEmail known up front); a referral can also be created
-// directly as `booked_first_appointment` when a guest arrives via the
-// specialist's referral link and books without a prior invite — see
-// src/lib/subscription/referrals.ts.
-enum ReferralStatus {
-  invited
-  booked_first_appointment
 }
 
 // See 05_Database.md `notifications_log` and 02_PRD.md Section 9: guests
@@ -177,17 +149,14 @@ model Specialist {
   instagramUrl                  String?   @map("instagram_url")
   facebookUrl                   String?   @map("facebook_url")
   languagePreference            Language  @default(am) @map("language_preference")
-  plan                          Plan      @default(starter)
   trialEndsAt                   DateTime? @map("trial_ends_at")
-  // Phase 7 (08_Roadmap.md / 02_PRD.md Section 14) — see schema header
-  // comment for why these are additive markers rather than derived values.
-  referralCode                  String    @unique @map("referral_code")
-  referralExtensionsGranted     Int       @default(0) @map("referral_extensions_granted")
-  // Dismissal state for the "5 bookings received" upgrade nudge
-  // (04_User_Flows.md Flow 5 step 5) — the prompt is informational/
-  // non-blocking, so once a specialist dismisses it, it shouldn't keep
-  // reappearing on every dashboard page load.
-  subscriptionPromptDismissedAt DateTime? @map("subscription_prompt_dismissed_at")
+  // 02_PRD.md Section 14 (final pricing model) — see schema header comment.
+  // `subscriptionCommitmentMonths` is one of 1/3/6/12 (price-per-month
+  // varies by commitment length only, see src/lib/subscription/pricing.ts);
+  // `subscriptionActiveUntil` is the paid-through date. Both null until a
+  // specialist has ever subscribed.
+  subscriptionCommitmentMonths  Int?      @map("subscription_commitment_months")
+  subscriptionActiveUntil       DateTime? @map("subscription_active_until")
   createdAt                     DateTime  @default(now()) @map("created_at")
   updatedAt                     DateTime  @updatedAt @map("updated_at")
   deletedAt                     DateTime? @map("deleted_at")
@@ -200,7 +169,6 @@ model Specialist {
   appointments            Appointment[]
   blockedTime             BlockedTime[]
   clientNotes             ClientNote[]
-  referrals               Referral[]
   reviews                 Review[]
 
   @@map("specialists")
@@ -356,26 +324,6 @@ model ClientNote {
 
   @@unique([specialistId, guestPhone])
   @@map("client_notes")
-}
-
-// Referral growth mechanic feeding the trial-extension rule (05_Database.md
-// `referrals`, 07_Business_Rules.md, 08_Roadmap.md Phase 7). One row per
-// invited/referred guest per specialist. `referredEmail`/`referredPhone`
-// mirror the "email or phone" wording in 05_Database.md — whichever the
-// specialist had at invite time, or whichever the guest provided at
-// booking time when there was no prior invite (see
-// src/lib/subscription/referrals.ts).
-model Referral {
-  id            String         @id @default(uuid())
-  specialistId  String         @map("specialist_id")
-  specialist    Specialist     @relation(fields: [specialistId], references: [id], onDelete: Cascade)
-  referredEmail String?        @map("referred_email")
-  referredPhone String?        @map("referred_phone")
-  status        ReferralStatus @default(invited)
-  createdAt     DateTime       @default(now()) @map("created_at")
-
-  @@index([specialistId])
-  @@map("referrals")
 }
 
 // Guest-authored review of a completed appointment (08_Roadmap.md Phase 9,
