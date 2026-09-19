@@ -15,6 +15,7 @@ export function BookingWizard({
   locale,
   services,
   initialDateStr,
+  initialServiceId,
   getSlotsForDateAction,
   getEarliestAvailableAction,
   createBookingAction,
@@ -24,6 +25,8 @@ export function BookingWizard({
   locale: string;
   services: Service[];
   initialDateStr: string;
+  /** From a "ready to rebook?" email link (`?service=<id>`, see src/lib/notifications/send.ts) — pre-selects the guest's previous service and skips straight to picking a time. */
+  initialServiceId?: string | null;
   getSlotsForDateAction: (
     specialistId: string,
     serviceId: string,
@@ -39,8 +42,9 @@ export function BookingWizard({
   const tServices = useTranslations("Services");
   const tErrors = useTranslations("Booking.errors");
 
-  const [step, setStep] = useState<"service" | "datetime" | "details">("service");
-  const [serviceId, setServiceId] = useState<string | null>(services.length === 1 ? services[0].id : null);
+  const preselectedServiceId = initialServiceId ?? (services.length === 1 ? services[0].id : null);
+  const [step, setStep] = useState<"service" | "datetime" | "details">(preselectedServiceId ? "datetime" : "service");
+  const [serviceId, setServiceId] = useState<string | null>(preselectedServiceId);
   const [slotIso, setSlotIso] = useState<string | null>(null);
   const [state, formAction, isPending] = useActionState(createBookingAction, initialState);
 

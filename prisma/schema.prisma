@@ -110,6 +110,16 @@ enum AppointmentSource {
 // `cancellation` (that type is specialist-facing, for guest-initiated
 // cancels) for the same reason `reschedule_alert` isn't reused for
 // `new_booking_alert` above — same rationale, opposite direction.
+//
+// `rebook_reminder` ("ready to rebook?" win-back email): scheduled once,
+// for some days after the appointment's `end_at`, inviting the guest back
+// for another visit with a link straight into a fresh booking with the
+// same service pre-selected (src/app/[locale]/book/[slug]/new's `?service=`
+// param — not the booking_token page, since there's no existing
+// appointment left to manage by then). Distinct from `review_request`
+// (also scheduled off `end_at`) because they serve different goals and a
+// specialist may want one without the other later; see
+// src/lib/notifications/queue.ts for the lead-time constant.
 enum NotificationType {
   booking_confirmation
   reminder
@@ -118,6 +128,7 @@ enum NotificationType {
   reschedule_alert
   review_request
   rebooking_notice
+  rebook_reminder
 }
 
 enum NotificationChannel {

@@ -50,6 +50,47 @@ async function enqueueReviewRequestIfNeeded(appointment: Appointment): Promise<v
   });
 }
 
+// How long after an appointment ends before the "ready to rebook?" email
+// goes out — long enough that it reads as a follow-up, not a same-day
+// pester. 1.5 days (36h) is a reasonable v1 default, overridable without a
+// code change.
+const REBOOK_REMINDER_LEAD_DAYS = Number(process.env.REBOOK_REMINDER_LEAD_DAYS ?? 1.5);
+
+function rebookReminderScheduledFor(endAt: Date): Date {
+  return new Date(endAt.getTime() + REBOOK_REMINDER_LEAD_DAYS * 24 * 60 * 60 * 1000);
+}
+
+/**
+ * "Ready to rebook?" win-back email — scheduled once, for some days after
+ * the appointment's `endAt`, inviting the guest back for another visit
+ * with the same specialist. Same "no persisted completed status" reasoning
+ * as enqueueReviewRequestIfNeeded above (see isAppointmentReviewable):
+ * scheduling ahead of time off `endAt` and relying on cancelPendingNotifications
+ * to drop the still-queued row on a cancellation is what "completed, or
+ * time passed without cancellation" collapses to in this app. Not
+ * plan-gated, matching every other guest-facing notification (02_PRD.md
+ * Section 14).
+ */
+async function enqueueRebookReminderIfNeeded(appointment: Appointment): Promise<void> {
+  if (!appointment.guestEmail) return;
+  const remindAt = rebookReminderScheduledFor(appointment.endAt);
+  // A manual/backdated entry (create-manual-booking.ts allows past startAt
+  // for walk-in record-keeping) could already be old enough that even
+  // endAt + the lead time has passed — skip rather than fire a "come back"
+  // nudge the moment the specialist finishes logging an old visit.
+  if (remindAt <= new Date()) return;
+
+  await prisma.notificationLog.create({
+    data: {
+      appointmentId: appointment.id,
+      type: "rebook_reminder",
+      channel: "email",
+      recipient: appointment.guestEmail,
+      scheduledFor: remindAt,
+    },
+  });
+}
+
 /**
  * Queues one immediately-due notification and schedules a post-response
  * processing pass — the shared shape behind every enqueue* function below.
@@ -96,6 +137,12 @@ export async function enqueueBookingNotifications(appointment: Appointment): Pro
     await enqueueReminderIfNeeded(appointment);
   } catch (err) {
     console.error("[notifications] failed to enqueue reminder:", err);
+  }
+
+  try {
+    await enqueueRebookReminderIfNeeded(appointment);
+  } catch (err) {
+    console.error("[notifications] failed to enqueue rebook reminder:", err);
   }
 }
 
@@ -165,6 +212,23 @@ export async function rescheduleReviewRequestNotification(appointment: Appointme
     await enqueueReviewRequestIfNeeded(appointment);
   } catch (err) {
     console.error("[notifications] failed to reschedule review request notification:", err);
+  }
+}
+
+/**
+ * Same idea as rescheduleReminderNotification, for the rebook-reminder
+ * notification — keeps it pointed at the appointment's new `endAt` instead
+ * of firing (or having already fired) too early/late for a time the
+ * appointment no longer occupies.
+ */
+export async function rescheduleRebookReminderNotification(appointment: Appointment): Promise<void> {
+  try {
+    await prisma.notificationLog.deleteMany({
+      where: { appointmentId: appointment.id, type: "rebook_reminder", status: "queued" },
+    });
+    await enqueueRebookReminderIfNeeded(appointment);
+  } catch (err) {
+    console.error("[notifications] failed to reschedule rebook reminder notification:", err);
   }
 }
 

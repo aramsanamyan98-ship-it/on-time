@@ -8,8 +8,10 @@ import {
   buildGuestCancelledAlertEmail,
   buildGuestRescheduledAlertEmail,
   buildRebookingNoticeEmail,
+  buildRebookReminderEmail,
   type AppointmentEmailParams,
   type SpecialistAlertEmailParams,
+  type RebookReminderEmailParams,
 } from "@/lib/email-templates";
 import { languageToRoutingLocale } from "@/lib/locale";
 import type { Appointment, NotificationLog, Specialist, Service } from "@/generated/prisma/client";
@@ -35,6 +37,15 @@ function guestParams(appointment: AppointmentWithRelations, locale: AppLocale): 
     serviceName: appointment.service.name,
     dateTime: formatAppointmentDateTime(appointment.startAt, appointment.specialist.timezone, locale),
     manageLink: `${process.env.APP_URL}/${locale}/booking/${appointment.bookingToken}`,
+  };
+}
+
+function guestRebookParams(appointment: AppointmentWithRelations, locale: AppLocale): RebookReminderEmailParams {
+  return {
+    guestName: appointment.guestName,
+    specialistName: appointment.specialist.displayName,
+    serviceName: appointment.service.name,
+    bookAgainLink: `${process.env.APP_URL}/${locale}/book/${appointment.specialist.slug}/new?service=${appointment.serviceId}`,
   };
 }
 
@@ -90,6 +101,9 @@ export async function sendNotification(row: NotificationLog, appointment: Appoin
       break;
     case "rebooking_notice":
       content = buildRebookingNoticeEmail(guestLocale, guestParams(appointment, guestLocale));
+      break;
+    case "rebook_reminder":
+      content = buildRebookReminderEmail(guestLocale, guestRebookParams(appointment, guestLocale));
       break;
     default:
       throw new Error(`No email template wired up for notification type: ${row.type}`);
