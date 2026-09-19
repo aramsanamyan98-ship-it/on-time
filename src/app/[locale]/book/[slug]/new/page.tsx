@@ -12,10 +12,13 @@ import { PageHeading } from "@/components/Heading";
 
 export default async function NewBookingPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; slug: string }>;
+  searchParams: Promise<{ service?: string }>;
 }) {
   const { locale, slug } = await params;
+  const sp = await searchParams;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
 
@@ -42,6 +45,13 @@ export default async function NewBookingPage({
     where: { specialistId: specialist.id, isActive: true },
     orderBy: { createdAt: "asc" },
   });
+
+  // Rebook-reminder email links land here with `?service=<id>` to
+  // pre-select the guest's previous service (src/lib/notifications/send.ts)
+  // — validated against this specialist's own active services rather than
+  // trusted outright, the same trust boundary createGuestBooking applies to
+  // a serviceId arriving from the booking form.
+  const initialServiceId = services.some((s) => s.id === sp.service) ? (sp.service as string) : null;
 
   const t = await getTranslations("Booking");
   const tErrors = await getTranslations("Booking.errors");
@@ -73,6 +83,7 @@ export default async function NewBookingPage({
             priceAmd: s.priceAmd,
           }))}
           initialDateStr={utcToZonedDateStr(new Date(), specialist.timezone)}
+          initialServiceId={initialServiceId}
           getSlotsForDateAction={getSlotsForDateAction}
           getEarliestAvailableAction={getEarliestAvailableAction}
           createBookingAction={createBookingAction}

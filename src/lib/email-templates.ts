@@ -160,6 +160,43 @@ export function buildRebookingNoticeEmail(locale: AppLocale, params: Appointment
   return REBOOKING_NOTICE_COPY[locale](params);
 }
 
+// "Ready to rebook?" win-back email (src/lib/notifications/queue.ts's
+// `rebook_reminder` type): sent once, some days after the appointment is
+// over, inviting the guest back for another visit. Its link doesn't point
+// at the existing booking_token page like every other guest email above —
+// there's no active appointment left to "manage" by then — it deep-links
+// straight into a *fresh* booking with the same service pre-selected
+// (src/app/[locale]/book/[slug]/new's `?service=` param), hence its own
+// params shape instead of reusing AppointmentEmailParams.
+export type RebookReminderEmailParams = {
+  guestName: string;
+  specialistName: string;
+  serviceName: string;
+  bookAgainLink: string;
+};
+
+const REBOOK_REMINDER_COPY: Record<AppLocale, (p: RebookReminderEmailParams) => EmailContent> = {
+  en: (p) => ({
+    subject: `Ready for your next ${p.serviceName}?`,
+    text: `Hi ${p.guestName},\n\nIt's been a couple of days since your ${p.serviceName} with ${p.specialistName}. Ready to book your next visit?\n\n${p.bookAgainLink}\n\nSee you soon!`,
+    html: `<p>Hi ${p.guestName},</p><p>It's been a couple of days since your <strong>${p.serviceName}</strong> with ${p.specialistName}. Ready to book your next visit?</p><p><a href="${p.bookAgainLink}">Book your next visit</a></p><p>See you soon!</p>`,
+  }),
+  ru: (p) => ({
+    subject: `Готовы к новому визиту: ${p.serviceName}?`,
+    text: `Здравствуйте, ${p.guestName}!\n\nПрошло пару дней с вашей записи «${p.serviceName}» у ${p.specialistName}. Готовы записаться снова?\n\n${p.bookAgainLink}\n\nДо встречи!`,
+    html: `<p>Здравствуйте, ${p.guestName}!</p><p>Прошло пару дней с вашей записи «<strong>${p.serviceName}</strong>» у ${p.specialistName}. Готовы записаться снова?</p><p><a href="${p.bookAgainLink}">Записаться снова</a></p><p>До встречи!</p>`,
+  }),
+  hy: (p) => ({
+    subject: `Պատրա՞ստ եք հաջորդ ${p.serviceName}-ին`,
+    text: `Բարև Ձեզ, ${p.guestName}։\n\nԱնցել է մի քանի օր Ձեր «${p.serviceName}» այցից՝ ${p.specialistName}-ի մոտ։ Պատրա՞ստ եք կրկին ամրագրել.\n\n${p.bookAgainLink}\n\nՏեսնվում ենք շուտով!`,
+    html: `<p>Բարև Ձեզ, ${p.guestName}։</p><p>Անցել է մի քանի օր Ձեր «<strong>${p.serviceName}</strong>» այցից՝ ${p.specialistName}-ի մոտ։ Պատրա՞ստ եք կրկին ամրագրել.</p><p><a href="${p.bookAgainLink}">Ամրագրել կրկին</a></p><p>Տեսնվում ենք շուտով!</p>`,
+  }),
+};
+
+export function buildRebookReminderEmail(locale: AppLocale, params: RebookReminderEmailParams): EmailContent {
+  return REBOOK_REMINDER_COPY[locale](params);
+}
+
 // Specialist-facing alerts (02_PRD.md Section 9 "New booking notification
 // sent to specialist"; 07_Business_Rules.md "the specialist is notified
 // whenever a guest cancels or reschedules via their link, the same as if

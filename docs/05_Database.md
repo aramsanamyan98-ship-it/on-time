@@ -111,7 +111,7 @@ appointments, and blocked time, however far into the future that extends
 - id
 - appointment_id (FK)
 - type (booking_confirmation / reminder / cancellation / new_booking_alert
-  / reschedule_alert / review_request)
+  / reschedule_alert / review_request / rebooking_notice / rebook_reminder)
 - channel (email / whatsapp / telegram / sms)
 - recipient (email or phone)
 - status (queued / sent / failed)

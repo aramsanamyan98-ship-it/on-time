@@ -4,6 +4,7 @@ import { isSlotConflictError } from "@/lib/booking/conflict-error";
 import {
   rescheduleReminderNotification,
   rescheduleReviewRequestNotification,
+  rescheduleRebookReminderNotification,
   enqueueGuestRescheduledAlert,
 } from "@/lib/notifications/queue";
 import type { BookingActionResult } from "@/lib/booking/errors";
@@ -47,6 +48,7 @@ export async function rescheduleAppointment(
     });
     await rescheduleReminderNotification(updated);
     await rescheduleReviewRequestNotification(updated);
+    await rescheduleRebookReminderNotification(updated);
     if (initiatedBy === "guest") {
       await enqueueGuestRescheduledAlert(updated, specialist);
     }
