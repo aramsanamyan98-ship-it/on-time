@@ -211,10 +211,10 @@ Price per month gets cheaper the longer the commitment:
 
 | Commitment | Price / month | Billed upfront |
 |---|---|---|
-| Monthly | 2,900 AMD | 2,900 AMD |
-| 3 months | 2,610 AMD | 7,830 AMD |
-| 6 months | 2,320 AMD | 13,920 AMD |
-| 12 months | 2,030 AMD | 24,360 AMD |
+| Monthly | 2,500 AMD | 2,500 AMD |
+| 3 months | 2,250 AMD | 6,750 AMD |
+| 6 months | 2,000 AMD | 12,000 AMD |
+| 12 months | 1,750 AMD | 21,000 AMD |
 
 Every commitment length includes, identically:
 - Public profile page (`book.ontime.am/[slug]`)
