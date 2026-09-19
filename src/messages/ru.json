@@ -275,6 +275,9 @@
     "submittingReview": "Отправка…",
     "ratingStarLabel": "Оценить на {star} из 5 звёзд",
     "ratingAriaLabel": "{rating} из 5 звёзд",
+    "addToCalendar": "Добавить в календарь",
+    "icsEventTitle": "{service} у специалиста {specialist}",
+    "icsEventDescription": "{service} у специалиста {specialist} · {duration}",
     "errors": {
       "serviceRequired": "Выберите услугу.",
       "serviceNotFound": "Эта услуга больше недоступна.",

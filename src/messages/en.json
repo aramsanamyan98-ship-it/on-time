@@ -275,6 +275,9 @@
     "submittingReview": "Submitting…",
     "ratingStarLabel": "Rate {star} out of 5 stars",
     "ratingAriaLabel": "{rating} out of 5 stars",
+    "addToCalendar": "Add to calendar",
+    "icsEventTitle": "{service} with {specialist}",
+    "icsEventDescription": "{service} with {specialist} · {duration}",
     "errors": {
       "serviceRequired": "Choose a service.",
       "serviceNotFound": "This service is no longer available.",

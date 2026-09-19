@@ -81,6 +81,9 @@ export default async function ManageBookingPage({
           guestName: appointment.guestName,
           specialistName: appointment.specialist.displayName,
           timezone: appointment.specialist.timezone,
+          startAt: appointment.startAt.toISOString(),
+          endAt: appointment.endAt.toISOString(),
+          address: appointment.specialist.address,
         }}
         locale={locale}
         justBooked={sp.justBooked === "1"}
