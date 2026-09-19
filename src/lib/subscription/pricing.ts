@@ -10,10 +10,10 @@ export function isCommitmentMonths(value: number): value is CommitmentMonths {
 }
 
 export const SUBSCRIPTION_PRICE_PER_MONTH_AMD: Record<CommitmentMonths, number> = {
-  1: 2900,
-  3: 2610,
-  6: 2320,
-  12: 2030,
+  1: 2500,
+  3: 2250,
+  6: 2000,
+  12: 1750,
 };
 
 /** Total amount billed upfront for a given commitment length. */
