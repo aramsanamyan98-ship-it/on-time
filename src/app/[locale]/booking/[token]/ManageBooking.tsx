@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 import { SlotPicker } from "@/components/booking/SlotPicker";
 import { StarRating } from "@/components/StarRating";
+import { buildIcsContent, downloadIcsFile } from "@/lib/booking/ics";
 import type { ManageBookingState, ReviewFormState } from "./actions";
 
 type AppointmentSummary = {
@@ -19,6 +20,11 @@ type AppointmentSummary = {
   guestName: string;
   specialistName: string;
   timezone: string;
+  // Raw UTC instants (unlike formattedDateTime) — needed to build the .ics
+  // file's DTSTART/DTEND, which must be exact timestamps, not localized text.
+  startAt: string;
+  endAt: string;
+  address: string | null;
 };
 
 type SubmittedReview = { rating: number; comment: string | null };
@@ -93,6 +99,22 @@ export function ManageBooking({
     minute: "2-digit",
     timeZone: appointment.timezone,
   });
+
+  function handleAddToCalendar() {
+    const ics = buildIcsContent({
+      uid: `${token}@ontime.am`,
+      summary: t("icsEventTitle", { service: appointment.serviceName, specialist: appointment.specialistName }),
+      description: t("icsEventDescription", {
+        service: appointment.serviceName,
+        specialist: appointment.specialistName,
+        duration: tServices("durationValue", { minutes: appointment.durationMinutes }),
+      }),
+      location: appointment.address ?? undefined,
+      startAt: new Date(appointment.startAt),
+      endAt: new Date(appointment.endAt),
+    });
+    downloadIcsFile(`booking-${token}.ics`, ics);
+  }
 
   if (appointment.status === "cancelled") {
     return (
@@ -205,6 +227,11 @@ export function ManageBooking({
           {tServices("durationValue", { minutes: appointment.durationMinutes })} ·{" "}
           {tServices("priceValue", { price: appointment.priceAmd })}
         </p>
+        {appointment.status === "confirmed" && (
+          <button type="button" onClick={handleAddToCalendar} className="btn-outline w-fit">
+            {t("addToCalendar")}
+          </button>
+        )}
       </div>
 
       {mode === "view" && (

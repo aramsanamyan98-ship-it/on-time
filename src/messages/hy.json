@@ -275,6 +275,9 @@
     "submittingReview": "Ուղարկվում է…",
     "ratingStarLabel": "Գնահատեք {star}՝ 5-ից աստղով",
     "ratingAriaLabel": "{rating}՝ 5 աստղից",
+    "addToCalendar": "Ավելացնել օրացույցում",
+    "icsEventTitle": "{service}՝ {specialist}-ի մոտ",
+    "icsEventDescription": "{service}՝ {specialist}-ի մոտ · {duration}",
     "errors": {
       "serviceRequired": "Ընտրեք ծառայություն։",
       "serviceNotFound": "Այս ծառայությունն այլևս հասանելի չէ։",
