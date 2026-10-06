@@ -144,6 +144,19 @@ enum NotificationStatus {
   failed
 }
 
+// Client-analytics cluster (loyalty + return-rate/prediction/lost-clients,
+// see src/lib/clients/visit-history.ts): the rule shape a specialist
+// configures for their own loyalty reward. `everyNthFree` = "every Nth
+// visit is free"; `percentOffAfterN` = "X% off once a client has reached N
+// visits" (`threshold` holds N either way; the percentage itself lives in
+// `rewardText`, which is specialist-authored display copy, not a value the
+// app computes a discount from — there's no pricing/checkout integration
+// for this to apply to automatically).
+enum LoyaltyRuleType {
+  everyNthFree
+  percentOffAfterN
+}
+
 model Specialist {
   id                            String    @id @default(uuid())
   email                         String    @unique
@@ -186,6 +199,7 @@ model Specialist {
   blockedTime             BlockedTime[]
   clientNotes             ClientNote[]
   reviews                 Review[]
+  loyaltyProgram          LoyaltyProgram?
 
   @@map("specialists")
 }
@@ -360,6 +374,24 @@ model Review {
 
   @@index([specialistId])
   @@map("reviews")
+}
+
+// One config per specialist (client-analytics cluster — see
+// src/lib/clients/visit-history.ts and docs/08_Roadmap.md's pulled-forward
+// CRM-lite entry). `enabled` lets a specialist configure a program ahead of
+// time without it showing on their public booking page yet.
+model LoyaltyProgram {
+  id           String          @id @default(uuid())
+  specialistId String          @unique @map("specialist_id")
+  specialist   Specialist      @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  enabled      Boolean         @default(false)
+  ruleType     LoyaltyRuleType @map("rule_type")
+  threshold    Int
+  rewardText   String          @map("reward_text")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+
+  @@map("loyalty_programs")
 }
 
 model EmailVerificationToken {

@@ -45,3 +45,6 @@ next-env.d.ts
 
 # user-uploaded files (local-disk storage, see src/lib/storage.ts)
 /public/uploads
+
+# phone-normalization snapshots (contain guest phone numbers), see scripts/normalize-phone-numbers.mts
+/scripts/backups/

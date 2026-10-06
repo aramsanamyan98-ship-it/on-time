@@ -1,8 +1,8 @@
 import type { BookingFieldErrors } from "@/lib/booking/errors";
+import { normalizePhone } from "@/lib/phone";
 
 const NAME_MAX_LENGTH = 100;
 const NOTES_MAX_LENGTH = 500;
-const PHONE_RE = /^[0-9+()\-.\s]{6,20}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export type GuestFields = "name" | "phone" | "email" | "notes";
@@ -19,7 +19,7 @@ export function validateGuestDetails(input: GuestDetailsInput): BookingFieldErro
 
   const phone = input.phone.trim();
   if (!phone) errors.phone = "phoneRequired";
-  else if (!PHONE_RE.test(phone)) errors.phone = "phoneInvalid";
+  else if ("error" in normalizePhone(phone)) errors.phone = "phoneInvalid";
 
   const email = input.email.trim();
   if (email && !EMAIL_RE.test(email)) errors.email = "emailInvalid";

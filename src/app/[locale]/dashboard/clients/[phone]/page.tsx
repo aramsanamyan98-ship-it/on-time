@@ -5,6 +5,7 @@ import { routing } from "@/i18n/routing";
 import type { AppLocale } from "@/i18n/routing";
 import { requireSpecialist } from "@/lib/dashboard/require-specialist";
 import { prisma } from "@/lib/prisma";
+import { getVisitHistoryForClient } from "@/lib/clients/visit-history";
 import { Link } from "@/i18n/navigation";
 import { ClientNoteForm } from "./ClientNoteForm";
 import { PageHeading, SectionHeading } from "@/components/Heading";
@@ -25,7 +26,7 @@ export default async function ClientDetailPage({
   const t = await getTranslations("Clients");
   const guestPhone = decodeURIComponent(phone);
 
-  const [appointments, note] = await Promise.all([
+  const [appointments, note, visitHistory] = await Promise.all([
     prisma.appointment.findMany({
       where: { specialistId: specialist.id, guestPhone },
       include: { service: true },
@@ -34,6 +35,7 @@ export default async function ClientDetailPage({
     prisma.clientNote.findUnique({
       where: { specialistId_guestPhone: { specialistId: specialist.id, guestPhone } },
     }),
+    getVisitHistoryForClient(specialist.id, guestPhone),
   ]);
   if (appointments.length === 0) notFound();
 
@@ -60,6 +62,11 @@ export default async function ClientDetailPage({
           {guestPhone}
           {latest.guestEmail ? ` · ${latest.guestEmail}` : ""}
         </p>
+        {visitHistory?.predictedNextVisit && (
+          <p className="body-text mt-1 text-sm">
+            {t("predictedNextVisit", { date: dateTimeFormatter.format(visitHistory.predictedNextVisit) })}
+          </p>
+        )}
       </div>
 
       <div className="panel">

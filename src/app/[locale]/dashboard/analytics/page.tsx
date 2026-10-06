@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import type { AppLocale } from "@/i18n/routing";
 import { requireSpecialist } from "@/lib/dashboard/require-specialist";
-import { getAnalyticsOverview, getRepeatClientStats, getRatingTrend } from "@/lib/analytics/queries";
+import { getAnalyticsOverview, getRepeatClientStats, getRatingTrend, getReturnRateStats } from "@/lib/analytics/queries";
 import { PageHeading, SectionHeading } from "@/components/Heading";
 import { StarRating } from "@/components/StarRating";
 import { BookingsChart } from "./BookingsChart";
@@ -27,10 +27,11 @@ export default async function AnalyticsPage({
   const specialist = await requireSpecialist(locale as AppLocale);
   const t = await getTranslations("Analytics");
 
-  const [overview, repeatStats, ratingTrend] = await Promise.all([
+  const [overview, repeatStats, ratingTrend, returnRateStats] = await Promise.all([
     getAnalyticsOverview(specialist),
     getRepeatClientStats(specialist.id),
     getRatingTrend(specialist),
+    getReturnRateStats(specialist.id),
   ]);
 
   const numberFormatter = new Intl.NumberFormat(locale);
@@ -126,6 +127,38 @@ export default async function AnalyticsPage({
                     repeat: numberFormatter.format(repeatStats.repeatClients),
                     total: numberFormatter.format(repeatStats.totalClients),
                   })}
+                </p>
+              </>
+            )}
+          </div>
+
+          <div className="panel flex flex-col gap-3">
+            <SectionHeading>{t("returnRateTitle")}</SectionHeading>
+            {returnRateStats.averageReturnGapDays === null ? (
+              <p className="body-text text-sm">{t("noDataYet")}</p>
+            ) : (
+              <>
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-brand-charcoal/50">
+                    {t("averageReturnGapTitle")}
+                  </p>
+                  <p className="text-2xl font-bold text-brand-charcoal">
+                    {t("averageReturnGapValue", { days: Math.round(returnRateStats.averageReturnGapDays) })}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  {returnRateStats.windows.map((window) => (
+                    <p key={window.windowDays} className="body-text text-sm">
+                      {t("returnRateWindow", {
+                        days: window.windowDays,
+                        newCount: numberFormatter.format(window.newClients),
+                        returningCount: numberFormatter.format(window.returningClients),
+                      })}
+                    </p>
+                  ))}
+                </div>
+                <p className="body-text text-sm">
+                  {t("dueSoonCount", { count: numberFormatter.format(returnRateStats.dueSoonCount) })}
                 </p>
               </>
             )}

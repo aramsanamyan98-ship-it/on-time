@@ -4,6 +4,9 @@ import { getLocale } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { getSlotsForDate, findEarliestAvailable } from "@/lib/booking/slots";
 import { createGuestBooking } from "@/lib/booking/create-booking";
+import { normalizePhone } from "@/lib/phone";
+import { getVisitHistoryForClient } from "@/lib/clients/visit-history";
+import { computeLoyaltyProgress } from "@/lib/loyalty/progress";
 import { redirect } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import type { BookingFieldErrors, BookingErrorCode } from "@/lib/booking/errors";
@@ -39,6 +42,29 @@ export async function getEarliestAvailableAction(
   const earliest = await findEarliestAvailable(loaded.specialist, loaded.service.durationMinutes);
   if (!earliest) return null;
   return { dateStr: earliest.dateStr, slot: earliest.slot.toISOString() };
+}
+
+export type LoyaltyProgressResult = { visitNumber: number; remaining: number; rewardText: string };
+
+// Live lookup as the guest types their phone (BookingWizard calls this
+// on blur) — shown only if the specialist has loyalty enabled
+// (src/app/[locale]/dashboard/loyalty). Returns null whenever there's
+// nothing to show: unparseable phone, no program configured, or disabled.
+export async function getLoyaltyProgressAction(
+  specialistId: string,
+  rawPhone: string,
+): Promise<LoyaltyProgressResult | null> {
+  const phoneResult = normalizePhone(rawPhone);
+  if ("error" in phoneResult) return null;
+
+  const loyaltyProgram = await prisma.loyaltyProgram.findUnique({ where: { specialistId } });
+  if (!loyaltyProgram || !loyaltyProgram.enabled) return null;
+
+  const history = await getVisitHistoryForClient(specialistId, phoneResult.phone);
+  const visitNumber = (history?.visitCount ?? 0) + 1;
+  const { remaining } = computeLoyaltyProgress(loyaltyProgram.ruleType, loyaltyProgram.threshold, visitNumber);
+
+  return { visitNumber, remaining, rewardText: loyaltyProgram.rewardText };
 }
 
 export type BookingFormState = {

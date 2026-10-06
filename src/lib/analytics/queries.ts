@@ -1,9 +1,17 @@
 import { prisma } from "@/lib/prisma";
 import type { Specialist } from "@/generated/prisma/client";
 import { utcToZonedDateStr, zonedTimeToUtc, addDaysToDateStr, firstOfMonthDateStr } from "@/lib/booking/timezone";
+import { getVisitHistoryMap } from "@/lib/clients/visit-history";
 
 const DAILY_SERIES_DAYS = 30;
 const RATING_TREND_MONTHS = 6;
+const MS_PER_DAY = 86_400_000;
+const RETURN_RATE_WINDOW_DAYS = [30, 90] as const;
+// How far into the future a predicted next visit counts as "coming up soon"
+// on the return-rate card — not specified by the brief, chosen to match the
+// lost-clients grace period (src/lib/clients/visit-history.ts) for a
+// consistent sense of scale between "about to be due" and "overdue".
+const DUE_SOON_WINDOW_DAYS = 7;
 
 export type DailyCount = { date: string; count: number };
 
@@ -151,4 +159,52 @@ export async function getRatingTrend(specialist: Specialist): Promise<MonthlyRat
   }
 
   return trend;
+}
+
+export type ReturnRateWindow = { windowDays: number; newClients: number; returningClients: number };
+export type ReturnRateStats = {
+  averageReturnGapDays: number | null;
+  windows: ReturnRateWindow[];
+  dueSoonCount: number;
+};
+
+/**
+ * Client-analytics cluster (docs/08_Roadmap.md): built entirely on
+ * src/lib/clients/visit-history.ts's completed-bookings history, same as
+ * the loyalty/prediction/lost-clients features — this is the one place that
+ * turns it into specialist-level aggregates rather than per-client detail.
+ * "New" vs "returning" is decided per window by comparing a client's first-
+ * ever completed visit against the window start: if it also falls inside
+ * the window, they're new to this specialist as of this window; otherwise
+ * they're a returning client who happened to visit again during it.
+ */
+export async function getReturnRateStats(specialistId: string): Promise<ReturnRateStats> {
+  const history = await getVisitHistoryMap(specialistId);
+  const now = Date.now();
+
+  const gaps = [...history.values()]
+    .map((client) => client.averageGapDays)
+    .filter((gap): gap is number => gap !== null);
+  const averageReturnGapDays = gaps.length === 0 ? null : gaps.reduce((a, b) => a + b, 0) / gaps.length;
+
+  const windows: ReturnRateWindow[] = RETURN_RATE_WINDOW_DAYS.map((windowDays) => {
+    const windowStart = now - windowDays * MS_PER_DAY;
+    let newClients = 0;
+    let returningClients = 0;
+    for (const client of history.values()) {
+      if (client.lastVisit.getTime() < windowStart) continue;
+      if (client.firstVisit.getTime() >= windowStart) newClients++;
+      else returningClients++;
+    }
+    return { windowDays, newClients, returningClients };
+  });
+
+  const dueSoonEnd = now + DUE_SOON_WINDOW_DAYS * MS_PER_DAY;
+  let dueSoonCount = 0;
+  for (const client of history.values()) {
+    const predicted = client.predictedNextVisit?.getTime();
+    if (predicted !== undefined && predicted >= now && predicted <= dueSoonEnd) dueSoonCount++;
+  }
+
+  return { averageReturnGapDays, windows, dueSoonCount };
 }

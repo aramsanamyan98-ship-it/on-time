@@ -7,7 +7,12 @@ import { utcToZonedDateStr } from "@/lib/booking/timezone";
 import { hasActiveAccess } from "@/lib/subscription/trial";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { BookingWizard } from "./BookingWizard";
-import { getSlotsForDateAction, getEarliestAvailableAction, createBookingAction } from "./actions";
+import {
+  getSlotsForDateAction,
+  getEarliestAvailableAction,
+  createBookingAction,
+  getLoyaltyProgressAction,
+} from "./actions";
 import { PageHeading } from "@/components/Heading";
 
 export default async function NewBookingPage({
@@ -87,6 +92,7 @@ export default async function NewBookingPage({
           getSlotsForDateAction={getSlotsForDateAction}
           getEarliestAvailableAction={getEarliestAvailableAction}
           createBookingAction={createBookingAction}
+          getLoyaltyProgressAction={getLoyaltyProgressAction}
         />
       )}
     </div>
