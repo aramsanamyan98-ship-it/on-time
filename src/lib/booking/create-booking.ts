@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { isSlotAvailable } from "@/lib/booking/slots";
 import { validateGuestDetails } from "@/lib/booking/validation";
+import { normalizePhone } from "@/lib/phone";
 import { generateUniqueBookingToken } from "@/lib/booking/token";
 import { isSlotConflictError } from "@/lib/booking/conflict-error";
 import { enqueueBookingNotifications, enqueueNewBookingAlert } from "@/lib/notifications/queue";
@@ -32,6 +33,11 @@ export async function createGuestBooking(
   });
   if (Object.keys(fieldErrors).length > 0) {
     return { ok: false, fieldErrors };
+  }
+  // validateGuestDetails already confirmed this normalizes cleanly.
+  const phoneResult = normalizePhone(input.guestPhone);
+  if ("error" in phoneResult) {
+    return { ok: false, fieldErrors: { phone: "phoneInvalid" } };
   }
 
   // Re-fetched server-side rather than trusted from the client: the guest
@@ -70,7 +76,7 @@ export async function createGuestBooking(
         startAt: input.startAt,
         endAt,
         guestName: input.guestName.trim(),
-        guestPhone: input.guestPhone.trim(),
+        guestPhone: phoneResult.phone,
         guestEmail: input.guestEmail.trim() || null,
         guestNotes: input.guestNotes.trim() || null,
         source: "guest_booking",

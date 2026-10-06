@@ -19,6 +19,7 @@ export function BookingWizard({
   getSlotsForDateAction,
   getEarliestAvailableAction,
   createBookingAction,
+  getLoyaltyProgressAction,
 }: {
   specialistId: string;
   timezone: string;
@@ -37,6 +38,10 @@ export function BookingWizard({
     serviceId: string,
   ) => Promise<{ dateStr: string; slot: string } | null>;
   createBookingAction: (prevState: BookingFormState, formData: FormData) => Promise<BookingFormState>;
+  getLoyaltyProgressAction: (
+    specialistId: string,
+    phone: string,
+  ) => Promise<{ visitNumber: number; remaining: number; rewardText: string } | null>;
 }) {
   const t = useTranslations("Booking");
   const tServices = useTranslations("Services");
@@ -47,6 +52,11 @@ export function BookingWizard({
   const [serviceId, setServiceId] = useState<string | null>(preselectedServiceId);
   const [slotIso, setSlotIso] = useState<string | null>(null);
   const [state, formAction, isPending] = useActionState(createBookingAction, initialState);
+  const [loyaltyProgress, setLoyaltyProgress] = useState<{
+    visitNumber: number;
+    remaining: number;
+    rewardText: string;
+  } | null>(null);
 
   const selectedService = services.find((s) => s.id === serviceId) ?? null;
 
@@ -167,11 +177,31 @@ export function BookingWizard({
               name="guestPhone"
               type="tel"
               required
+              onBlur={async (event) => {
+                const phone = event.target.value.trim();
+                if (!phone) {
+                  setLoyaltyProgress(null);
+                  return;
+                }
+                const progress = await getLoyaltyProgressAction(specialistId, phone);
+                setLoyaltyProgress(progress);
+              }}
               className="rounded-md border border-brand-charcoal/20 px-3 py-2 text-sm focus:border-brand-gold focus:outline-none"
             />
             {state.fieldErrors?.phone && (
               <p role="alert" className="text-sm text-red-700">
                 {tErrors(state.fieldErrors.phone)}
+              </p>
+            )}
+            {loyaltyProgress && (
+              <p className="text-sm text-brand-green">
+                {loyaltyProgress.remaining === 0
+                  ? t("loyaltyProgressReward", { rewardText: loyaltyProgress.rewardText })
+                  : t("loyaltyProgressCounting", {
+                      visitNumber: loyaltyProgress.visitNumber,
+                      remaining: loyaltyProgress.remaining,
+                      rewardText: loyaltyProgress.rewardText,
+                    })}
               </p>
             )}
           </div>

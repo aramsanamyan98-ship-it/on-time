@@ -29,6 +29,9 @@ export type DashboardErrorCode =
   | "reasonTooLong"
   | "emailRequired"
   | "emailInvalid"
+  | "thresholdInvalid"
+  | "rewardTextRequired"
+  | "rewardTextTooLong"
   | "notFound"
   | "generic";
 

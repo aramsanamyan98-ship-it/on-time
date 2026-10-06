@@ -174,6 +174,46 @@ appointment; it shows up correctly (right average, right list) on the
 specialist's public profile, and is visible to the specialist on their
 dashboard.
 
+## Phase 10 — Client Analytics Cluster (pulled forward from v2+)
+
+Originally listed below under "Later / Explicitly Deferred" as "CRM-lite /
+advanced analytics beyond what's already built." Pulled forward as one
+cluster because all four features share a single underlying calculation —
+building them separately would mean re-deriving the same per-client visit
+history four times.
+
+- **Phone normalization** (prerequisite, everything below depends on it):
+  guest phone numbers were previously stored however the guest or
+  specialist typed them (e.g. `37455357458` and `096357457` for the same
+  Armenian mobile number), which silently split one client's history across
+  multiple identities. `src/lib/phone.ts`'s `normalizePhone` canonicalizes
+  to E.164 (`+374XXXXXXXX`) at write time (`createGuestBooking`,
+  `createManualBooking`); `scripts/normalize-phone-numbers.mts` is the
+  one-time backfill for rows written before this existed.
+- **Shared visit-history layer** (`src/lib/clients/visit-history.ts`):
+  per-client visit dates, count, average gap between visits, and a
+  predicted next-visit date (lastVisit + averageGap), scoped to `completed`
+  bookings only. Everything below reads from this instead of re-deriving it.
+- **Loyalty streak**: `LoyaltyProgram` model (one config per specialist —
+  enabled flag, rule type, threshold, reward text), dashboard settings at
+  `/dashboard/loyalty`, and a live progress readout on the public booking
+  page once a guest enters their phone number.
+- **Return-rate analytics**: a card on `/dashboard/analytics` — average
+  return gap, new-vs-returning split for the last 30/90 days, and a
+  due-soon count.
+- **Next-visit prediction**: shown wherever a specialist views a client
+  (clients list and detail page).
+- **Lost-clients list**: clients more than 7 days (`LOST_CLIENT_GRACE_DAYS`)
+  past their predicted next visit, most-overdue-first, on `/dashboard/clients`.
+  Re-engage is a stub (logs intent, shows a "would send a reminder" state) —
+  no WhatsApp/messaging integration yet.
+
+**Exit criteria:** existing and new guest phone numbers are stored in one
+canonical format; a specialist can configure a loyalty reward and see it
+reflected to guests at booking time; the analytics page shows return-rate
+figures; client views show a predicted next visit; the clients page surfaces
+overdue clients with a re-engage stub.
+
 ## Later / Explicitly Deferred (v2+)
 
 - Customer accounts and login
@@ -181,7 +221,6 @@ dashboard.
 - Marketplace search/discovery (browsing all specialists, not just direct
   links)
 - Multi-staff/multi-location support
-- CRM-lite / advanced analytics beyond what's already built
 - SMS notifications (if WhatsApp/Telegram prove sufficient)
 
 ### New item — Pricing page comparison table
