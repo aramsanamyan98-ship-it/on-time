@@ -6,6 +6,7 @@ import { Link, usePathname } from "@/i18n/navigation";
 const TABS = [
   { href: "/dashboard", key: "home" },
   { href: "/dashboard/appointments", key: "appointments" },
+  { href: "/dashboard/fill-schedule", key: "fillSchedule" },
   { href: "/dashboard/clients", key: "clients" },
   { href: "/dashboard/profile", key: "profile" },
   { href: "/dashboard/portfolio", key: "portfolio" },

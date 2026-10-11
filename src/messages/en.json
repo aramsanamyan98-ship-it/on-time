@@ -111,7 +111,8 @@
       "reviews": "Reviews",
       "analytics": "Analytics",
       "plan": "Plan",
-      "unviewedBadgeLabel": "{count, plural, one {# unread appointment update} other {# unread appointment updates}}"
+      "unviewedBadgeLabel": "{count, plural, one {# unread appointment update} other {# unread appointment updates}}",
+      "fillSchedule": "Fill my schedule"
     },
     "errors": {
       "bioTooLong": "Bio must be 500 characters or fewer.",
@@ -325,7 +326,8 @@
       "reviewNotEligibleYet": "You can leave a review once your appointment has passed.",
       "alreadyReviewed": "You've already reviewed this appointment.",
       "generic": "Something went wrong. Please try again."
-    }
+    },
+    "linkedSlotTaken": "That time was just taken — please pick another one."
   },
   "Appointments": {
     "title": "Appointments",
@@ -455,5 +457,41 @@
     "confirmDelete": "Remove this blocked time?",
     "delete": "Remove",
     "deleting": "Removing…"
+  },
+  "FillSchedule": {
+    "title": "Fill my schedule",
+    "subtitle": "Got an open slot in the next 48 hours? Turn it into an Instagram Story with a booking link in one tap.",
+    "noServices": "Add at least one active service first — the Story needs a service and a price to show.",
+    "emptyTitle": "Your next 48 hours are looking full",
+    "emptyBody": "There are no open slots in the next two days, so there's nothing to fill right now. Nice work! Check back if a client cancels.",
+    "serviceLabel": "Service",
+    "slotLabel": "Time slot",
+    "suggestedBadge": "Next open",
+    "languageLabel": "Story language",
+    "previewHeading": "Preview",
+    "previewAlt": "Preview of your Instagram Story",
+    "previewLoading": "Creating your Story…",
+    "previewError": "Couldn't create the image. Please try again.",
+    "previewSlotGone": "That slot was just taken. Reload the page to see what's still open.",
+    "shareButton": "Share to Instagram",
+    "downloadButton": "Download image & copy link",
+    "working": "One moment…",
+    "shared": "Link copied — paste it into the link sticker.",
+    "downloaded": "Image saved and link copied.",
+    "linkCopyFailed": "Couldn't copy the link automatically. Copy it below.",
+    "linkLabel": "Booking link",
+    "copyLink": "Copy link",
+    "copied": "Copied",
+    "stepsHeading": "How to post",
+    "step1": "Tap the button. The image is shared (or downloaded) and the booking link is copied for you.",
+    "step2": "In Instagram, tap the sticker icon → Link → paste.",
+    "hint": "Don't see Instagram in the share menu? Save the image, then post it from the Instagram app."
+  },
+  "StoryImage": {
+    "openingToday": "OPENING TODAY",
+    "openingTomorrow": "OPENING TOMORROW",
+    "openingDay": "OPENING {day}",
+    "with": "with {name}",
+    "bookNow": "Book now"
   }
 }
