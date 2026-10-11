@@ -16,6 +16,8 @@ export function BookingWizard({
   services,
   initialDateStr,
   initialServiceId,
+  initialSlotIso,
+  initialSlotTaken,
   getSlotsForDateAction,
   getEarliestAvailableAction,
   createBookingAction,
@@ -28,6 +30,10 @@ export function BookingWizard({
   initialDateStr: string;
   /** From a "ready to rebook?" email link (`?service=<id>`, see src/lib/notifications/send.ts) — pre-selects the guest's previous service and skips straight to picking a time. */
   initialServiceId?: string | null;
+  /** From a "Fill my schedule" Story link (`&start=`, see src/lib/booking/slot-link.ts) — a start time the server just confirmed is still open; skips straight to the details step. */
+  initialSlotIso?: string | null;
+  /** The Story link's start time was taken since it was posted: open the time picker with a notice instead. */
+  initialSlotTaken?: boolean;
   getSlotsForDateAction: (
     specialistId: string,
     serviceId: string,
@@ -48,9 +54,12 @@ export function BookingWizard({
   const tErrors = useTranslations("Booking.errors");
 
   const preselectedServiceId = initialServiceId ?? (services.length === 1 ? services[0].id : null);
-  const [step, setStep] = useState<"service" | "datetime" | "details">(preselectedServiceId ? "datetime" : "service");
+  const preselectedSlotIso = preselectedServiceId && initialSlotIso ? initialSlotIso : null;
+  const [step, setStep] = useState<"service" | "datetime" | "details">(
+    preselectedSlotIso ? "details" : preselectedServiceId ? "datetime" : "service",
+  );
   const [serviceId, setServiceId] = useState<string | null>(preselectedServiceId);
-  const [slotIso, setSlotIso] = useState<string | null>(null);
+  const [slotIso, setSlotIso] = useState<string | null>(preselectedSlotIso);
   const [state, formAction, isPending] = useActionState(createBookingAction, initialState);
   const [loyaltyProgress, setLoyaltyProgress] = useState<{
     visitNumber: number;
@@ -111,6 +120,11 @@ export function BookingWizard({
           >
             {t("changeService")}
           </button>
+          {initialSlotTaken && !slotIso && (
+            <p role="status" className="rounded-md bg-brand-gold/15 px-3 py-2 text-sm text-brand-charcoal">
+              {t("linkedSlotTaken")}
+            </p>
+          )}
           <SlotPicker
             initialDateStr={initialDateStr}
             timezone={timezone}

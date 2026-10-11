@@ -2,11 +2,12 @@ import { prisma } from "@/lib/prisma";
 import { loadSchedule } from "@/lib/working-hours/load-schedule";
 import { computeSlotsForDay, MAX_SEARCH_DAYS, type TimeRange } from "@/lib/booking/availability";
 import { utcToZonedDateStr, addDaysToDateStr, dayOfWeekFromDateStr } from "@/lib/booking/timezone";
+import { computeOpenSlots, pickSuggestion, type SlotSuggestion } from "@/lib/booking/open-slots";
 import type { DayOfWeek } from "@/lib/working-hours/defaults";
 
 export type BookingSpecialist = { id: string; timezone: string };
 
-async function loadBusyRanges(
+export async function loadBusyRanges(
   specialistId: string,
   now: Date,
   excludeAppointmentId?: string,
@@ -110,4 +111,36 @@ export async function isSlotAvailable(
   const dateStr = utcToZonedDateStr(startAt, specialist.timezone);
   const { slots } = await getSlotsForDate(specialist, serviceDurationMinutes, dateStr, options);
   return slots.some((slot) => slot.getTime() === startAt.getTime());
+}
+
+/**
+ * Open slots in the next 48 hours for each of the given services ("Fill my
+ * schedule" Story suggestions). Loads the schedule and busy ranges once and
+ * runs the shared slot math per service duration. Services with no open
+ * slot in the window are omitted from the result.
+ */
+export async function findOpenSlotsForServices(
+  specialist: BookingSpecialist,
+  services: { id: string; durationMinutes: number }[],
+  now: Date = new Date(),
+): Promise<Map<string, SlotSuggestion>> {
+  const [schedule, busyRanges] = await Promise.all([
+    loadSchedule(specialist.id),
+    loadBusyRanges(specialist.id, now),
+  ]);
+
+  const result = new Map<string, SlotSuggestion>();
+  for (const service of services) {
+    const suggestion = pickSuggestion(
+      computeOpenSlots({
+        schedule,
+        busyRanges,
+        serviceDurationMinutes: service.durationMinutes,
+        timezone: specialist.timezone,
+        now,
+      }),
+    );
+    if (suggestion) result.set(service.id, suggestion);
+  }
+  return result;
 }

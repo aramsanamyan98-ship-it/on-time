@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { utcToZonedDateStr } from "@/lib/booking/timezone";
+import { isSlotAvailable } from "@/lib/booking/slots";
 import { hasActiveAccess } from "@/lib/subscription/trial";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { BookingWizard } from "./BookingWizard";
@@ -20,7 +21,7 @@ export default async function NewBookingPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; slug: string }>;
-  searchParams: Promise<{ service?: string }>;
+  searchParams: Promise<{ service?: string; start?: string }>;
 }) {
   const { locale, slug } = await params;
   const sp = await searchParams;
@@ -58,6 +59,26 @@ export default async function NewBookingPage({
   // a serviceId arriving from the booking form.
   const initialServiceId = services.some((s) => s.id === sp.service) ? (sp.service as string) : null;
 
+  // "Fill my schedule" Story links add `&start=<ISO instant>` to pre-select a
+  // time too (src/lib/booking/slot-link.ts). The slot is re-checked against
+  // live availability here — the same check every booking path uses — and
+  // if it's gone the wizard falls back to the normal time picker (opened on
+  // that day) with a notice. createGuestBooking still re-validates on submit.
+  const requestedStart = sp.start ? new Date(sp.start) : null;
+  const initialService = services.find((s) => s.id === initialServiceId);
+  let initialSlotIso: string | null = null;
+  let initialSlotTaken = false;
+  let initialDateStr = utcToZonedDateStr(new Date(), specialist.timezone);
+  if (initialService && requestedStart && !Number.isNaN(requestedStart.getTime())) {
+    if (await isSlotAvailable(specialist, initialService.durationMinutes, requestedStart)) {
+      initialSlotIso = requestedStart.toISOString();
+    } else {
+      initialSlotTaken = true;
+    }
+    const requestedDateStr = utcToZonedDateStr(requestedStart, specialist.timezone);
+    if (requestedDateStr > initialDateStr) initialDateStr = requestedDateStr;
+  }
+
   const t = await getTranslations("Booking");
   const tErrors = await getTranslations("Booking.errors");
 
@@ -87,8 +108,10 @@ export default async function NewBookingPage({
             durationMinutes: s.durationMinutes,
             priceAmd: s.priceAmd,
           }))}
-          initialDateStr={utcToZonedDateStr(new Date(), specialist.timezone)}
+          initialDateStr={initialDateStr}
           initialServiceId={initialServiceId}
+          initialSlotIso={initialSlotIso}
+          initialSlotTaken={initialSlotTaken}
           getSlotsForDateAction={getSlotsForDateAction}
           getEarliestAvailableAction={getEarliestAvailableAction}
           createBookingAction={createBookingAction}

@@ -214,6 +214,35 @@ reflected to guests at booking time; the analytics page shows return-rate
 figures; client views show a predicted next visit; the clients page surfaces
 overdue clients with a re-engage stub.
 
+## Phase 11 — "Fill my schedule" Instagram Story suggestion (v1)
+
+Helps a specialist turn an open slot in the next 48 hours into a
+ready-to-post Instagram Story. No Instagram API, Meta app, or login — they
+share the image and add the link sticker themselves. No schema change.
+
+- **Open-slot finder** (`src/lib/booking/open-slots.ts`, DB wrapper
+  `findOpenSlotsForServices` in `slots.ts`): reuses `computeSlotsForDay`, so
+  working hours, days off, appointments, blocked time, service duration,
+  minimum notice and `Asia/Yerevan` handling are exactly what the booking
+  wizard uses. Returns the soonest slot plus a few alternatives spaced
+  ≥ 1 hour apart.
+- **Slot link** (`src/lib/booking/slot-link.ts`): `…/book/[slug]/new?service=<id>&start=<ISO>`.
+  The wizard re-checks the slot with `isSlotAvailable`; if free it opens on
+  the details step, if taken it opens the normal time picker on that day
+  with a notice.
+- **Story image** (`GET /api/story-image`, session-authenticated): 1080×1920
+  PNG via `ImageResponse`, charcoal/brass, en/hy/ru with bundled Inter
+  (Latin, Cyrillic) and Noto Sans Armenian fonts in `src/assets/fonts`.
+- **Dashboard** (`/dashboard/fill-schedule`): service/slot/language pickers,
+  preview, one button (share sheet with image on mobile, download on
+  desktop; link copied either way), posting steps, empty state.
+- **Tests**: first test runner in the repo (`vitest`, `npm test`) — slot finder
+  (overlap, day off, past, short gap, timezone) and a Story render smoke test
+  in all three languages.
+
+Not included (by design): auto-posting, QR codes, notifications/banners,
+discount text, multi-slot layouts, WhatsApp.
+
 ## Later / Explicitly Deferred (v2+)
 
 - Customer accounts and login

@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
+  // The Story image route reads its fonts from disk at request time, so the
+  // serverless file tracer has to be told to ship them with the function.
+  outputFileTracingIncludes: {
+    "/api/story-image": ["./src/assets/fonts/**"],
+  },
   images: {
     remotePatterns: [
       {
