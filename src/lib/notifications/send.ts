@@ -9,9 +9,12 @@ import {
   buildGuestRescheduledAlertEmail,
   buildRebookingNoticeEmail,
   buildRebookReminderEmail,
+  buildTrialEndingSoonEmail,
+  buildTrialEndedEmail,
   type AppointmentEmailParams,
   type SpecialistAlertEmailParams,
   type RebookReminderEmailParams,
+  type TrialEmailParams,
 } from "@/lib/email-templates";
 import { languageToRoutingLocale } from "@/lib/locale";
 import type { Appointment, NotificationLog, Specialist, Service } from "@/generated/prisma/client";
@@ -57,6 +60,42 @@ function specialistParams(appointment: AppointmentWithRelations, locale: AppLoca
     dateTime: formatAppointmentDateTime(appointment.startAt, appointment.specialist.timezone, locale),
     dashboardLink: `${process.env.APP_URL}/${locale}/dashboard/appointments`,
   };
+}
+
+/**
+ * Sends one specialist-level trial email (`trial_ending_soon` /
+ * `trial_ended`) — the only notification types with no appointment, see
+ * src/lib/notifications/trial-emails.ts. Same contract as sendNotification:
+ * throws on failure so the queue processor can record the attempt.
+ */
+export async function sendTrialNotification(row: NotificationLog, specialist: Specialist): Promise<void> {
+  const locale = languageToRoutingLocale[specialist.languagePreference];
+  const params: TrialEmailParams = {
+    name: specialist.displayName,
+    endDate: specialist.trialEndsAt
+      ? new Intl.DateTimeFormat(locale, {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+          timeZone: specialist.timezone,
+        }).format(specialist.trialEndsAt)
+      : "",
+    planLink: `${process.env.APP_URL}/${locale}/dashboard/plan`,
+  };
+
+  let content;
+  switch (row.type) {
+    case "trial_ending_soon":
+      content = buildTrialEndingSoonEmail(locale, params);
+      break;
+    case "trial_ended":
+      content = buildTrialEndedEmail(locale, params);
+      break;
+    default:
+      throw new Error(`Not a trial notification type: ${row.type}`);
+  }
+
+  await sendEmail({ to: row.recipient, subject: content.subject, html: content.html, text: content.text });
 }
 
 /**

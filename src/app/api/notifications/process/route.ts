@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processQueuedNotifications } from "@/lib/notifications/process";
+import { enqueueTrialEmails } from "@/lib/notifications/trial-queue";
 
 // Cron-triggered entry point (see vercel.json) that drains the
 // notifications_log queue: sends anything due (queued confirmations,
@@ -21,8 +22,17 @@ async function handleProcessRequest(request: NextRequest): Promise<NextResponse>
     }
   }
 
+  // Trial emails are queued first so the same pass sends them. A failure
+  // here must not stop the appointment notifications from draining.
+  let trialEmails;
+  try {
+    trialEmails = await enqueueTrialEmails();
+  } catch (err) {
+    console.error("[notifications] failed to enqueue trial emails:", err);
+  }
+
   const result = await processQueuedNotifications();
-  return NextResponse.json(result);
+  return NextResponse.json({ ...result, trialEmails });
 }
 
 export async function GET(request: NextRequest) {

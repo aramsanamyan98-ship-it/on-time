@@ -6,6 +6,7 @@ import { generateUniqueBookingToken } from "@/lib/booking/token";
 import { isSlotConflictError } from "@/lib/booking/conflict-error";
 import { enqueueBookingNotifications } from "@/lib/notifications/queue";
 import { routingLocaleToLanguage } from "@/lib/locale";
+import { hasActiveAccess } from "@/lib/subscription/trial";
 import type { BookingActionResult } from "@/lib/booking/errors";
 import type { Appointment, Specialist } from "@/generated/prisma/client";
 import type { AppLocale } from "@/i18n/routing";
@@ -32,6 +33,11 @@ export type CreateManualBookingInput = {
 export async function createManualBooking(
   input: CreateManualBookingInput,
 ): Promise<BookingActionResult<Appointment>> {
+  // 02_PRD.md Section 14: manual entry is a dashboard feature, so it needs
+  // active trial/subscription access too — re-checked here because the
+  // calling server action is directly callable.
+  if (!hasActiveAccess(input.specialist)) return { ok: false, formError: "generic" };
+
   const fieldErrors = validateGuestDetails({
     name: input.guestName,
     phone: input.guestPhone,

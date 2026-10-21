@@ -1,6 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
-import { sendNotification } from "@/lib/notifications/send";
+import { sendNotification, sendTrialNotification } from "@/lib/notifications/send";
 
 // 07_Business_Rules.md / 10_Risks.md: failed sends must be retried, not
 // silently dropped, but also not retried forever. Five attempts spread
@@ -39,7 +39,7 @@ export async function processQueuedNotifications(): Promise<ProcessResult> {
       scheduledFor: { lte: now },
       OR: [{ status: "queued" }, { status: "failed", attempts: { lt: MAX_NOTIFICATION_ATTEMPTS } }],
     },
-    include: { appointment: { include: { specialist: true, service: true } } },
+    include: { appointment: { include: { specialist: true, service: true } }, specialist: true },
     orderBy: { scheduledFor: "asc" },
     take: BATCH_LIMIT,
   });
@@ -55,7 +55,13 @@ export async function processQueuedNotifications(): Promise<ProcessResult> {
     if (claim.count === 0) continue; // lost the race to a concurrent invocation
 
     try {
-      await sendNotification(row, row.appointment);
+      if (row.appointment) {
+        await sendNotification(row, row.appointment);
+      } else if (row.specialist) {
+        await sendTrialNotification(row, row.specialist);
+      } else {
+        throw new Error("Notification has neither an appointment nor a specialist");
+      }
       await prisma.notificationLog.update({
         where: { id: row.id },
         data: { status: "sent", errorMessage: null },

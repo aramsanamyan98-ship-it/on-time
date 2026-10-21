@@ -277,3 +277,57 @@ export function buildGuestRescheduledAlertEmail(locale: AppLocale, params: Speci
   return GUEST_RESCHEDULED_ALERT_COPY[locale](params);
 }
 
+// Trial emails (src/lib/notifications/trial-emails.ts): specialist-facing
+// account notices sent in the specialist's dashboard language. `endDate`
+// arrives pre-formatted (specialist's timezone and locale — see
+// src/lib/notifications/send.ts); `planLink` points at the dashboard Plan
+// page where they can subscribe.
+export type TrialEmailParams = {
+  name: string;
+  endDate: string;
+  planLink: string;
+};
+
+const TRIAL_ENDING_SOON_COPY: Record<AppLocale, (p: TrialEmailParams) => EmailContent> = {
+  en: (p) => ({
+    subject: `Your On-Time free trial ends on ${p.endDate}`,
+    text: `Hi ${p.name},\n\nYour free trial ends on ${p.endDate}. Subscribe to keep your dashboard and bookings active:\n${p.planLink}`,
+    html: `<p>Hi ${p.name},</p><p>Your free trial ends on <strong>${p.endDate}</strong>. Subscribe to keep your dashboard and bookings active.</p><p><a href="${p.planLink}">View plans and subscribe</a></p>`,
+  }),
+  ru: (p) => ({
+    subject: `Бесплатный пробный период On-Time заканчивается ${p.endDate}`,
+    text: `Здравствуйте, ${p.name}!\n\nВаш бесплатный пробный период заканчивается ${p.endDate}. Оформите подписку, чтобы сохранить доступ к панели управления и записям:\n${p.planLink}`,
+    html: `<p>Здравствуйте, ${p.name}!</p><p>Ваш бесплатный пробный период заканчивается <strong>${p.endDate}</strong>. Оформите подписку, чтобы сохранить доступ к панели управления и записям.</p><p><a href="${p.planLink}">Посмотреть тарифы и оформить подписку</a></p>`,
+  }),
+  hy: (p) => ({
+    subject: `On-Time-ի անվճար փորձաշրջանն ավարտվում է ${p.endDate}-ին`,
+    text: `Բարև Ձեզ, ${p.name}։\n\nՁեր անվճար փորձաշրջանն ավարտվում է ${p.endDate}-ին։ Ակտիվացրեք բաժանորդագրությունը, որպեսզի պահպանեք ձեր վահանակը և ամրագրումները ակտիվ.\n${p.planLink}`,
+    html: `<p>Բարև Ձեզ, ${p.name}։</p><p>Ձեր անվճար փորձաշրջանն ավարտվում է <strong>${p.endDate}</strong>-ին։ Ակտիվացրեք բաժանորդագրությունը, որպեսզի պահպանեք ձեր վահանակը և ամրագրումները ակտիվ։</p><p><a href="${p.planLink}">Դիտել փաթեթները և բաժանորդագրվել</a></p>`,
+  }),
+};
+
+const TRIAL_ENDED_COPY: Record<AppLocale, (p: TrialEmailParams) => EmailContent> = {
+  en: (p) => ({
+    subject: "Your On-Time free trial has ended",
+    text: `Hi ${p.name},\n\nYour trial has ended. Your booking page is no longer accepting new bookings. Subscribe to reactivate:\n${p.planLink}`,
+    html: `<p>Hi ${p.name},</p><p>Your trial has ended. Your booking page is no longer accepting new bookings. Subscribe to reactivate.</p><p><a href="${p.planLink}">View plans and subscribe</a></p>`,
+  }),
+  ru: (p) => ({
+    subject: "Ваш бесплатный пробный период On-Time закончился",
+    text: `Здравствуйте, ${p.name}!\n\nВаш пробный период закончился. Ваша страница записи больше не принимает новые записи. Оформите подписку, чтобы возобновить работу:\n${p.planLink}`,
+    html: `<p>Здравствуйте, ${p.name}!</p><p>Ваш пробный период закончился. Ваша страница записи больше не принимает новые записи. Оформите подписку, чтобы возобновить работу.</p><p><a href="${p.planLink}">Посмотреть тарифы и оформить подписку</a></p>`,
+  }),
+  hy: (p) => ({
+    subject: "On-Time-ի ձեր անվճար փորձաշրջանն ավարտվել է",
+    text: `Բարև Ձեզ, ${p.name}։\n\nՁեր փորձաշրջանն ավարտվել է։ Ձեր ամրագրման էջն այլևս նոր ամրագրումներ չի ընդունում։ Ակտիվացրեք բաժանորդագրությունը՝ վերականգնելու համար.\n${p.planLink}`,
+    html: `<p>Բարև Ձեզ, ${p.name}։</p><p>Ձեր փորձաշրջանն ավարտվել է։ Ձեր ամրագրման էջն այլևս նոր ամրագրումներ չի ընդունում։ Ակտիվացրեք բաժանորդագրությունը՝ վերականգնելու համար։</p><p><a href="${p.planLink}">Դիտել փաթեթները և բաժանորդագրվել</a></p>`,
+  }),
+};
+
+export function buildTrialEndingSoonEmail(locale: AppLocale, params: TrialEmailParams): EmailContent {
+  return TRIAL_ENDING_SOON_COPY[locale](params);
+}
+
+export function buildTrialEndedEmail(locale: AppLocale, params: TrialEmailParams): EmailContent {
+  return TRIAL_ENDED_COPY[locale](params);
+}

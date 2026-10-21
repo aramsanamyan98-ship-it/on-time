@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/session";
 import { redirect } from "@/i18n/navigation";
 import { prisma } from "@/lib/prisma";
+import { hasActiveAccess } from "@/lib/subscription/trial";
 import { cancelAppointment } from "@/lib/booking/cancel-booking";
 import { rescheduleAppointment } from "@/lib/booking/reschedule-booking";
 import { getSlotsForDate, findEarliestAvailable } from "@/lib/booking/slots";
@@ -17,16 +18,23 @@ export type AppointmentActionState = {
   formError?: BookingErrorCode;
 };
 
+// 02_PRD.md Section 14: every dashboard action requires an active trial or
+// subscription. The layout already blocks the dashboard UI for anyone
+// without it; these loaders re-check server-side since a server action is
+// directly callable, so a lapsed specialist gets the same "not found" /
+// "generic" result as any other unusable session.
 async function loadOwnedAppointment(specialistId: string, appointmentId: string) {
-  return prisma.appointment.findFirst({
+  const appointment = await prisma.appointment.findFirst({
     where: { id: appointmentId, specialistId },
     include: { specialist: true, service: true },
   });
+  if (!appointment || !hasActiveAccess(appointment.specialist)) return null;
+  return appointment;
 }
 
 async function loadActiveSpecialist(specialistId: string) {
   const specialist = await prisma.specialist.findUnique({ where: { id: specialistId } });
-  if (!specialist || !specialist.emailVerifiedAt || specialist.deletedAt) return null;
+  if (!specialist || !specialist.emailVerifiedAt || specialist.deletedAt || !hasActiveAccess(specialist)) return null;
   return specialist;
 }
 
@@ -198,6 +206,7 @@ export async function createManualAppointmentAction(
 export async function markAppointmentsViewedAction(): Promise<void> {
   const session = await getSession();
   if (!session) return;
+  if (!(await loadActiveSpecialist(session.specialistId))) return;
 
   await prisma.specialist.update({
     where: { id: session.specialistId },

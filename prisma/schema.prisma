@@ -120,6 +120,12 @@ enum AppointmentSource {
 // (also scheduled off `end_at`) because they serve different goals and a
 // specialist may want one without the other later; see
 // src/lib/notifications/queue.ts for the lead-time constant.
+//
+// `trial_ending_soon` / `trial_ended`: specialist-facing account emails,
+// not tied to any appointment — their `notifications_log` rows carry
+// `specialist_id` instead of `appointment_id`, and the unique
+// (specialist_id, type) index is what guarantees each is sent at most once
+// per specialist. See src/lib/notifications/trial-emails.ts.
 enum NotificationType {
   booking_confirmation
   reminder
@@ -129,6 +135,8 @@ enum NotificationType {
   review_request
   rebooking_notice
   rebook_reminder
+  trial_ending_soon
+  trial_ended
 }
 
 enum NotificationChannel {
@@ -200,6 +208,7 @@ model Specialist {
   clientNotes             ClientNote[]
   reviews                 Review[]
   loyaltyProgram          LoyaltyProgram?
+  notifications           NotificationLog[]
 
   @@map("specialists")
 }
@@ -317,8 +326,12 @@ model Appointment {
 // "Client books but specialist doesn't receive it").
 model NotificationLog {
   id            String              @id @default(uuid())
-  appointmentId String              @map("appointment_id")
-  appointment   Appointment         @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  // Exactly one of appointmentId / specialistId is set: appointment
+  // notifications use the former, trial emails the latter.
+  appointmentId String?             @map("appointment_id")
+  appointment   Appointment?        @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  specialistId  String?             @map("specialist_id")
+  specialist    Specialist?         @relation(fields: [specialistId], references: [id], onDelete: Cascade)
   type          NotificationType
   channel       NotificationChannel @default(email)
   recipient     String
@@ -335,6 +348,9 @@ model NotificationLog {
 
   @@index([status, scheduledFor])
   @@index([appointmentId])
+  // Postgres treats NULLs as distinct, so this only constrains the
+  // specialist-level rows (appointment rows have a null specialist_id).
+  @@unique([specialistId, type])
   @@map("notifications_log")
 }
 
