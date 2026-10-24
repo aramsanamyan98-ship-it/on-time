@@ -76,3 +76,28 @@ export function pickSuggestion(slots: Date[]): SlotSuggestion | null {
   }
   return { suggested, alternatives };
 }
+
+/** How many "next free times" the public booking page shows. */
+export const NEXT_FREE_SLOT_COUNT = 4;
+
+/**
+ * Appends to `picked` from `slots` (soonest first) until it holds `count`
+ * entries, skipping near-duplicates: slots sit on a 15-minute grid, so
+ * without spacing "next free times" would be 15:00, 15:15, 15:30, ... The
+ * first slot ever seen is always taken. Mutates and returns `picked` so a
+ * day-by-day search can keep feeding it.
+ */
+export function appendSpreadSlots(
+  picked: Date[],
+  slots: Date[],
+  count: number = NEXT_FREE_SLOT_COUNT,
+  spacingMinutes: number = MIN_ALTERNATIVE_SPACING_MINUTES,
+): Date[] {
+  const spacingMs = spacingMinutes * 60_000;
+  for (const slot of slots) {
+    if (picked.length >= count) break;
+    const last = picked[picked.length - 1];
+    if (!last || slot.getTime() - last.getTime() >= spacingMs) picked.push(slot);
+  }
+  return picked;
+}

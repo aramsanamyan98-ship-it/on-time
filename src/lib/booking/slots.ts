@@ -2,7 +2,13 @@ import { prisma } from "@/lib/prisma";
 import { loadSchedule } from "@/lib/working-hours/load-schedule";
 import { computeSlotsForDay, MAX_SEARCH_DAYS, type TimeRange } from "@/lib/booking/availability";
 import { utcToZonedDateStr, addDaysToDateStr, dayOfWeekFromDateStr } from "@/lib/booking/timezone";
-import { computeOpenSlots, pickSuggestion, type SlotSuggestion } from "@/lib/booking/open-slots";
+import {
+  appendSpreadSlots,
+  computeOpenSlots,
+  NEXT_FREE_SLOT_COUNT,
+  pickSuggestion,
+  type SlotSuggestion,
+} from "@/lib/booking/open-slots";
 import type { DayOfWeek } from "@/lib/working-hours/defaults";
 
 export type BookingSpecialist = { id: string; timezone: string };
@@ -143,4 +149,47 @@ export async function findOpenSlotsForServices(
     if (suggestion) result.set(service.id, suggestion);
   }
   return result;
+}
+
+/**
+ * The next few bookable start times for one service ("Next free times" on
+ * the public booking page), soonest first and spread out (see
+ * appendSpreadSlots). Walks forward day by day like findEarliestAvailable,
+ * using the same shared slot math, so every returned slot is one the
+ * booking wizard will accept.
+ */
+export async function findNextFreeSlots(
+  specialist: BookingSpecialist,
+  serviceDurationMinutes: number,
+  count: number = NEXT_FREE_SLOT_COUNT,
+  now: Date = new Date(),
+): Promise<Date[]> {
+  const [schedule, busyRanges] = await Promise.all([
+    loadSchedule(specialist.id),
+    loadBusyRanges(specialist.id, now),
+  ]);
+  const scheduleByDay = new Map(schedule.map((d) => [d.dayOfWeek, d]));
+
+  const picked: Date[] = [];
+  let cursor = utcToZonedDateStr(now, specialist.timezone);
+  for (let i = 0; i < MAX_SEARCH_DAYS && picked.length < count; i++) {
+    const daySchedule = scheduleByDay.get(dayOfWeekFromDateStr(cursor) as DayOfWeek);
+    if (daySchedule) {
+      const slots = computeSlotsForDay({
+        dateStr: cursor,
+        schedule: daySchedule,
+        serviceDurationMinutes,
+        timezone: specialist.timezone,
+        busyRanges,
+        now,
+      });
+      appendSpreadSlots(
+        picked,
+        slots.map((s) => s.start),
+        count,
+      );
+    }
+    cursor = addDaysToDateStr(cursor, 1);
+  }
+  return picked;
 }

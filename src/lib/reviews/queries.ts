@@ -23,6 +23,7 @@ export type PublicReview = {
   comment: string | null;
   createdAt: Date;
   firstName: string | null;
+  serviceName: string;
 };
 
 /**
@@ -36,7 +37,7 @@ export async function listReviewsForPublicProfile(specialistId: string): Promise
   const reviews = await prisma.review.findMany({
     where: { specialistId },
     orderBy: { createdAt: "desc" },
-    include: { appointment: { select: { guestName: true } } },
+    include: { appointment: { select: { guestName: true, service: { select: { name: true } } } } },
   });
 
   return reviews.map((review) => ({
@@ -45,6 +46,7 @@ export async function listReviewsForPublicProfile(specialistId: string): Promise
     comment: review.comment,
     createdAt: review.createdAt,
     firstName: firstNameOf(review.appointment.guestName),
+    serviceName: review.appointment.service.name,
   }));
 }
 
