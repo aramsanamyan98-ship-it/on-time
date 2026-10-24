@@ -429,7 +429,7 @@
     }
   },
   "Appointments": {
-    "title": "Appointments",
+    "title": "Bookings",
     "empty": "You have no upcoming appointments.",
     "reschedule": "Reschedule",
     "cancel": "Cancel",
