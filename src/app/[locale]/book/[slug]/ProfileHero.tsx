@@ -32,8 +32,12 @@ export function ProfileHero({
 }) {
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
-      <div className="flex items-center gap-4 lg:gap-6">
-        <div className="relative flex h-22 w-22 shrink-0 items-center justify-center overflow-hidden rounded-3xl border-2 border-brand-gold bg-brand-green-soft lg:h-32 lg:w-32 lg:rounded-[2rem]">
+      {/* Avatar + rating + name, with the location and open/closed pills under
+          the name. On phones the pills drop to their own full-width row so the
+          narrow text column never squeezes them; pills wrap between each other
+          but never inside (whitespace-nowrap). */}
+      <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 gap-y-3 lg:gap-x-6">
+        <div className="relative flex h-22 w-22 shrink-0 items-center justify-center overflow-hidden rounded-3xl border-2 border-brand-gold bg-brand-green-soft lg:row-span-2 lg:h-32 lg:w-32 lg:rounded-[2rem]">
           {photoUrl ? (
             <Image src={photoUrl} alt="" fill sizes="128px" priority className="object-cover" />
           ) : (
@@ -43,7 +47,7 @@ export function ProfileHero({
           )}
         </div>
 
-        <div className="flex min-w-0 flex-col gap-1.5">
+        <div className="flex min-w-0 flex-col gap-1.5 lg:self-end">
           {rating !== null && reviewCountLabel && (
             <div className="flex items-center gap-1.5 text-sm text-brand-cream" aria-label={ratingLabel} role="img">
               <StarIcon className="h-4 w-4 text-brand-gold" />
@@ -51,27 +55,29 @@ export function ProfileHero({
               <span className="text-brand-cream/75">({reviewCountLabel})</span>
             </div>
           )}
-          <h1 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-brand-cream lg:text-5xl">
+          <h1 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-brand-cream [overflow-wrap:anywhere] lg:text-5xl">
             {name}
           </h1>
         </div>
-      </div>
 
-      <div className="flex flex-col gap-1.5 text-sm text-brand-cream/85 lg:items-end">
-        {address && (
-          <p className="flex items-center gap-2">
-            <PinIcon className="h-4 w-4 shrink-0" />
-            <span>{address}</span>
-          </p>
-        )}
-        {statusText && (
-          <p className="flex items-center gap-2">
-            <span
-              aria-hidden="true"
-              className={`mx-1 h-2 w-2 shrink-0 rounded-full ${isOpen ? "bg-[#7fd29a]" : "bg-brand-cream/50"}`}
-            />
-            <span>{statusText}</span>
-          </p>
+        {(address || statusText) && (
+          <ul className="col-span-2 flex flex-wrap gap-2 lg:col-span-1 lg:self-start">
+            {address && (
+              <li className="flex max-w-full items-center gap-1.5 rounded-full border border-brand-cream/15 bg-brand-cream/10 px-3 py-1.5 text-[0.8125rem] text-brand-cream">
+                <PinIcon className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate whitespace-nowrap">{address}</span>
+              </li>
+            )}
+            {statusText && (
+              <li className="flex max-w-full items-center gap-2 rounded-full border border-brand-cream/15 bg-brand-cream/10 px-3 py-1.5 text-[0.8125rem] text-brand-cream">
+                <span
+                  aria-hidden="true"
+                  className={`h-2 w-2 shrink-0 rounded-full ${isOpen ? "bg-[#7fd29a]" : "bg-brand-cream/50"}`}
+                />
+                <span className="truncate whitespace-nowrap">{statusText}</span>
+              </li>
+            )}
+          </ul>
         )}
       </div>
 

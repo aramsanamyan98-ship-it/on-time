@@ -250,9 +250,9 @@
     "callAction": "Call",
     "directionsAction": "Directions",
     "openUntil": "Open · until {time}",
-    "closedOpensToday": "Closed · opens today at {time}",
-    "closedOpensTomorrow": "Closed · opens tomorrow at {time}",
-    "closedOpensDay": "Closed · opens {day} at {time}",
+    "closedOpensToday": "Closed · opens today {time}",
+    "closedOpensTomorrow": "Closed · opens tomorrow {time}",
+    "closedOpensDay": "Closed · opens {day} {time}",
     "closedNow": "Closed",
     "nextTimesTitle": "Next free times",
     "today": "Today",
@@ -286,7 +286,16 @@
     "languageAria": "Language",
     "metaTitle": "{name} | Book online",
     "metaDescription": "Book online with {name}: {services}.",
-    "metaDescriptionNoServices": "Book an appointment online with {name}."
+    "metaDescriptionNoServices": "Book an appointment online with {name}.",
+    "daysShort": {
+      "0": "Sun",
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat"
+    }
   },
   "Booking": {
     "title": "Book with {name}",

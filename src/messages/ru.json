@@ -250,9 +250,9 @@
     "callAction": "Позвонить",
     "directionsAction": "Маршрут",
     "openUntil": "Открыто · до {time}",
-    "closedOpensToday": "Закрыто · откроется сегодня в {time}",
-    "closedOpensTomorrow": "Закрыто · откроется завтра в {time}",
-    "closedOpensDay": "Закрыто · откроется {day} в {time}",
+    "closedOpensToday": "Закрыто · откроется сегодня {time}",
+    "closedOpensTomorrow": "Закрыто · откроется завтра {time}",
+    "closedOpensDay": "Закрыто · откроется {day} {time}",
     "closedNow": "Закрыто",
     "nextTimesTitle": "Ближайшее свободное время",
     "today": "Сегодня",
@@ -286,7 +286,16 @@
     "languageAria": "Язык",
     "metaTitle": "{name} | Онлайн-запись",
     "metaDescription": "Запишитесь онлайн к мастеру {name}: {services}.",
-    "metaDescriptionNoServices": "Запишитесь онлайн к мастеру {name}."
+    "metaDescriptionNoServices": "Запишитесь онлайн к мастеру {name}.",
+    "daysShort": {
+      "0": "Вс",
+      "1": "Пн",
+      "2": "Вт",
+      "3": "Ср",
+      "4": "Чт",
+      "5": "Пт",
+      "6": "Сб"
+    }
   },
   "Booking": {
     "title": "Запись к {name}",
