@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { routing } from "@/i18n/routing";
 import { usePathname, useRouter } from "@/i18n/navigation";
-import { ClockIcon, ShareIcon } from "./ProfileIcons";
+import { ShareIcon } from "./ProfileIcons";
 
 const SHORT_LABELS = { hy: "ՀԱՅ", ru: "РУС", en: "ENG" } as const;
 
@@ -33,12 +34,15 @@ export function ProfileTopBar({ shareTitle, showShare = true }: { shareTitle: st
 
   return (
     <div className="flex items-center justify-between gap-3">
-      <div className="flex items-center gap-2 font-bold tracking-tight text-brand-cream">
-        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-gold text-brand-green">
-          <ClockIcon className="h-4 w-4" />
-        </span>
+      {/* Real On-Time mark (light version, made for dark backgrounds) + name, linking to the marketing site. */}
+      <a
+        href="https://on-time.am"
+        aria-label={tCommon("logoLinkLabel")}
+        className="flex min-h-11 items-center gap-2 font-bold tracking-tight text-brand-cream"
+      >
+        <Image src="/brand/on-time-icon-light.png" alt="" width={28} height={28} className="h-7 w-7 shrink-0" />
         <span>{tCommon("appName")}</span>
-      </div>
+      </a>
 
       <div className="flex items-center gap-2">
         <div role="group" aria-label={t("languageAria")} className="flex items-center rounded-full border border-brand-cream/30 p-0.5">
