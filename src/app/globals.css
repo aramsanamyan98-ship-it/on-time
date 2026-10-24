@@ -226,3 +226,12 @@ body {
     transform: translateY(0);
   }
 }
+
+/* Dashboard (sidebar layout, design/dashboard-nav): page titles use the serif
+   face like the public booking page; scoped here so auth/marketing pages keep
+   their current headings. */
+.ot-dashboard .heading-page,
+.ot-dashboard .heading-section {
+  font-family: var(--font-serif);
+  color: var(--color-brand-green);
+}

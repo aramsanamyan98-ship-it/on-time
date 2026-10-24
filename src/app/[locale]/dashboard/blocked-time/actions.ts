@@ -130,7 +130,7 @@ export async function createBlockedTimeAction(
     await cancelAppointment(appointment, specialist, "specialist");
   }
 
-  return redirect({ href: "/dashboard/blocked-time?added=1", locale });
+  return redirect({ href: "/dashboard/working-hours?blockedAdded=1#blocked-time", locale });
 }
 
 export type DeleteBlockedTimeState = { formError?: DashboardErrorCode };
@@ -149,5 +149,5 @@ export async function deleteBlockedTimeAction(
 
   await prisma.blockedTime.delete({ where: { id: existing.id } });
 
-  return redirect({ href: "/dashboard/blocked-time?deleted=1", locale });
+  return redirect({ href: "/dashboard/working-hours?blockedDeleted=1#blocked-time", locale });
 }
