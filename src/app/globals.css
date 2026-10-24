@@ -12,6 +12,15 @@
   /* Hover shade for gold CTAs: ~12% darker than brand-gold. */
   --color-brand-gold-hover: #b0955d;
   --color-brand-warm-white: #f7f5f2;
+  /* Public booking page palette (design/booking-page): tints and neutrals
+     that only exist there. */
+  --color-brand-gold-tint: #f3ead6;
+  --color-brand-gold-border: #e3d3ad;
+  --color-brand-card-border: #ebe6da;
+  --color-brand-sand: #ddd6c6;
+  --color-brand-muted: #5e5a52;
+  --color-brand-cream: #f6f1e6;
+  --color-brand-green-soft: #2c5240;
 }
 
 @theme inline {
@@ -21,11 +30,19 @@
   --color-brand-gold: var(--color-brand-gold);
   --color-brand-gold-hover: var(--color-brand-gold-hover);
   --color-brand-warm-white: var(--color-brand-warm-white);
+  --color-brand-gold-tint: var(--color-brand-gold-tint);
+  --color-brand-gold-border: var(--color-brand-gold-border);
+  --color-brand-card-border: var(--color-brand-card-border);
+  --color-brand-sand: var(--color-brand-sand);
+  --color-brand-muted: var(--color-brand-muted);
+  --color-brand-cream: var(--color-brand-cream);
+  --color-brand-green-soft: var(--color-brand-green-soft);
 
   --color-warm-white: var(--color-brand-warm-white);
   --color-charcoal: var(--color-brand-charcoal);
 
   --font-sans: var(--font-inter), var(--font-noto-armenian), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-noto-serif-armenian), Georgia, ui-serif, serif;
 }
 
 body {

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Noto_Sans_Armenian } from "next/font/google";
+import { Inter, Noto_Sans_Armenian, Noto_Serif_Armenian } from "next/font/google";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -21,6 +21,17 @@ const notoSansArmenian = Noto_Sans_Armenian({
   subsets: ["armenian"],
   variable: "--font-noto-armenian",
   display: "swap",
+});
+
+// Serif for the barber name and section headings on the public booking page
+// (design/booking-page). Armenian-only glyph set, so Latin/Cyrillic text falls
+// back to Georgia; not preloaded since most pages never use it.
+const notoSerifArmenian = Noto_Serif_Armenian({
+  subsets: ["armenian"],
+  weight: ["600", "700"],
+  variable: "--font-noto-serif-armenian",
+  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -49,7 +60,7 @@ export default async function LocaleLayout({
   const t = await getTranslations({ locale, namespace: "Common" });
 
   return (
-    <html lang={locale} className={`${inter.variable} ${notoSansArmenian.variable} h-full antialiased`}>
+    <html lang={locale} className={`${inter.variable} ${notoSansArmenian.variable} ${notoSerifArmenian.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans bg-warm-white text-charcoal">
         <NextIntlClientProvider>
           <a href="#main-content" className="sr-only focus:not-sr-only">

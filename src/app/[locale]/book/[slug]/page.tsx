@@ -1,28 +1,45 @@
+import { cache } from "react";
+import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { loadSchedule } from "@/lib/working-hours/load-schedule";
 import { getReviewStats, listReviewsForPublicProfile } from "@/lib/reviews/queries";
 import { hasActiveAccess } from "@/lib/subscription/trial";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { Link } from "@/i18n/navigation";
-import { PageHeading, SectionHeading } from "@/components/Heading";
-import { StarRating } from "@/components/StarRating";
-import { PhoneIcon, PinIcon, InstagramIcon, FacebookIcon } from "@/components/ContactIcons";
+import { findNextFreeSlots } from "@/lib/booking/slots";
+import { dayOfWeekFromDateStr, utcToZonedDateStr, utcToZonedTimeStr } from "@/lib/booking/timezone";
+import {
+  computeOpenStatus,
+  formatAmount,
+  groupHours,
+  mapLinks,
+  shortestService,
+  slotDayKind,
+  telHref,
+} from "@/lib/booking/public-profile";
+import type { DayOfWeek } from "@/lib/working-hours/defaults";
+import { ProfileTopBar } from "./ProfileTopBar";
+import { ProfileHero, heroIcons } from "./ProfileHero";
+import {
+  AboutSection,
+  AddressHoursSection,
+  LoyaltyCard,
+  NextFreeTimes,
+  ProfileFooter,
+  ServicesSection,
+  StickyBookBar,
+  type NextSlot,
+} from "./ProfileSections";
+import { PortfolioGrid } from "./PortfolioGrid";
+import { ReviewsList } from "./ReviewsList";
 
-export default async function PublicProfilePage({
-  params,
-}: {
-  params: Promise<{ locale: string; slug: string }>;
-}) {
-  const { locale, slug } = await params;
-  if (!hasLocale(routing.locales, locale)) notFound();
-  setRequestLocale(locale);
+const sectionHeading = "font-serif text-2xl font-bold text-brand-green lg:text-[1.7rem]";
 
-  const specialist = await prisma.specialist.findUnique({
+// Shared by generateMetadata and the page so the specialist is fetched once per request.
+const loadSpecialist = cache((slug: string) =>
+  prisma.specialist.findUnique({
     where: { slug },
     select: {
       id: true,
@@ -34,12 +51,65 @@ export default async function PublicProfilePage({
       address: true,
       instagramUrl: true,
       facebookUrl: true,
+      timezone: true,
       emailVerifiedAt: true,
       deletedAt: true,
       trialEndsAt: true,
       subscriptionActiveUntil: true,
     },
+  }),
+);
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}): Promise<Metadata> {
+  const { locale, slug } = await params;
+  if (!hasLocale(routing.locales, locale)) return {};
+
+  const specialist = await loadSpecialist(slug);
+  if (!specialist || !specialist.emailVerifiedAt || specialist.deletedAt) return {};
+
+  const t = await getTranslations({ locale, namespace: "PublicProfile" });
+  const services = await prisma.service.findMany({
+    where: { specialistId: specialist.id, isActive: true },
+    orderBy: { createdAt: "asc" },
+    select: { name: true },
+    take: 4,
   });
+
+  const title = t("metaTitle", { name: specialist.displayName });
+  const description =
+    services.length > 0
+      ? t("metaDescription", { name: specialist.displayName, services: services.map((s) => s.name).join(", ") })
+      : t("metaDescriptionNoServices", { name: specialist.displayName });
+  const image = specialist.profilePhotoUrl ?? specialist.coverPhotoUrl;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      locale,
+      ...(image ? { images: [{ url: image, alt: specialist.displayName }] } : {}),
+    },
+    twitter: { card: image ? "summary_large_image" : "summary", title, description },
+  };
+}
+
+export default async function PublicProfilePage({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}) {
+  const { locale, slug } = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
+  setRequestLocale(locale);
+
+  const specialist = await loadSpecialist(slug);
 
   // A page must be unreachable the moment a specialist is unverified or
   // deactivated (07_Business_Rules.md, Specialist Account Rules) — no
@@ -50,11 +120,12 @@ export default async function PublicProfilePage({
 
   // 02_PRD.md Section 14: the public profile itself stays reachable to
   // guests even once a specialist's trial/subscription lapses — only the
-  // ability to book is gated (below), same as every other feature (reviews
-  // included) which is now identical across every paying specialist.
+  // ability to book is gated (below).
   const canAcceptBookings = hasActiveAccess(specialist);
+  const now = new Date();
+  const timezone = specialist.timezone;
 
-  const [services, schedule, portfolioPhotos, reviewStats, reviews] = await Promise.all([
+  const [services, schedule, portfolioPhotos, reviewStats, reviews, loyalty] = await Promise.all([
     prisma.service.findMany({
       where: { specialistId: specialist.id, isActive: true },
       orderBy: { createdAt: "asc" },
@@ -66,228 +137,234 @@ export default async function PublicProfilePage({
     }),
     getReviewStats(specialist.id),
     listReviewsForPublicProfile(specialist.id),
+    prisma.loyaltyProgram.findUnique({ where: { specialistId: specialist.id } }),
   ]);
 
   const t = await getTranslations("PublicProfile");
   const tHours = await getTranslations("WorkingHours");
   const tServices = await getTranslations("Services");
 
+  const canBook = canAcceptBookings && services.length > 0;
+
+  // "Next free times": the soonest spread-out slots for the shortest service.
+  // A tapped slot opens the wizard on that service + time (slot-link params),
+  // which re-checks it against live availability.
+  const nextService = canBook ? shortestService(services) : null;
+  const freeSlots = nextService ? await findNextFreeSlots(specialist, nextService.durationMinutes, undefined, now) : [];
+  const slotDayFormatter = new Intl.DateTimeFormat(locale, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    timeZone: timezone,
+  });
+  const nextSlots: NextSlot[] = freeSlots.map((slot) => {
+    const kind = slotDayKind(slot, now, timezone);
+    return {
+      iso: slot.toISOString(),
+      dayLabel: kind === "today" ? t("today") : kind === "tomorrow" ? t("tomorrow") : slotDayFormatter.format(slot),
+      time: utcToZonedTimeStr(slot, timezone),
+    };
+  });
+
+  // Open-now line, from the weekly schedule in the specialist's timezone.
+  const status = computeOpenStatus(schedule, timezone, now);
+  let statusText: string | null = null;
+  if (status.kind === "open") {
+    statusText = t("openUntil", { time: status.until });
+  } else if (status.kind === "closed") {
+    const { dayOffset, dayOfWeek, time } = status.opens;
+    statusText =
+      dayOffset === 0
+        ? t("closedOpensToday", { time })
+        : dayOffset === 1
+          ? t("closedOpensTomorrow", { time })
+          : t("closedOpensDay", { day: tHours(`days.${dayOfWeek}`), time });
+  } else {
+    statusText = t("closedNow");
+  }
+
+  const address = specialist.address?.trim() || null;
+  const links = address ? mapLinks(address) : null;
+
+  const heroActions = [
+    specialist.phone && {
+      key: "phone",
+      href: telHref(specialist.phone),
+      label: t("callAction"),
+      icon: heroIcons.phone,
+    },
+    specialist.instagramUrl && {
+      key: "instagram",
+      href: specialist.instagramUrl,
+      label: "Instagram",
+      icon: heroIcons.instagram,
+      external: true,
+    },
+    specialist.facebookUrl && {
+      key: "facebook",
+      href: specialist.facebookUrl,
+      label: "Facebook",
+      icon: heroIcons.facebook,
+      external: true,
+    },
+    links && {
+      key: "directions",
+      href: links.directions,
+      label: t("directionsAction"),
+      icon: heroIcons.directions,
+      external: true,
+    },
+  ].filter((action): action is Exclude<typeof action, "" | null> => typeof action === "object" && action !== null);
+
+  const todayDayOfWeek = dayOfWeekFromDateStr(utcToZonedDateStr(now, timezone)) as DayOfWeek;
+  const hoursRows = groupHours(schedule, todayDayOfWeek).map((row) => {
+    const first = tHours(`days.${row.days[0]}`);
+    const last = tHours(`days.${row.days[row.days.length - 1]}`);
+    return {
+      isToday: row.isToday,
+      isDayOff: row.isDayOff,
+      startTime: row.startTime,
+      endTime: row.endTime,
+      label: row.days.length > 1 ? `${first} – ${last}` : first,
+    };
+  });
+
+  const formatPrice = (amount: number) => t("priceAmd", { price: formatAmount(amount) });
+  const serviceItems = services.map((service) => ({
+    id: service.id,
+    name: service.name,
+    description: service.description,
+    durationLabel: tServices("durationValue", { minutes: service.durationMinutes }),
+    priceLabel: formatPrice(service.priceAmd),
+  }));
+
   const reviewDateFormatter = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" });
+  const reviewItems = reviews.map((review) => ({
+    id: review.id,
+    rating: review.rating,
+    comment: review.comment,
+    authorName: review.firstName ?? t("anonymousReviewer"),
+    serviceName: review.serviceName,
+    dateLabel: reviewDateFormatter.format(review.createdAt),
+  }));
+
+  const hasRating = reviewStats.count > 0 && reviewStats.average !== null;
+  const bio = specialist.bio?.trim() || null;
+  const showStickyBar = canBook;
+  const lowestPrice = services.length > 0 ? Math.min(...services.map((s) => s.priceAmd)) : null;
+  const firstSlot = nextSlots[0];
 
   return (
     <div className="flex flex-1 flex-col">
-      <div className="relative">
-        <div className="relative h-40 w-full overflow-hidden bg-brand-charcoal/10 sm:h-56">
-          {specialist.coverPhotoUrl && (
-            <Image
-              src={specialist.coverPhotoUrl}
-              alt=""
-              fill
-              sizes="100vw"
-              priority
-              className="object-cover"
-            />
-          )}
+      <header className="bg-brand-green px-4 pb-20 pt-3.5 lg:px-8 lg:pb-16">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 lg:gap-8">
+          <ProfileTopBar shareTitle={specialist.displayName} />
+          <ProfileHero
+            name={specialist.displayName}
+            photoUrl={specialist.profilePhotoUrl}
+            rating={hasRating ? reviewStats.average : null}
+            ratingLabel={hasRating ? t("ratingAriaLabel", { rating: reviewStats.average!.toFixed(1) }) : ""}
+            reviewCountLabel={hasRating ? t("reviewCount", { count: reviewStats.count }) : null}
+            address={address}
+            statusText={statusText}
+            isOpen={status.kind === "open"}
+            actions={heroActions}
+          />
         </div>
-        <div className="absolute right-4 top-4">
-          <LanguageSwitcher />
-        </div>
-        <div className="absolute -bottom-10 left-6 h-20 w-20 overflow-hidden rounded-full border-4 border-brand-warm-white bg-brand-warm-white sm:h-28 sm:w-28">
-          {specialist.profilePhotoUrl ? (
-            <Image
-              src={specialist.profilePhotoUrl}
-              alt=""
-              width={112}
-              height={112}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-2xl font-semibold text-brand-charcoal/30">
-              {specialist.displayName.charAt(0).toUpperCase()}
-            </div>
-          )}
-        </div>
-      </div>
+      </header>
 
-      <div
-        className={`flex flex-col gap-8 px-6 pt-14 sm:pt-16 ${
-          services.length > 0 ? "pb-24" : "pb-10"
+      <main
+        className={`mx-auto -mt-12 flex w-full max-w-6xl flex-col gap-8 px-4 lg:-mt-10 lg:grid lg:grid-cols-[minmax(0,1fr)_23.75rem] lg:items-start lg:gap-x-8 lg:px-8 ${
+          showStickyBar ? "pb-32 lg:pb-12" : "pb-10"
         }`}
       >
-        <div className="flex flex-col gap-3">
-          <PageHeading>{specialist.displayName}</PageHeading>
-
-          {reviewStats.count > 0 && reviewStats.average !== null && (
-            <div className="flex items-center gap-2">
-              <StarRating
-                value={reviewStats.average}
-                className="text-lg"
-                ariaLabel={t("ratingAriaLabel", { rating: reviewStats.average.toFixed(1) })}
-              />
-              <span className="font-semibold text-brand-charcoal">{reviewStats.average.toFixed(1)}</span>
-              <span className="body-text text-sm">{t("reviewCount", { count: reviewStats.count })}</span>
+        {/* On phones these two wrappers are display:contents so every section
+            is a direct flex child ordered by `order-*`; from lg up they become
+            the main and side columns. */}
+        <div className="contents lg:col-start-1 lg:row-start-1 lg:flex lg:flex-col lg:gap-8">
+          {serviceItems.length > 0 && (
+            <div className="order-3">
+              <ServicesSection slug={slug} services={serviceItems} canBook={canBook} />
             </div>
           )}
-
-          {specialist.bio && <p className="body-text max-w-prose">{specialist.bio}</p>}
-
-          {services.length > 0 &&
-            (canAcceptBookings ? (
-              <Link href={`/book/${slug}/new`} className="btn-accent mt-2 w-fit">
-                {t("bookButton")}
-              </Link>
-            ) : (
-              <p className="body-text text-sm">{t("notAcceptingBookings")}</p>
-            ))}
-        </div>
-
-        {(specialist.phone || specialist.address || specialist.instagramUrl || specialist.facebookUrl) && (
-          <section className="flex max-w-sm flex-col gap-3">
-            <SectionHeading>{t("contactTitle")}</SectionHeading>
-            <div className="panel flex flex-col gap-3">
-              {specialist.phone && (
-                <a
-                  href={`tel:${specialist.phone}`}
-                  className="flex items-center gap-3 text-sm text-brand-charcoal transition hover:text-brand-green"
-                >
-                  <PhoneIcon className="h-5 w-5 shrink-0 text-brand-gold" />
-                  <span>{specialist.phone}</span>
-                </a>
-              )}
-              {specialist.address && (
-                <div className="flex items-center gap-3 text-sm text-brand-charcoal">
-                  <PinIcon className="h-5 w-5 shrink-0 text-brand-gold" />
-                  <span>{specialist.address}</span>
-                </div>
-              )}
-              {(specialist.instagramUrl || specialist.facebookUrl) && (
-                <div className="flex items-center gap-3 pt-1">
-                  {specialist.instagramUrl && (
-                    <a
-                      href={specialist.instagramUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="Instagram"
-                      className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-charcoal/5 text-brand-charcoal transition hover:bg-brand-gold hover:text-brand-charcoal"
-                    >
-                      <InstagramIcon className="h-4 w-4" />
-                    </a>
-                  )}
-                  {specialist.facebookUrl && (
-                    <a
-                      href={specialist.facebookUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="Facebook"
-                      className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-charcoal/5 text-brand-charcoal transition hover:bg-brand-gold hover:text-brand-charcoal"
-                    >
-                      <FacebookIcon className="h-4 w-4" />
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
-          </section>
-        )}
-
-        <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:items-start lg:gap-10">
-          <div className="flex flex-col gap-8">
-            {reviewStats.count > 0 && (
-              <section className="flex flex-col gap-3">
-                <SectionHeading>{t("reviewsTitle")}</SectionHeading>
-                <div className="flex flex-col gap-3">
-                  {reviews.map((review) => (
-                    <div key={review.id} className="surface-card flex flex-col gap-1">
-                      <div className="flex items-center justify-between gap-4">
-                        <StarRating
-                          value={review.rating}
-                          ariaLabel={t("ratingAriaLabel", { rating: review.rating })}
-                        />
-                        <span className="text-xs text-brand-charcoal/50">
-                          {reviewDateFormatter.format(review.createdAt)}
-                        </span>
-                      </div>
-                      {review.comment && <p className="body-text text-sm">{review.comment}</p>}
-                      <span className="text-xs font-medium text-brand-charcoal/60">
-                        {review.firstName ?? t("anonymousReviewer")}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            <section className="flex flex-col gap-3">
-              <SectionHeading>{t("servicesTitle")}</SectionHeading>
-              {services.length === 0 ? (
-                <p className="body-text text-sm">{t("noServices")}</p>
-              ) : (
-                <div className="panel flex flex-col divide-y divide-brand-charcoal/10 p-0">
-                  {services.map((service) => (
-                    <div key={service.id} className="flex flex-col gap-0.5 px-4 py-3">
-                      <div className="flex items-center justify-between gap-4">
-                        <span className="font-medium text-brand-charcoal">{service.name}</span>
-                        <span className="body-text whitespace-nowrap text-sm">
-                          {tServices("durationValue", { minutes: service.durationMinutes })} ·{" "}
-                          {tServices("priceValue", { price: service.priceAmd })}
-                        </span>
-                      </div>
-                      {service.description && (
-                        <p className="text-sm text-brand-charcoal/60">{service.description}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
-
-            <section className="flex max-w-sm flex-col gap-3">
-              <SectionHeading>{t("workingHoursTitle")}</SectionHeading>
-              <div className="panel flex flex-col divide-y divide-brand-charcoal/10 p-0">
-                {schedule.map((day) => (
-                  <div key={day.dayOfWeek} className="flex items-center justify-between px-4 py-2 text-sm">
-                    <span className="text-brand-charcoal">{tHours(`days.${day.dayOfWeek}`)}</span>
-                    <span className="body-text">
-                      {day.isDayOff ? t("dayOff") : `${day.startTime} – ${day.endTime}`}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </section>
-          </div>
 
           {portfolioPhotos.length > 0 && (
-            <section className="flex flex-col gap-3">
-              <SectionHeading>{t("portfolioTitle")}</SectionHeading>
-              {/* Real per-photo aspect ratios aren't stored, so a plain <img>
-                  (rather than next/image, which needs known dimensions) lets
-                  each thumbnail keep its natural proportions in the masonry
-                  layout instead of being cropped to a fixed box. */}
-              <div className="columns-2 gap-4">
-                {portfolioPhotos.map((photo) => (
-                  <div
-                    key={photo.id}
-                    className="mb-4 break-inside-avoid overflow-hidden rounded-xl bg-brand-charcoal/5 shadow-sm transition hover:shadow-md"
+            <section aria-labelledby="portfolio-title" className="order-4 flex flex-col gap-3.5">
+              <div className="flex items-baseline justify-between gap-3">
+                <h2 id="portfolio-title" className={sectionHeading}>
+                  {t("portfolioTitle")}
+                </h2>
+                {specialist.instagramUrl && (
+                  <a
+                    href={specialist.instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex min-h-11 items-center text-sm font-semibold text-brand-green hover:underline"
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={photo.imageUrl} alt="" loading="lazy" className="w-full object-cover" />
-                  </div>
-                ))}
+                    Instagram
+                  </a>
+                )}
               </div>
+              <PortfolioGrid
+                photos={portfolioPhotos.map((p) => ({ id: p.id, url: p.imageUrl }))}
+                altText={t("portfolioPhotoAlt", { name: specialist.displayName })}
+              />
             </section>
           )}
-        </div>
-      </div>
 
-      {services.length > 0 && canAcceptBookings && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-brand-charcoal/10 bg-brand-warm-white/95 backdrop-blur">
-          <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-6 py-3">
-            <span className="truncate text-sm font-medium text-brand-charcoal">{specialist.displayName}</span>
-            <Link href={`/book/${slug}/new`} className="btn-accent shrink-0">
-              {t("bookButton")}
-            </Link>
+          {reviewItems.length > 0 && hasRating && (
+            <section aria-labelledby="reviews-title" className="order-5 flex flex-col gap-3.5">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+                <h2 id="reviews-title" className={sectionHeading}>
+                  {t("reviewsTitle")}
+                </h2>
+                <span className="text-sm text-brand-muted">
+                  <strong className="text-brand-green">{reviewStats.average!.toFixed(1)}</strong> ·{" "}
+                  {t("reviewsRealVisits", { count: reviewStats.count })}
+                </span>
+              </div>
+              <ReviewsList reviews={reviewItems} />
+            </section>
+          )}
+
+          {bio && (
+            <div className="order-6">
+              <AboutSection bio={bio} />
+            </div>
+          )}
+        </div>
+
+        <div className="contents lg:col-start-2 lg:row-start-1 lg:flex lg:flex-col lg:gap-5">
+          <div className="order-1">
+            <NextFreeTimes slug={slug} slots={nextSlots} serviceId={nextService?.id ?? null} canBook={canBook} />
+          </div>
+
+          {loyalty?.enabled && (
+            <div className="order-2">
+              <LoyaltyCard
+                ruleType={loyalty.ruleType}
+                threshold={loyalty.threshold}
+                rewardText={loyalty.rewardText}
+              />
+            </div>
+          )}
+
+          <div className="order-7">
+            <AddressHoursSection address={address} rows={hoursRows} links={links} />
           </div>
         </div>
+
+        <div className="order-8 lg:col-span-2">
+          <ProfileFooter />
+        </div>
+      </main>
+
+      {showStickyBar && lowestPrice !== null && (
+        <StickyBookBar
+          slug={slug}
+          fromPriceLabel={t("fromPrice", { price: formatPrice(lowestPrice) })}
+          nextFreeLabel={firstSlot ? t("nextFreeShort", { when: `${firstSlot.dayLabel} ${firstSlot.time}` }) : null}
+        />
       )}
     </div>
   );

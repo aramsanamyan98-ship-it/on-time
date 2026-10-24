@@ -48,3 +48,6 @@ next-env.d.ts
 
 # phone-normalization snapshots (contain guest phone numbers), see scripts/normalize-phone-numbers.mts
 /scripts/backups/
+
+# Design mockups (reference only, not part of the app)
+/design/
