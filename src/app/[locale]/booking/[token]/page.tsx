@@ -5,7 +5,7 @@ import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { utcToZonedDateStr } from "@/lib/booking/timezone";
 import { isAppointmentReviewable } from "@/lib/reviews/eligibility";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ProfileTopBar } from "../../book/[slug]/ProfileTopBar";
 import { Link } from "@/i18n/navigation";
 import { ManageBooking } from "./ManageBooking";
 import {
@@ -16,7 +16,6 @@ import {
   rebookBookingAction,
   submitReviewAction,
 } from "./actions";
-import { PageHeading } from "@/components/Heading";
 
 // This is the private link sent in every guest booking confirmation
 // (05_Database.md `booking_token`, 04_User_Flows.md Flow 4b): it doubles as
@@ -62,14 +61,20 @@ export default async function ManageBookingPage({
   });
 
   return (
-    <div className="flex flex-1 flex-col gap-6 px-6 py-8">
-      <div className="flex items-center justify-between gap-4">
-        <PageHeading>{t("manageTitle")}</PageHeading>
-        <LanguageSwitcher />
-      </div>
-      <Link href={`/book/${appointment.specialist.slug}`} className="w-fit text-sm text-brand-charcoal/60 underline">
-        &lsaquo; {t("backToProfile", { name: appointment.specialist.displayName })}
-      </Link>
+    <div className="flex flex-1 flex-col">
+      <header className="bg-brand-green px-4 pb-14 pt-3.5 lg:px-8">
+        <div className="mx-auto flex w-full max-w-xl flex-col gap-4">
+          <ProfileTopBar shareTitle={appointment.specialist.displayName} showShare={false} />
+          <Link
+            href={`/book/${appointment.specialist.slug}`}
+            className="flex min-h-11 w-fit items-center text-sm font-semibold text-brand-cream/85 hover:text-brand-cream"
+          >
+            &lsaquo; {t("backToProfile", { name: appointment.specialist.displayName })}
+          </Link>
+          <h1 className="font-serif text-3xl font-bold leading-tight text-brand-cream">{t("manageTitle")}</h1>
+        </div>
+      </header>
+      <main className="mx-auto -mt-8 flex w-full max-w-xl flex-col px-4 pb-12">
       <ManageBooking
         token={token}
         appointment={{
@@ -100,6 +105,7 @@ export default async function ManageBookingPage({
         initialReview={existingReview ? { rating: existingReview.rating, comment: existingReview.comment } : null}
         submitReviewAction={submitReviewAction}
       />
+      </main>
     </div>
   );
 }

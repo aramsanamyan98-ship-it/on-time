@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { utcToZonedDateStr } from "@/lib/booking/timezone";
 
 /**
  * Shared date/time slot picker used by the guest booking wizard, the guest
@@ -50,7 +51,9 @@ export function SlotPicker({
 
   const isLoading = !result || result.dateStr !== dateStr;
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  // "Today" is the barber's calendar date, not the UTC one — they differ for
+  // four hours every night in Yerevan (00:00-04:00 local is still yesterday in UTC).
+  const todayStr = utcToZonedDateStr(new Date(), timezone);
   const timeFormatter = new Intl.DateTimeFormat(locale, {
     hour: "2-digit",
     minute: "2-digit",

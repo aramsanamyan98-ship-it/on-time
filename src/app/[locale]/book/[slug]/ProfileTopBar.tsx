@@ -8,7 +8,7 @@ import { ClockIcon, ShareIcon } from "./ProfileIcons";
 
 const SHORT_LABELS = { hy: "ՀԱՅ", ru: "РУС", en: "ENG" } as const;
 
-export function ProfileTopBar({ shareTitle }: { shareTitle: string }) {
+export function ProfileTopBar({ shareTitle, showShare = true }: { shareTitle: string; showShare?: boolean }) {
   const t = useTranslations("PublicProfile");
   const tCommon = useTranslations("Common");
   const locale = useLocale();
@@ -58,6 +58,7 @@ export function ProfileTopBar({ shareTitle }: { shareTitle: string }) {
             </button>
           ))}
         </div>
+        {showShare && (
         <button
           type="button"
           onClick={share}
@@ -67,6 +68,7 @@ export function ProfileTopBar({ shareTitle }: { shareTitle: string }) {
         >
           <ShareIcon className="h-4 w-4" />
         </button>
+        )}
         <span role="status" className="sr-only">
           {copied ? t("shareCopied") : ""}
         </span>
