@@ -79,3 +79,102 @@ body {
     @apply rounded-md border border-brand-charcoal/20 px-4 py-2 text-sm font-medium text-brand-charcoal transition hover:border-brand-charcoal/40 hover:bg-brand-charcoal/5 disabled:opacity-60;
   }
 }
+
+/* Appointments calendar (FullCalendar). FullCalendar injects its own base
+   styles; these override its CSS variables and event colours to match the
+   brand palette. Status colours are shared by events, legend and badges. */
+.ot-calendar .fc {
+  --fc-border-color: rgb(18 18 18 / 0.1);
+  --fc-page-bg-color: #fff;
+  --fc-today-bg-color: rgb(200 169 106 / 0.1);
+  --fc-now-indicator-color: #dc2626;
+  --fc-non-business-color: rgb(18 18 18 / 0.05);
+  --fc-event-border-color: transparent;
+  font-size: 0.8125rem;
+}
+.ot-calendar .fc .fc-col-header-cell-cushion,
+.ot-calendar .fc .fc-timegrid-slot-label-cushion {
+  color: rgb(18 18 18 / 0.7);
+  text-decoration: none;
+}
+.ot-event {
+  border-radius: 0.375rem;
+  cursor: pointer;
+  overflow: hidden;
+}
+.ot-event-body {
+  display: flex;
+  flex-direction: column;
+  padding: 1px 4px;
+  line-height: 1.25;
+  overflow: hidden;
+}
+.ot-event-time {
+  font-size: 0.6875rem;
+  opacity: 0.85;
+}
+.ot-event-name {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ot-event-service {
+  font-size: 0.6875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ot-event-confirmed,
+.ot-status-confirmed {
+  background: #1f3d2b;
+  color: #fff;
+}
+.ot-event-completed,
+.ot-status-completed {
+  background: #c8a96a;
+  color: #121212;
+}
+.ot-event-no_show,
+.ot-status-no_show {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.ot-event-no_show {
+  border: 1px solid #fca5a5;
+}
+.ot-event-cancelled,
+.ot-status-cancelled {
+  background: #e5e5e5;
+  color: #121212;
+}
+.ot-event-cancelled {
+  opacity: 0.5;
+}
+.ot-event-cancelled .ot-event-name,
+.ot-event-cancelled .ot-event-service {
+  text-decoration: line-through;
+}
+.ot-status-badge {
+  flex-shrink: 0;
+  border-radius: 9999px;
+  padding: 2px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.ot-legend-dot {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 0.25rem;
+}
+.ot-calendar .fc .fc-bg-event.ot-blocked {
+  background: repeating-linear-gradient(45deg, rgb(18 18 18 / 0.1), rgb(18 18 18 / 0.1) 4px, rgb(18 18 18 / 0.03) 4px, rgb(18 18 18 / 0.03) 8px);
+  opacity: 1;
+}
+.ot-blocked-label {
+  padding: 2px 4px;
+  font-size: 0.6875rem;
+  color: rgb(18 18 18 / 0.6);
+  font-style: normal;
+}

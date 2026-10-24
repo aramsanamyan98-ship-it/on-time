@@ -8,6 +8,9 @@ import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { AppointmentRow } from "./AppointmentRow";
 import { MarkAppointmentsViewed } from "./MarkAppointmentsViewed";
+import { AppointmentsView } from "./AppointmentsView";
+import { loadCalendarRange } from "@/lib/dashboard/calendar-data";
+import { initialCalendarRange } from "@/lib/dashboard/calendar";
 import { PageHeading } from "@/components/Heading";
 
 export default async function AppointmentsPage({
@@ -43,8 +46,19 @@ export default async function AppointmentsPage({
     timeZone: specialist.timezone,
   });
 
+  // First calendar load is server-rendered for the current week; later
+  // navigation fetches via getCalendarRangeAction.
+  const initialRange = initialCalendarRange(new Date(), specialist.timezone);
+  const [initialData, workingHours] = await Promise.all([
+    loadCalendarRange(specialist.id, initialRange.from, initialRange.to),
+    prisma.workingHours.findMany({
+      where: { specialistId: specialist.id },
+      select: { dayOfWeek: true, startTime: true, endTime: true, isDayOff: true },
+    }),
+  ]);
+
   return (
-    <div className="flex max-w-2xl flex-col gap-6">
+    <div className="flex max-w-5xl flex-col gap-6">
       <MarkAppointmentsViewed />
       <div className="flex items-center justify-between gap-4">
         <PageHeading>{t("title")}</PageHeading>
@@ -55,24 +69,31 @@ export default async function AppointmentsPage({
 
       {added === "1" && <p className="text-sm text-brand-green">{t("addedSuccess")}</p>}
 
-      {appointments.length === 0 ? (
-        <p className="body-text text-sm">{t("empty")}</p>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {appointments.map((appointment) => (
-            <AppointmentRow
-              key={appointment.id}
-              appointment={{
-                id: appointment.id,
-                serviceName: appointment.service.name,
-                formattedDateTime: dateTimeFormatter.format(appointment.startAt),
-                guestName: appointment.guestName,
-                guestPhone: appointment.guestPhone,
-              }}
-            />
-          ))}
-        </div>
-      )}
+      <AppointmentsView
+        locale={locale as AppLocale}
+        timeZone={specialist.timezone}
+        workingHours={workingHours}
+        initialData={initialData}
+      >
+        {appointments.length === 0 ? (
+          <p className="body-text text-sm">{t("empty")}</p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {appointments.map((appointment) => (
+              <AppointmentRow
+                key={appointment.id}
+                appointment={{
+                  id: appointment.id,
+                  serviceName: appointment.service.name,
+                  formattedDateTime: dateTimeFormatter.format(appointment.startAt),
+                  guestName: appointment.guestName,
+                  guestPhone: appointment.guestPhone,
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </AppointmentsView>
     </div>
   );
 }
