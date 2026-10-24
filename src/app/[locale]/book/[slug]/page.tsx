@@ -178,7 +178,7 @@ export default async function PublicProfilePage({
         ? t("closedOpensToday", { time })
         : dayOffset === 1
           ? t("closedOpensTomorrow", { time })
-          : t("closedOpensDay", { day: tHours(`days.${dayOfWeek}`), time });
+          : t("closedOpensDay", { day: t(`daysShort.${dayOfWeek}`), time });
   } else {
     statusText = t("closedNow");
   }
@@ -251,12 +251,13 @@ export default async function PublicProfilePage({
   const hasRating = reviewStats.count > 0 && reviewStats.average !== null;
   const bio = specialist.bio?.trim() || null;
   const showStickyBar = canBook;
+  const overlapsHero = canBook && nextSlots.length > 0;
   const lowestPrice = services.length > 0 ? Math.min(...services.map((s) => s.priceAmd)) : null;
   const firstSlot = nextSlots[0];
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="bg-brand-green px-4 pb-20 pt-3.5 lg:px-8 lg:pb-16">
+      <header className={`bg-brand-green px-4 ${overlapsHero ? "pb-20" : "pb-8"} pt-3.5 lg:px-8 lg:pb-16`}>
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 lg:gap-8">
           <ProfileTopBar shareTitle={specialist.displayName} />
           <ProfileHero
@@ -274,7 +275,7 @@ export default async function PublicProfilePage({
       </header>
 
       <main
-        className={`mx-auto -mt-12 flex w-full max-w-6xl flex-col gap-8 px-4 lg:-mt-10 lg:grid lg:grid-cols-[minmax(0,1fr)_23.75rem] lg:items-start lg:gap-x-8 lg:px-8 ${
+        className={`mx-auto ${overlapsHero ? "-mt-12" : "mt-6"} flex w-full max-w-6xl flex-col gap-8 px-4 lg:-mt-10 lg:grid lg:grid-cols-[minmax(0,1fr)_23.75rem] lg:items-start lg:gap-x-8 lg:px-8 ${
           showStickyBar ? "pb-32 lg:pb-12" : "pb-10"
         }`}
       >

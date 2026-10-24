@@ -195,3 +195,34 @@ body {
   color: rgb(18 18 18 / 0.6);
   font-style: normal;
 }
+
+/* Booking popup (book/[slug]/new via the intercepting @modal route): slides up
+   as a bottom sheet on phones, a gentle fade-up on larger screens. */
+@media (prefers-reduced-motion: no-preference) {
+  .ot-sheet {
+    animation: ot-sheet-up 0.24s ease-out;
+  }
+  @media (min-width: 640px) {
+    .ot-sheet {
+      animation-name: ot-sheet-fade;
+    }
+  }
+}
+@keyframes ot-sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes ot-sheet-fade {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

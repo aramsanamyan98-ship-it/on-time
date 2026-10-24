@@ -2,7 +2,8 @@
 
 import { getLocale } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
-import { getSlotsForDate, findEarliestAvailable } from "@/lib/booking/slots";
+import { getSlotsForDate, findEarliestAvailable, getDayAvailability } from "@/lib/booking/slots";
+import type { DayAvailability } from "@/lib/booking/day-availability";
 import { createGuestBooking } from "@/lib/booking/create-booking";
 import { normalizePhone } from "@/lib/phone";
 import { getVisitHistoryForClient } from "@/lib/clients/visit-history";
@@ -44,6 +45,17 @@ export async function getEarliestAvailableAction(
   return { dateStr: earliest.dateStr, slot: earliest.slot.toISOString() };
 }
 
+/** Day-by-day availability (open / day off / fully booked) for the popup's 14-day strip. Read-only, same public scoping as getSlotsForDateAction. */
+export async function getDayAvailabilityAction(
+  specialistId: string,
+  serviceId: string,
+  fromDateStr?: string,
+): Promise<{ todayDateStr: string; days: DayAvailability[] } | null> {
+  const loaded = await loadPublicSpecialistService(specialistId, serviceId);
+  if (!loaded) return null;
+  return getDayAvailability(loaded.specialist, loaded.service.durationMinutes, fromDateStr);
+}
+
 export type LoyaltyProgressResult = { visitNumber: number; remaining: number; rewardText: string };
 
 // Live lookup as the guest types their phone (BookingWizard calls this
@@ -70,12 +82,18 @@ export async function getLoyaltyProgressAction(
 export type BookingFormState = {
   fieldErrors?: BookingFieldErrors;
   formError?: BookingErrorCode;
+  /** Set only by createBookingInPlaceAction, on success. */
+  bookingToken?: string;
 };
 
-export async function createBookingAction(
-  _prevState: BookingFormState,
-  formData: FormData,
-): Promise<BookingFormState> {
+type SubmitResult = { ok: true; bookingToken: string; locale: AppLocale } | { ok: false; state: BookingFormState };
+
+// Shared by the full-page wizard (which redirects to the manage page) and the
+// popup (which shows its own Confirmed step). Both go through the one
+// createGuestBooking, so validation, the availability re-check, the
+// appointment insert and every queued notification (guest confirmation email,
+// reminders, barber alert) are identical.
+async function submitBooking(formData: FormData): Promise<SubmitResult> {
   const locale = (await getLocale()) as AppLocale;
 
   const specialistId = String(formData.get("specialistId") ?? "");
@@ -84,7 +102,7 @@ export async function createBookingAction(
   const startAt = new Date(startAtRaw);
 
   if (!specialistId || !serviceId || !startAtRaw || Number.isNaN(startAt.getTime())) {
-    return { formError: "slotInvalid" };
+    return { ok: false, state: { formError: "slotInvalid" } };
   }
 
   const result = await createGuestBooking({
@@ -99,8 +117,27 @@ export async function createBookingAction(
   });
 
   if (!result.ok) {
-    return { fieldErrors: result.fieldErrors, formError: result.formError };
+    return { ok: false, state: { fieldErrors: result.fieldErrors, formError: result.formError } };
   }
+  return { ok: true, bookingToken: result.data.bookingToken, locale };
+}
 
-  return redirect({ href: `/booking/${result.data.bookingToken}?justBooked=1`, locale });
+export async function createBookingAction(
+  _prevState: BookingFormState,
+  formData: FormData,
+): Promise<BookingFormState> {
+  const result = await submitBooking(formData);
+  if (!result.ok) return result.state;
+
+  return redirect({ href: `/booking/${result.bookingToken}?justBooked=1`, locale: result.locale });
+}
+
+/** Popup variant: same booking, but returns the token so the popup can show its Confirmed step instead of navigating away. */
+export async function createBookingInPlaceAction(
+  _prevState: BookingFormState,
+  formData: FormData,
+): Promise<BookingFormState> {
+  const result = await submitBooking(formData);
+  if (!result.ok) return result.state;
+  return { bookingToken: result.bookingToken };
 }

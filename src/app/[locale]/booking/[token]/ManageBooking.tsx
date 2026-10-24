@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { SlotPicker } from "@/components/booking/SlotPicker";
 import { StarRating } from "@/components/StarRating";
 import { buildIcsContent, downloadIcsFile } from "@/lib/booking/ics";
+import { formatAmount } from "@/lib/booking/public-profile";
 import type { ManageBookingState, ReviewFormState } from "./actions";
 
 type AppointmentSummary = {
@@ -118,7 +119,7 @@ export function ManageBooking({
 
   if (appointment.status === "cancelled") {
     return (
-      <div className="flex max-w-lg flex-col gap-6">
+      <div className="flex w-full flex-col gap-6">
         <div className="panel flex flex-col gap-3">
           <p className="font-medium text-brand-charcoal">{t("alreadyCancelledTitle")}</p>
           <p className="body-text text-sm">{t("alreadyCancelledMessage")}</p>
@@ -126,10 +127,10 @@ export function ManageBooking({
 
         <div className="panel flex flex-col gap-2">
           <p className="text-sm text-brand-charcoal/60">{t("withSpecialist", { name: appointment.specialistName })}</p>
-          <p className="text-lg font-semibold text-brand-charcoal">{appointment.serviceName}</p>
+          <p className="font-serif text-xl font-bold text-brand-green">{appointment.serviceName}</p>
           <p className="body-text text-sm">
             {tServices("durationValue", { minutes: appointment.durationMinutes })} ·{" "}
-            {tServices("priceValue", { price: appointment.priceAmd })}
+            {t("priceAmd", { price: formatAmount(appointment.priceAmd) })}
           </p>
         </div>
 
@@ -197,7 +198,7 @@ export function ManageBooking({
     (reviewState.success ? { rating: reviewState.submittedRating ?? 0, comment: reviewState.submittedComment ?? null } : null);
 
   return (
-    <div className="flex max-w-lg flex-col gap-6">
+    <div className="flex w-full flex-col gap-6">
       {justBooked && (
         <p role="status" className="rounded-md bg-brand-green/10 px-4 py-3 text-sm font-medium text-brand-green">
           {t("bookingSuccess")}
@@ -221,11 +222,11 @@ export function ManageBooking({
 
       <div className="panel flex flex-col gap-2">
         <p className="text-sm text-brand-charcoal/60">{t("withSpecialist", { name: appointment.specialistName })}</p>
-        <p className="text-lg font-semibold text-brand-charcoal">{appointment.serviceName}</p>
+        <p className="font-serif text-xl font-bold text-brand-green">{appointment.serviceName}</p>
         <p className="text-brand-charcoal">{appointment.formattedDateTime}</p>
         <p className="body-text text-sm">
           {tServices("durationValue", { minutes: appointment.durationMinutes })} ·{" "}
-          {tServices("priceValue", { price: appointment.priceAmd })}
+          {t("priceAmd", { price: formatAmount(appointment.priceAmd) })}
         </p>
         {appointment.status === "confirmed" && (
           <button type="button" onClick={handleAddToCalendar} className="btn-outline w-fit">

@@ -9,6 +9,13 @@ import {
   pickSuggestion,
   type SlotSuggestion,
 } from "@/lib/booking/open-slots";
+import {
+  buildDayRange,
+  classifyDay,
+  clampWindowStart,
+  DAY_STRIP_LENGTH,
+  type DayAvailability,
+} from "@/lib/booking/day-availability";
 import type { DayOfWeek } from "@/lib/working-hours/defaults";
 
 export type BookingSpecialist = { id: string; timezone: string };
@@ -192,4 +199,45 @@ export async function findNextFreeSlots(
     cursor = addDaysToDateStr(cursor, 1);
   }
   return picked;
+}
+
+/**
+ * Day-by-day availability for the booking popup's date strip: `days`
+ * consecutive local dates from `fromDateStr` (clamped to today), each marked
+ * open / day off / fully booked. Loads the schedule and busy ranges once and
+ * runs the shared slot math per day, so "open" means the same thing the time
+ * grid (getSlotsForDate) will then show.
+ */
+export async function getDayAvailability(
+  specialist: BookingSpecialist,
+  serviceDurationMinutes: number,
+  fromDateStr?: string,
+  days: number = DAY_STRIP_LENGTH,
+  now: Date = new Date(),
+): Promise<{ todayDateStr: string; days: DayAvailability[] }> {
+  const todayDateStr = utcToZonedDateStr(now, specialist.timezone);
+  const startDateStr = clampWindowStart(fromDateStr, todayDateStr);
+  const [schedule, busyRanges] = await Promise.all([
+    loadSchedule(specialist.id),
+    loadBusyRanges(specialist.id, now),
+  ]);
+  const scheduleByDay = new Map(schedule.map((d) => [d.dayOfWeek, d]));
+
+  return {
+    todayDateStr,
+    days: buildDayRange(startDateStr, days).map((dateStr) => {
+      const daySchedule = scheduleByDay.get(dayOfWeekFromDateStr(dateStr) as DayOfWeek);
+      const openSlots = daySchedule
+        ? computeSlotsForDay({
+            dateStr,
+            schedule: daySchedule,
+            serviceDurationMinutes,
+            timezone: specialist.timezone,
+            busyRanges,
+            now,
+          })
+        : [];
+      return { dateStr, status: classifyDay(daySchedule, openSlots.length) };
+    }),
+  };
 }
