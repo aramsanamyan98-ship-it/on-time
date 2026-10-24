@@ -10,6 +10,8 @@ import { cancelAppointment } from "@/lib/booking/cancel-booking";
 import { rescheduleAppointment } from "@/lib/booking/reschedule-booking";
 import { getSlotsForDate, findEarliestAvailable } from "@/lib/booking/slots";
 import { createManualBooking } from "@/lib/booking/create-manual-booking";
+import { loadCalendarRange } from "@/lib/dashboard/calendar-data";
+import { canMarkOutcome, parseCalendarRange, type CalendarRangeData } from "@/lib/dashboard/calendar";
 import type { AppLocale } from "@/i18n/routing";
 import type { BookingErrorCode, BookingFieldErrors } from "@/lib/booking/errors";
 
@@ -191,6 +193,48 @@ export async function createManualAppointmentAction(
   if (!result.ok) return { fieldErrors: result.fieldErrors, formError: result.formError };
 
   return redirect({ href: "/dashboard/appointments?added=1", locale });
+}
+
+// Calendar view (Appointments tab). Both are scoped by the logged-in
+// specialist's own session, same trust boundary as the actions above.
+
+/** Read-only: bookings + blocked time overlapping the calendar's visible range. */
+export async function getCalendarRangeAction(fromIso: string, toIso: string): Promise<CalendarRangeData | null> {
+  const session = await getSession();
+  if (!session) return null;
+  const specialist = await loadActiveSpecialist(session.specialistId);
+  if (!specialist) return null;
+
+  const range = parseCalendarRange(fromIso, toIso);
+  if (!range) return null;
+  return loadCalendarRange(specialist.id, range.from, range.to);
+}
+
+export type AppointmentOutcomeResult = { ok: true } | { ok: false; error: "notFound" | "notEnded" | "invalid" };
+
+/**
+ * Marks an ended booking completed or no-show. Also used to switch between
+ * the two after a mistake, so any non-cancelled, already-ended booking is
+ * accepted. Not a <form> action: the calendar dialog calls it directly and
+ * refetches the visible range instead of redirecting.
+ */
+export async function setAppointmentOutcomeAction(
+  appointmentId: string,
+  outcome: string,
+): Promise<AppointmentOutcomeResult> {
+  if (outcome !== "completed" && outcome !== "no_show") return { ok: false, error: "invalid" };
+
+  const session = await getSession();
+  if (!session) return { ok: false, error: "notFound" };
+
+  const appointment = await loadOwnedAppointment(session.specialistId, String(appointmentId));
+  if (!appointment) return { ok: false, error: "notFound" };
+  if (!canMarkOutcome(appointment.status, appointment.endAt)) {
+    return { ok: false, error: appointment.status === "cancelled" ? "invalid" : "notEnded" };
+  }
+
+  await prisma.appointment.update({ where: { id: appointment.id }, data: { status: outcome } });
+  return { ok: true };
 }
 
 /**
