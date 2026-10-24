@@ -9,7 +9,8 @@
       "hy": "Հայերեն",
       "ru": "Русский",
       "en": "English"
-    }
+    },
+    "logoLinkLabel": "On-Time website"
   },
   "Auth": {
     "register": {
