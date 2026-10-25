@@ -126,7 +126,7 @@
       "displayNameRequired": "Enter your name.",
       "displayNameTooShort": "Name must be at least 2 characters.",
       "displayNameTooLong": "Name must be 60 characters or fewer.",
-      "displayNameInvalid": "Use only letters, spaces, hyphens and apostrophes.",
+      "displayNameInvalid": "Use only letters, digits, periods, spaces, hyphens and apostrophes.",
       "bioTooLong":"Bio must be 500 characters or fewer.",
       "phoneInvalid": "Enter a valid phone number.",
       "addressTooLong": "Address must be 200 characters or fewer.",

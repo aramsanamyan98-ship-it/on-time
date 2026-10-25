@@ -2,10 +2,12 @@ import type { FieldErrors } from "@/lib/dashboard/errors";
 
 const DISPLAY_NAME_MIN_LENGTH = 2;
 const DISPLAY_NAME_MAX_LENGTH = 60;
-// Armenian, Cyrillic and Latin letters, joined by single spaces, hyphens or
-// apostrophes — which also rules out HTML (< > &) and digits.
-const NAME_LETTER = "[\\p{Script=Armenian}\\p{Script=Cyrillic}\\p{Script=Latin}]";
-const DISPLAY_NAME_RE = new RegExp(`^${NAME_LETTER}+(?:[ \\-'\u2019\u055A]+${NAME_LETTER}+)*$`, "u");
+// Armenian, Cyrillic and Latin letters plus digits and periods, joined by
+// spaces, hyphens or apostrophes — which also rules out HTML (< > &),
+// underscores and control characters. Must start and end with a letter,
+// digit or period (no leading/trailing hyphen).
+const NAME_CHAR = "[\\p{Script=Armenian}\\p{Script=Cyrillic}\\p{Script=Latin}0-9.]";
+const DISPLAY_NAME_RE = new RegExp(`^${NAME_CHAR}+(?:[ \\-'\u2019\u055A]+${NAME_CHAR}+)*$`, "u");
 const BIO_MAX_LENGTH = 500;
 const ADDRESS_MAX_LENGTH = 200;
 const PHONE_RE = /^[0-9+()\-.\s]{6,20}$/;

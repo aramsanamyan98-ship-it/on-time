@@ -10,7 +10,7 @@ import { updateDisplayName } from "@/lib/profile/update-profile";
 const check = (raw: string) => validateDisplayName(normalizeDisplayName(raw)).displayName;
 
 describe("validateDisplayName", () => {
-  it.each(["Anna", "Աննա Սարգսյան", "Анна Иванова", "Mary-Jane O'Neil", "Անի’ս", "Ян"])("accepts %s", (name) => {
+  it.each(["Anna", "Աննա Սարգսյան", "Анна Иванова", "Mary-Jane O'Neil", "Անի’ս", "Ян", "Anna2", "Dr. Smith", "Studio 54", "A.B."])("accepts %s", (name) => {
     expect(check(name)).toBeUndefined();
   });
 
@@ -26,7 +26,7 @@ describe("validateDisplayName", () => {
     expect(check("A".repeat(61))).toBe("displayNameTooLong");
   });
 
-  it.each(["<b>Anna</b>", "Anna & Co", "Anna2", "Anna_K", "-Anna", "Anna-", "日本語", "Anna​"])(
+  it.each(["<b>Anna</b>", "Anna & Co", "Anna_K", "-Anna", "Anna-", "日本語", "Anna​", "Anna\u0007K", "Anna\tK\u0000"])(
     "rejects %s",
     (name) => {
       expect(check(name)).toBe("displayNameInvalid");
@@ -50,6 +50,13 @@ describe("updateDisplayName", () => {
   it("cannot be pointed at another specialist by the name input", async () => {
     await updateDisplayName("specialist-a", "Anna");
     expect(update.mock.calls[0][0].where).toEqual({ id: "specialist-a" });
+  });
+
+  it("leaves the slug unchanged after saving a new display name", async () => {
+    update.mockImplementation(async ({ data }) => ({ id: "me", slug: "anna-k", ...data }));
+    const result = await updateDisplayName("specialist-a", "Totally New Name");
+    expect(update.mock.calls[0][0].data).not.toHaveProperty("slug");
+    expect(result.ok && result.data).toMatchObject({ displayName: "Totally New Name", slug: "anna-k" });
   });
 
   it("does not hit the database for invalid names", async () => {

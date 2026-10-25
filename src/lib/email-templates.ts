@@ -8,6 +8,32 @@ import type { AppLocale } from "@/i18n/routing";
  */
 type EmailContent = { subject: string; html: string; text: string };
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/**
+ * Subject and plain text use the raw values; only the HTML body is built from
+ * HTML-escaped ones, so user-supplied text (names etc.) can't inject markup.
+ */
+function renderEmail<P extends string | Record<string, string>>(
+  copy: (params: P) => EmailContent,
+  params: P,
+): EmailContent {
+  const escaped = (
+    typeof params === "string"
+      ? escapeHtml(params)
+      : Object.fromEntries(Object.entries(params).map(([key, value]) => [key, escapeHtml(value)]))
+  ) as P;
+  const raw = copy(params);
+  return { subject: raw.subject, text: raw.text, html: copy(escaped).html };
+}
+
 const VERIFICATION_COPY: Record<AppLocale, (link: string) => EmailContent> = {
   en: (link) => ({
     subject: "Verify your email for On-Time",
@@ -45,11 +71,11 @@ const PASSWORD_RESET_COPY: Record<AppLocale, (link: string) => EmailContent> = {
 };
 
 export function buildVerificationEmail(locale: AppLocale, link: string): EmailContent {
-  return VERIFICATION_COPY[locale](link);
+  return renderEmail(VERIFICATION_COPY[locale], link);
 }
 
 export function buildPasswordResetEmail(locale: AppLocale, link: string): EmailContent {
-  return PASSWORD_RESET_COPY[locale](link);
+  return renderEmail(PASSWORD_RESET_COPY[locale], link);
 }
 
 // Guest-facing appointment notifications (02_PRD.md Section 9, 08_Roadmap.md
@@ -120,15 +146,15 @@ const REVIEW_REQUEST_COPY: Record<AppLocale, (p: AppointmentEmailParams) => Emai
 };
 
 export function buildBookingConfirmationEmail(locale: AppLocale, params: AppointmentEmailParams): EmailContent {
-  return BOOKING_CONFIRMATION_COPY[locale](params);
+  return renderEmail(BOOKING_CONFIRMATION_COPY[locale], params);
 }
 
 export function buildReminderEmail(locale: AppLocale, params: AppointmentEmailParams): EmailContent {
-  return REMINDER_COPY[locale](params);
+  return renderEmail(REMINDER_COPY[locale], params);
 }
 
 export function buildReviewRequestEmail(locale: AppLocale, params: AppointmentEmailParams): EmailContent {
-  return REVIEW_REQUEST_COPY[locale](params);
+  return renderEmail(REVIEW_REQUEST_COPY[locale], params);
 }
 
 // Rebooking-assist feature: sent to the guest when a *specialist* cancels
@@ -157,7 +183,7 @@ const REBOOKING_NOTICE_COPY: Record<AppLocale, (p: AppointmentEmailParams) => Em
 };
 
 export function buildRebookingNoticeEmail(locale: AppLocale, params: AppointmentEmailParams): EmailContent {
-  return REBOOKING_NOTICE_COPY[locale](params);
+  return renderEmail(REBOOKING_NOTICE_COPY[locale], params);
 }
 
 // "Ready to rebook?" win-back email (src/lib/notifications/queue.ts's
@@ -194,7 +220,7 @@ const REBOOK_REMINDER_COPY: Record<AppLocale, (p: RebookReminderEmailParams) => 
 };
 
 export function buildRebookReminderEmail(locale: AppLocale, params: RebookReminderEmailParams): EmailContent {
-  return REBOOK_REMINDER_COPY[locale](params);
+  return renderEmail(REBOOK_REMINDER_COPY[locale], params);
 }
 
 // Specialist-facing alerts (02_PRD.md Section 9 "New booking notification
@@ -266,15 +292,15 @@ const GUEST_RESCHEDULED_ALERT_COPY: Record<AppLocale, (p: SpecialistAlertEmailPa
 };
 
 export function buildNewBookingAlertEmail(locale: AppLocale, params: SpecialistAlertEmailParams): EmailContent {
-  return NEW_BOOKING_ALERT_COPY[locale](params);
+  return renderEmail(NEW_BOOKING_ALERT_COPY[locale], params);
 }
 
 export function buildGuestCancelledAlertEmail(locale: AppLocale, params: SpecialistAlertEmailParams): EmailContent {
-  return GUEST_CANCELLED_ALERT_COPY[locale](params);
+  return renderEmail(GUEST_CANCELLED_ALERT_COPY[locale], params);
 }
 
 export function buildGuestRescheduledAlertEmail(locale: AppLocale, params: SpecialistAlertEmailParams): EmailContent {
-  return GUEST_RESCHEDULED_ALERT_COPY[locale](params);
+  return renderEmail(GUEST_RESCHEDULED_ALERT_COPY[locale], params);
 }
 
 // Trial emails (src/lib/notifications/trial-emails.ts): specialist-facing
@@ -325,9 +351,9 @@ const TRIAL_ENDED_COPY: Record<AppLocale, (p: TrialEmailParams) => EmailContent>
 };
 
 export function buildTrialEndingSoonEmail(locale: AppLocale, params: TrialEmailParams): EmailContent {
-  return TRIAL_ENDING_SOON_COPY[locale](params);
+  return renderEmail(TRIAL_ENDING_SOON_COPY[locale], params);
 }
 
 export function buildTrialEndedEmail(locale: AppLocale, params: TrialEmailParams): EmailContent {
-  return TRIAL_ENDED_COPY[locale](params);
+  return renderEmail(TRIAL_ENDED_COPY[locale], params);
 }
