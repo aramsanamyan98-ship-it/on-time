@@ -5,6 +5,7 @@ import { routing } from "@/i18n/routing";
 import type { AppLocale } from "@/i18n/routing";
 import { requireSpecialist } from "@/lib/dashboard/require-specialist";
 import { PhotoUploadForm } from "./PhotoUploadForm";
+import { DisplayNameForm } from "./DisplayNameForm";
 import { ProfileForm } from "./ProfileForm";
 import { PublicLinkBox } from "./PublicLinkBox";
 import { PageHeading, SectionHeading } from "@/components/Heading";
@@ -25,6 +26,10 @@ export default async function ProfilePage({
   return (
     <div className="flex max-w-2xl flex-col gap-8">
       <PageHeading>{t("title")}</PageHeading>
+
+      <div className="panel">
+        <DisplayNameForm displayName={specialist.displayName} />
+      </div>
 
       <PhotoUploadForm kind="cover" initialUrl={specialist.coverPhotoUrl} />
       <PhotoUploadForm kind="profile" initialUrl={specialist.profilePhotoUrl} />

@@ -123,7 +123,11 @@
       "opensInNewTab": "(opens in a new tab)"
     },
     "errors": {
-      "bioTooLong": "Bio must be 500 characters or fewer.",
+      "displayNameRequired": "Enter your name.",
+      "displayNameTooShort": "Name must be at least 2 characters.",
+      "displayNameTooLong": "Name must be 60 characters or fewer.",
+      "displayNameInvalid": "Use only letters, digits, periods, spaces, hyphens and apostrophes.",
+      "bioTooLong":"Bio must be 500 characters or fewer.",
       "phoneInvalid": "Enter a valid phone number.",
       "addressTooLong": "Address must be 200 characters or fewer.",
       "instagramInvalid": "Enter a valid Instagram handle or link.",
@@ -160,7 +164,9 @@
     "noPhoto": "No photo yet",
     "upload": "Upload",
     "uploading": "Uploading…",
-    "bioLabel": "Bio",
+    "displayNameLabel": "Display name",
+    "displayNameHint": "Your name as clients see it on your booking page and in emails. Your booking link does not change.",
+    "bioLabel":"Bio",
     "phoneLabel": "Phone number",
     "addressLabel": "Address",
     "instagramLabel": "Instagram",

@@ -1,7 +1,8 @@
 "use server";
 
 import { getSession } from "@/lib/session";
-import { updateSpecialistProfile, updateProfilePhoto } from "@/lib/profile/update-profile";
+import { revalidatePath } from "next/cache";
+import { updateDisplayName, updateSpecialistProfile, updateProfilePhoto } from "@/lib/profile/update-profile";
 import type { ProfileFields } from "@/lib/profile/validation";
 import type { FieldErrors, DashboardErrorCode } from "@/lib/dashboard/errors";
 
@@ -10,6 +11,21 @@ export type ProfileState = {
   formError?: DashboardErrorCode;
   success?: boolean;
 };
+
+export async function updateDisplayNameAction(_prevState: ProfileState, formData: FormData): Promise<ProfileState> {
+  const session = await getSession();
+  if (!session) return { formError: "generic" };
+
+  // The specialist id comes from the session only, never from the form.
+  const result = await updateDisplayName(session.specialistId, String(formData.get("displayName") ?? ""));
+  if (!result.ok) {
+    return { fieldErrors: result.fieldErrors, formError: result.formError };
+  }
+  // The name appears in the dashboard shell and on the public booking pages.
+  revalidatePath("/[locale]/dashboard", "layout");
+  revalidatePath("/[locale]/book/[slug]", "layout");
+  return { success: true };
+}
 
 export async function updateProfileAction(_prevState: ProfileState, formData: FormData): Promise<ProfileState> {
   const session = await getSession();
