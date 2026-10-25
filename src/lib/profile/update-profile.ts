@@ -1,8 +1,23 @@
 import { prisma } from "@/lib/prisma";
 import { saveUploadedImage, deleteUploadedImage } from "@/lib/storage";
-import { validateProfileFields, normalizeInstagram, normalizeFacebook } from "@/lib/profile/validation";
+import { validateProfileFields, normalizeDisplayName, validateDisplayName, normalizeInstagram, normalizeFacebook } from "@/lib/profile/validation";
 import type { ActionResult } from "@/lib/dashboard/errors";
 import type { Specialist } from "@/generated/prisma/client";
+
+/** Only ever updates the row for `specialistId`; the slug is deliberately left alone. */
+export async function updateDisplayName(specialistId: string, raw: string): Promise<ActionResult<Specialist>> {
+  const displayName = normalizeDisplayName(raw);
+  const fieldErrors = validateDisplayName(displayName);
+  if (Object.keys(fieldErrors).length > 0) {
+    return { ok: false, fieldErrors };
+  }
+
+  const specialist = await prisma.specialist.update({
+    where: { id: specialistId },
+    data: { displayName },
+  });
+  return { ok: true, data: specialist };
+}
 
 export async function updateSpecialistProfile(
   specialistId: string,

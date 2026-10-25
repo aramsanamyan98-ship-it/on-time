@@ -1,12 +1,33 @@
 import type { FieldErrors } from "@/lib/dashboard/errors";
 
+const DISPLAY_NAME_MIN_LENGTH = 2;
+const DISPLAY_NAME_MAX_LENGTH = 60;
+// Armenian, Cyrillic and Latin letters, joined by single spaces, hyphens or
+// apostrophes — which also rules out HTML (< > &) and digits.
+const NAME_LETTER = "[\\p{Script=Armenian}\\p{Script=Cyrillic}\\p{Script=Latin}]";
+const DISPLAY_NAME_RE = new RegExp(`^${NAME_LETTER}+(?:[ \\-'\u2019\u055A]+${NAME_LETTER}+)*$`, "u");
 const BIO_MAX_LENGTH = 500;
 const ADDRESS_MAX_LENGTH = 200;
 const PHONE_RE = /^[0-9+()\-.\s]{6,20}$/;
 const INSTAGRAM_HANDLE_RE = /^[a-zA-Z0-9._]{1,30}$/;
 const FACEBOOK_HANDLE_RE = /^[a-zA-Z0-9.]{5,50}$/;
 
-export type ProfileFields = "bio" | "phone" | "address" | "instagramUrl" | "facebookUrl";
+export type ProfileFields = "displayName" | "bio" | "phone" | "address" | "instagramUrl" | "facebookUrl";
+
+/** Trims and collapses inner whitespace, so "  Anna   K " is stored as "Anna K". */
+export function normalizeDisplayName(raw: string): string {
+  return raw.trim().replace(/\s+/g, " ");
+}
+
+/** Expects an already-normalized name (see normalizeDisplayName). */
+export function validateDisplayName(name: string): FieldErrors<ProfileFields> {
+  if (!name) return { displayName: "displayNameRequired" };
+  const length = Array.from(name).length;
+  if (length < DISPLAY_NAME_MIN_LENGTH) return { displayName: "displayNameTooShort" };
+  if (length > DISPLAY_NAME_MAX_LENGTH) return { displayName: "displayNameTooLong" };
+  if (!DISPLAY_NAME_RE.test(name)) return { displayName: "displayNameInvalid" };
+  return {};
+}
 
 export function validateBio(bio: string): FieldErrors<ProfileFields> {
   if (bio.length > BIO_MAX_LENGTH) return { bio: "bioTooLong" };

@@ -6,6 +6,10 @@
  * user-facing is ever hardcoded in a single language (02_PRD.md Section 2).
  */
 export type DashboardErrorCode =
+  | "displayNameRequired"
+  | "displayNameTooShort"
+  | "displayNameTooLong"
+  | "displayNameInvalid"
   | "bioTooLong"
   | "phoneInvalid"
   | "addressTooLong"
