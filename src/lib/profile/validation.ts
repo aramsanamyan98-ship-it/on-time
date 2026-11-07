@@ -13,8 +13,34 @@ const ADDRESS_MAX_LENGTH = 200;
 const PHONE_RE = /^[0-9+()\-.\s]{6,20}$/;
 const INSTAGRAM_HANDLE_RE = /^[a-zA-Z0-9._]{1,30}$/;
 const FACEBOOK_HANDLE_RE = /^[a-zA-Z0-9.]{5,50}$/;
+// Matches the 40-char cap generateUniqueSlug (src/lib/slug.ts) applies to
+// auto-generated slugs, so a manually-typed slug can't exceed what an
+// auto-generated one ever could.
+const SLUG_MIN_LENGTH = 3;
+const SLUG_MAX_LENGTH = 40;
+// Lowercase letters/digits in hyphen-separated groups: no leading/trailing
+// hyphen, no "--", nothing but ASCII — this is a URL path segment
+// (book.ontime.am/[slug]), not a display string.
+const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+// Slugs that would be confusing (even though nothing in the router actually
+// collides with them — see src/app/[locale]/book/[slug]/).
+const RESERVED_SLUGS = new Set([
+  "new",
+  "book",
+  "booking",
+  "dashboard",
+  "login",
+  "register",
+  "admin",
+  "api",
+  "app",
+  "www",
+  "static",
+  "public",
+  "specialist",
+]);
 
-export type ProfileFields = "displayName" | "bio" | "phone" | "address" | "instagramUrl" | "facebookUrl";
+export type ProfileFields = "displayName" | "slug" | "bio" | "phone" | "address" | "instagramUrl" | "facebookUrl";
 
 /** Trims and collapses inner whitespace, so "  Anna   K " is stored as "Anna K". */
 export function normalizeDisplayName(raw: string): string {
@@ -28,6 +54,24 @@ export function validateDisplayName(name: string): FieldErrors<ProfileFields> {
   if (length < DISPLAY_NAME_MIN_LENGTH) return { displayName: "displayNameTooShort" };
   if (length > DISPLAY_NAME_MAX_LENGTH) return { displayName: "displayNameTooLong" };
   if (!DISPLAY_NAME_RE.test(name)) return { displayName: "displayNameInvalid" };
+  return {};
+}
+
+/** Lowercases, trims, and turns runs of whitespace into a single hyphen — the same shape generateUniqueSlug (src/lib/slug.ts) produces. */
+export function normalizeSlug(raw: string): string {
+  return raw
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-");
+}
+
+/** Expects an already-normalized slug (see normalizeSlug). Uniqueness is checked separately, against the database. */
+export function validateSlug(slug: string): FieldErrors<ProfileFields> {
+  if (!slug) return { slug: "slugRequired" };
+  if (slug.length < SLUG_MIN_LENGTH) return { slug: "slugTooShort" };
+  if (slug.length > SLUG_MAX_LENGTH) return { slug: "slugTooLong" };
+  if (!SLUG_RE.test(slug)) return { slug: "slugInvalid" };
+  if (RESERVED_SLUGS.has(slug)) return { slug: "slugReserved" };
   return {};
 }
 
