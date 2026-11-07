@@ -2,7 +2,7 @@
 
 import { getSession } from "@/lib/session";
 import { revalidatePath } from "next/cache";
-import { updateDisplayName, updateSpecialistProfile, updateProfilePhoto } from "@/lib/profile/update-profile";
+import { updateDisplayName, updateSlug, updateSpecialistProfile, updateProfilePhoto } from "@/lib/profile/update-profile";
 import type { ProfileFields } from "@/lib/profile/validation";
 import type { FieldErrors, DashboardErrorCode } from "@/lib/dashboard/errors";
 
@@ -23,6 +23,21 @@ export async function updateDisplayNameAction(_prevState: ProfileState, formData
   }
   // The name appears in the dashboard shell and on the public booking pages.
   revalidatePath("/[locale]/dashboard", "layout");
+  revalidatePath("/[locale]/book/[slug]", "layout");
+  return { success: true };
+}
+
+export async function updateSlugAction(_prevState: ProfileState, formData: FormData): Promise<ProfileState> {
+  const session = await getSession();
+  if (!session) return { formError: "generic" };
+
+  // The specialist id comes from the session only, never from the form.
+  const result = await updateSlug(session.specialistId, String(formData.get("slug") ?? ""));
+  if (!result.ok) {
+    return { fieldErrors: result.fieldErrors, formError: result.formError };
+  }
+  // The slug drives this page's own public-link box and the public booking route.
+  revalidatePath("/[locale]/dashboard/profile", "page");
   revalidatePath("/[locale]/book/[slug]", "layout");
   return { success: true };
 }

@@ -6,6 +6,7 @@ import type { AppLocale } from "@/i18n/routing";
 import { requireSpecialist } from "@/lib/dashboard/require-specialist";
 import { PhotoUploadForm } from "./PhotoUploadForm";
 import { DisplayNameForm } from "./DisplayNameForm";
+import { SlugForm } from "./SlugForm";
 import { ProfileForm } from "./ProfileForm";
 import { PublicLinkBox } from "./PublicLinkBox";
 import { PageHeading, SectionHeading } from "@/components/Heading";
@@ -21,7 +22,8 @@ export default async function ProfilePage({
 
   const specialist = await requireSpecialist(locale as AppLocale);
   const t = await getTranslations("Profile");
-  const publicLink = `${process.env.APP_URL}/${locale}/book/${specialist.slug}`;
+  const bookingBaseUrl = `${process.env.APP_URL}/${locale}/book`;
+  const publicLink = `${bookingBaseUrl}/${specialist.slug}`;
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
@@ -38,6 +40,8 @@ export default async function ProfilePage({
         <SectionHeading>{t("publicLinkTitle")}</SectionHeading>
         <p className="body-text text-sm">{t("publicLinkHint")}</p>
         <PublicLinkBox link={publicLink} />
+        <hr className="border-brand-charcoal/10" />
+        <SlugForm slug={specialist.slug} baseUrl={bookingBaseUrl} />
       </section>
 
       <div className="panel">
