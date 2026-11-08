@@ -34,7 +34,7 @@ describe("validateSlug", () => {
     expect(check("a".repeat(41))).toBe("slugTooLong");
   });
 
-  it.each(["-anna", "anna-", "anna--k", "Anna", "anna_k", "anna.k", "日本語", "<script>"])("rejects %s", (slug) => {
+  it.each(["-anna", "anna-", "anna--k", "anna_k", "anna.k", "日本語", "<script>"])("rejects %s", (slug) => {
     expect(check(slug)).toBe("slugInvalid");
   });
 

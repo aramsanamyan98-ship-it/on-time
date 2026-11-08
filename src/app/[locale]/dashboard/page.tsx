@@ -8,6 +8,9 @@ import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { utcToZonedDateStr, addDaysToDateStr, zonedTimeToUtc } from "@/lib/booking/timezone";
 import { getReviewStats } from "@/lib/reviews/queries";
+import { hasDisplayName } from "@/lib/profile/public-name";
+import { getSetupProgress } from "@/lib/dashboard/setup-progress";
+import { SetupCard } from "./SetupCard";
 import { AppointmentRow } from "./appointments/AppointmentRow";
 import { PageHeading, SectionHeading } from "@/components/Heading";
 import { StarRating } from "@/components/StarRating";
@@ -37,6 +40,17 @@ export default async function DashboardPage({
   // regardless of plan (review display is a baseline feature of every paid
   // plan — see src/app/[locale]/book/[slug]/page.tsx).
   const reviewStats = await getReviewStats(specialist.id);
+
+  const [activeServiceCount, workingHoursRowCount] = await Promise.all([
+    prisma.service.count({ where: { specialistId: specialist.id, isActive: true } }),
+    prisma.workingHours.count({ where: { specialistId: specialist.id } }),
+  ]);
+  const setupProgress = getSetupProgress({
+    displayName: specialist.displayName,
+    profilePhotoUrl: specialist.profilePhotoUrl,
+    activeServiceCount,
+    workingHoursRowCount,
+  });
 
   const todayStr = utcToZonedDateStr(new Date(), specialist.timezone);
   const todayStart = zonedTimeToUtc(todayStr, "00:00", specialist.timezone);
@@ -88,7 +102,13 @@ export default async function DashboardPage({
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
-      <PageHeading>{t("welcomeTitle", { name: specialist.displayName })}</PageHeading>
+      <PageHeading>
+        {hasDisplayName(specialist.displayName)
+          ? t("welcomeTitle", { name: specialist.displayName.trim() })
+          : t("welcomeTitleNoName")}
+      </PageHeading>
+
+      <SetupCard progress={setupProgress} />
 
       <div className="flex flex-wrap gap-3">
         <Link href="/dashboard/appointments/new" className="btn-primary">

@@ -10,6 +10,7 @@ import { isSlotAvailable } from "@/lib/booking/slots";
 import { addDaysToDateStr, utcToZonedDateStr, utcToZonedTimeStr } from "@/lib/booking/timezone";
 import { StoryLayout, STORY_WIDTH, STORY_HEIGHT } from "./StoryLayout";
 import { routing, type AppLocale } from "@/i18n/routing";
+import { hasDisplayName } from "@/lib/profile/public-name";
 
 // "Fill my schedule" Instagram Story (1080x1920). The specialist is taken
 // from the session cookie — never a query param — so this can only render
@@ -92,6 +93,12 @@ export async function GET(request: NextRequest) {
   const specialist = await prisma.specialist.findUnique({ where: { id: session.specialistId } });
   if (!specialist || !specialist.emailVerifiedAt || specialist.deletedAt || !hasActiveAccess(specialist)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  // A Story advertises the public booking page, which stays hidden until the
+  // specialist has set a display name.
+  if (!hasDisplayName(specialist.displayName)) {
+    return NextResponse.json({ error: "profileIncomplete" }, { status: 403 });
   }
 
   const params = request.nextUrl.searchParams;

@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { loadSchedule } from "@/lib/working-hours/load-schedule";
 import { getReviewStats, listReviewsForPublicProfile } from "@/lib/reviews/queries";
 import { hasActiveAccess } from "@/lib/subscription/trial";
+import { hasDisplayName } from "@/lib/profile/public-name";
 import { findNextFreeSlots } from "@/lib/booking/slots";
 import { dayOfWeekFromDateStr, utcToZonedDateStr, utcToZonedTimeStr } from "@/lib/booking/timezone";
 import {
@@ -69,7 +70,9 @@ export async function generateMetadata({
   if (!hasLocale(routing.locales, locale)) return {};
 
   const specialist = await loadSpecialist(slug);
-  if (!specialist || !specialist.emailVerifiedAt || specialist.deletedAt) return {};
+  if (!specialist || !specialist.emailVerifiedAt || specialist.deletedAt || !hasDisplayName(specialist.displayName)) {
+    return {};
+  }
 
   const t = await getTranslations({ locale, namespace: "PublicProfile" });
   const services = await prisma.service.findMany({
@@ -113,8 +116,9 @@ export default async function PublicProfilePage({
 
   // A page must be unreachable the moment a specialist is unverified or
   // deactivated (07_Business_Rules.md, Specialist Account Rules) — no
-  // bookings should ever be possible against it.
-  if (!specialist || !specialist.emailVerifiedAt || specialist.deletedAt) {
+  // bookings should ever be possible against it. Also hidden until the
+  // specialist has set a display name (new accounts start with none).
+  if (!specialist || !specialist.emailVerifiedAt || specialist.deletedAt || !hasDisplayName(specialist.displayName)) {
     notFound();
   }
 

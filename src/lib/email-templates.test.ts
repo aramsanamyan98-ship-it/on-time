@@ -26,4 +26,19 @@ describe("email HTML escaping", () => {
     expect(email.html).not.toContain("<b>");
     expect(email.html).toContain("&lt;b&gt;");
   });
+
+  it("greets an unnamed specialist without a dangling comma or space", () => {
+    const params = { name: "", endDate: "1 Jan", planLink: "https://x.test/plan" };
+    const en = buildTrialEndedEmail("en", params);
+    expect(en.text.startsWith("Hi,\n")).toBe(true);
+    expect(en.html.startsWith("<p>Hi,</p>")).toBe(true);
+    expect(buildTrialEndedEmail("ru", params).text.startsWith("Здравствуйте!")).toBe(true);
+    expect(buildTrialEndedEmail("hy", params).text.startsWith("Բարև Ձեզ։")).toBe(true);
+  });
+
+  it("still greets a named specialist by name", () => {
+    const params = { name: "Anna", endDate: "1 Jan", planLink: "https://x.test/plan" };
+    expect(buildTrialEndedEmail("en", params).text.startsWith("Hi Anna,")).toBe(true);
+    expect(buildTrialEndedEmail("ru", params).text.startsWith("Здравствуйте, Anna!")).toBe(true);
+  });
 });

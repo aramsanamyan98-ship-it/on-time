@@ -20,7 +20,8 @@ import { LogoutButton } from "./LogoutButton";
 
 const BADGE_DISPLAY_CAP = 9;
 
-export type DashboardBarber = { name: string; photoUrl: string | null; slug: string };
+/** `name` is already display-safe (a placeholder label when `hasName` is false). */
+export type DashboardBarber = { name: string; hasName: boolean; photoUrl: string | null; slug: string };
 
 function Logo({ size }: { size: number }) {
   return (
@@ -41,7 +42,7 @@ function BarberAvatar({ barber, className }: { barber: DashboardBarber; classNam
       {barber.photoUrl ? (
         <Image src={barber.photoUrl} alt="" fill sizes="40px" className="object-cover" />
       ) : (
-        <span aria-hidden="true">{Array.from(barber.name.trim())[0]?.toUpperCase()}</span>
+        <span aria-hidden="true">{barber.hasName ? Array.from(barber.name.trim())[0]?.toUpperCase() : "?"}</span>
       )}
     </span>
   );
@@ -63,6 +64,35 @@ function Badge({ count, label, className = "" }: { count: number; label: string;
 function usePublicPageHref(slug: string) {
   const locale = useLocale();
   return `/${locale}/book/${slug}`;
+}
+
+/**
+ * Link to the public booking page. While the profile has no name that page is
+ * hidden (404), so the link goes to the profile settings instead, in the same
+ * tab. `children` receives whether the link is the external one.
+ */
+function PublicPageLink({
+  barber,
+  className,
+  children,
+}: {
+  barber: DashboardBarber;
+  className: string;
+  children: (external: boolean) => React.ReactNode;
+}) {
+  const publicHref = usePublicPageHref(barber.slug);
+  if (!barber.hasName) {
+    return (
+      <Link href="/dashboard/profile" className={className}>
+        {children(false)}
+      </Link>
+    );
+  }
+  return (
+    <a href={publicHref} target="_blank" rel="noopener noreferrer" className={className}>
+      {children(true)}
+    </a>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -140,7 +170,6 @@ export function DashboardSidebar({
   const t = useTranslations("Dashboard.nav");
   const tCommon = useTranslations("Common");
   const pathname = usePathname();
-  const publicHref = usePublicPageHref(barber.slug);
   const groupProps = { pathname, unviewedAppointmentsCount };
 
   return (
@@ -161,20 +190,26 @@ export function DashboardSidebar({
       <SidebarGroup heading={t("groupSettings")} items={SETTINGS_ITEMS} {...groupProps} />
 
       <div className="mt-auto flex flex-col gap-2.5">
-        <a
-          href={publicHref}
-          target="_blank"
-          rel="noopener noreferrer"
+        <PublicPageLink
+          barber={barber}
           className="flex items-center gap-2.5 rounded-xl bg-brand-cream/10 p-2.5 text-brand-cream transition hover:bg-brand-cream/15"
         >
-          <BarberAvatar barber={barber} className="h-9 w-9 rounded-[0.625rem] bg-brand-gold text-brand-green" />
-          <span className="flex min-w-0 flex-1 flex-col leading-tight">
-            <strong className="truncate text-[0.8125rem] font-semibold">{barber.name}</strong>
-            <span className="text-xs text-brand-cream/75">{t("viewMyPage")}</span>
-          </span>
-          <ExternalLinkIcon className="h-4 w-4 shrink-0" />
-          <span className="sr-only">{t("opensInNewTab")}</span>
-        </a>
+          {(external) => (
+            <>
+              <BarberAvatar barber={barber} className="h-9 w-9 rounded-[0.625rem] bg-brand-gold text-brand-green" />
+              <span className="flex min-w-0 flex-1 flex-col leading-tight">
+                <strong className="truncate text-[0.8125rem] font-semibold">{barber.name}</strong>
+                <span className="text-xs text-brand-cream/75">{external ? t("viewMyPage") : t("addNameToPublish")}</span>
+              </span>
+              {external && (
+                <>
+                  <ExternalLinkIcon className="h-4 w-4 shrink-0" />
+                  <span className="sr-only">{t("opensInNewTab")}</span>
+                </>
+              )}
+            </>
+          )}
+        </PublicPageLink>
         <div className="flex gap-2">
           <DashboardLanguagePills tone="dark" className="flex-1" />
           <LogoutButton variant="sidebar" />
@@ -191,7 +226,6 @@ export function DashboardSidebar({
 export function DashboardPhoneTopBar({ barber }: { barber: DashboardBarber }) {
   const t = useTranslations("Dashboard.nav");
   const tCommon = useTranslations("Common");
-  const publicHref = usePublicPageHref(barber.slug);
 
   return (
     <header className="flex items-center justify-between bg-brand-green pb-2.5 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-[max(0.625rem,env(safe-area-inset-top))] lg:hidden">
@@ -199,16 +233,22 @@ export function DashboardPhoneTopBar({ barber }: { barber: DashboardBarber }) {
         <Logo size={30} />
         {tCommon("appName")}
       </Link>
-      <a
-        href={publicHref}
-        target="_blank"
-        rel="noopener noreferrer"
+      <PublicPageLink
+        barber={barber}
         className="flex min-h-11 items-center gap-1.5 rounded-full border border-brand-cream/30 px-3.5 text-[0.8125rem] font-semibold text-brand-cream transition hover:bg-brand-cream/10"
       >
-        {t("myPageShort")}
-        <ExternalLinkIcon className="h-3.5 w-3.5" />
-        <span className="sr-only">{t("opensInNewTab")}</span>
-      </a>
+        {(external) => (
+          <>
+            {external ? t("myPageShort") : t("addNameShort")}
+            {external && (
+              <>
+                <ExternalLinkIcon className="h-3.5 w-3.5" />
+                <span className="sr-only">{t("opensInNewTab")}</span>
+              </>
+            )}
+          </>
+        )}
+      </PublicPageLink>
     </header>
   );
 }
@@ -223,7 +263,6 @@ function MoreSheet({
   pathname: string;
 }) {
   const t = useTranslations("Dashboard.nav");
-  const publicHref = usePublicPageHref(barber.slug);
   const pressStartedOnBackdrop = useRef(false);
 
   const heading = "px-1 pb-1.5 text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-brand-muted";
@@ -250,20 +289,28 @@ function MoreSheet({
           <span className="h-[5px] w-10 rounded-full bg-brand-sand" />
         </button>
 
-        <a
-          href={publicHref}
-          target="_blank"
-          rel="noopener noreferrer"
+        <PublicPageLink
+          barber={barber}
           className="flex items-center gap-3 rounded-[0.875rem] bg-brand-gold-tint p-3 text-brand-green"
         >
-          <BarberAvatar barber={barber} className="h-10 w-10 rounded-xl bg-brand-green text-brand-gold" />
-          <span className="flex min-w-0 flex-1 flex-col leading-tight">
-            <strong className="truncate font-bold">{barber.name}</strong>
-            <span className="text-[0.8125rem] text-brand-charcoal/75">{t("viewMyPage")}</span>
-          </span>
-          <ExternalLinkIcon className="h-[18px] w-[18px] shrink-0" />
-          <span className="sr-only">{t("opensInNewTab")}</span>
-        </a>
+          {(external) => (
+            <>
+              <BarberAvatar barber={barber} className="h-10 w-10 rounded-xl bg-brand-green text-brand-gold" />
+              <span className="flex min-w-0 flex-1 flex-col leading-tight">
+                <strong className="truncate font-bold">{barber.name}</strong>
+                <span className="text-[0.8125rem] text-brand-charcoal/75">
+                  {external ? t("viewMyPage") : t("addNameToPublish")}
+                </span>
+              </span>
+              {external && (
+                <>
+                  <ExternalLinkIcon className="h-[18px] w-[18px] shrink-0" />
+                  <span className="sr-only">{t("opensInNewTab")}</span>
+                </>
+              )}
+            </>
+          )}
+        </PublicPageLink>
 
         <MoreRow item={NAV_ANALYTICS} pathname={pathname} standalone />
 

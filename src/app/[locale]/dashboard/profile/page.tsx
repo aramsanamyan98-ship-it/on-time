@@ -10,6 +10,7 @@ import { SlugForm } from "./SlugForm";
 import { ProfileForm } from "./ProfileForm";
 import { PublicLinkBox } from "./PublicLinkBox";
 import { PageHeading, SectionHeading } from "@/components/Heading";
+import { hasDisplayName } from "@/lib/profile/public-name";
 
 export default async function ProfilePage({
   params,
@@ -39,6 +40,11 @@ export default async function ProfilePage({
       <section className="panel flex flex-col gap-3">
         <SectionHeading>{t("publicLinkTitle")}</SectionHeading>
         <p className="body-text text-sm">{t("publicLinkHint")}</p>
+        {!hasDisplayName(specialist.displayName) && (
+          <p role="note" className="rounded-md bg-brand-gold-tint px-3 py-2 text-sm text-brand-charcoal">
+            {t("pageHiddenNotice")}
+          </p>
+        )}
         <PublicLinkBox link={publicLink} />
         <hr className="border-brand-charcoal/10" />
         <SlugForm slug={specialist.slug} baseUrl={bookingBaseUrl} />

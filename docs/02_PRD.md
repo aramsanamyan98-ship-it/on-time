@@ -47,7 +47,7 @@ Specialist can set:
 - Working hours (per day of week, with support for days off)
 - Time zone (default Armenia, but store explicitly — don't assume)
 - Instagram / social links (optional)
-- Public slug (auto-generated from name, editable once)
+- Public slug (random placeholder at signup, editable from the profile page)
 
 ## 5. Services
 
