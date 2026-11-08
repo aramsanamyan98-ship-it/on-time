@@ -51,3 +51,4 @@ next-env.d.ts
 
 # Design mockups (reference only, not part of the app)
 /design/
+security-reports/
