@@ -4,7 +4,7 @@ This lists required screens for v1. Visual styling must follow
 09_Brand_Guidelines.md. All screens must support Armenian, Russian, and
 English (see 02_PRD.md Section 2).
 
-## App (`app.ontime.am`) — Specialist-Facing
+## App (`book.on-time.am`) — Specialist-Facing
 
 1. **Register** — email, password
 2. **Email verification pending / confirmed**
@@ -27,7 +27,7 @@ English (see 02_PRD.md Section 2).
     (see 02_PRD.md Section 10)
 12. **Subscription / plan** — current plan, trial status, upgrade options
 
-## Public Booking Page (`book.ontime.am/[slug]`) — Guest-Facing
+## Public Booking Page (`book.on-time.am/[slug]`) — Guest-Facing
 
 1. **Specialist profile view** — photo, bio, portfolio grid, service list,
    working hours, "Book" button

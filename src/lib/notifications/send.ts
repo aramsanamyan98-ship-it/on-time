@@ -17,6 +17,7 @@ import {
   type TrialEmailParams,
 } from "@/lib/email-templates";
 import { displayNameOrFallback, hasDisplayName, EMAIL_NAME_FALLBACK } from "@/lib/profile/public-name";
+import { buildBookingUrl, getBookingBaseUrl } from "@/lib/booking/urls";
 import { languageToRoutingLocale } from "@/lib/locale";
 import type { Appointment, NotificationLog, Specialist, Service } from "@/generated/prisma/client";
 import type { AppLocale } from "@/i18n/routing";
@@ -49,7 +50,11 @@ function guestRebookParams(appointment: AppointmentWithRelations, locale: AppLoc
     guestName: appointment.guestName,
     specialistName: displayNameOrFallback(appointment.specialist.displayName, EMAIL_NAME_FALLBACK),
     serviceName: appointment.service.name,
-    bookAgainLink: `${process.env.APP_URL}/${locale}/book/${appointment.specialist.slug}/new?service=${appointment.serviceId}`,
+    bookAgainLink: buildBookingUrl(getBookingBaseUrl(), appointment.specialist.slug, {
+      page: "new",
+      query: { service: appointment.serviceId },
+      lang: locale,
+    }),
   };
 }
 

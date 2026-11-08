@@ -4,8 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { routing } from "@/i18n/routing";
-import { usePathname, useRouter } from "@/i18n/navigation";
 import { ShareIcon } from "./ProfileIcons";
+import { useSwitchLocale } from "./useSwitchLocale";
 
 const SHORT_LABELS = { hy: "ՀԱՅ", ru: "РУС", en: "ENG" } as const;
 
@@ -13,8 +13,7 @@ export function ProfileTopBar({ shareTitle, showShare = true }: { shareTitle: st
   const t = useTranslations("PublicProfile");
   const tCommon = useTranslations("Common");
   const locale = useLocale();
-  const router = useRouter();
-  const pathname = usePathname();
+  const switchLocale = useSwitchLocale();
   const [copied, setCopied] = useState(false);
 
   async function share() {
@@ -53,7 +52,7 @@ export function ProfileTopBar({ shareTitle, showShare = true }: { shareTitle: st
               lang={code}
               aria-label={tCommon(`localeNames.${code}`)}
               aria-pressed={locale === code}
-              onClick={() => router.replace(pathname, { locale: code })}
+              onClick={() => switchLocale(code)}
               className={`min-h-11 min-w-11 rounded-full px-2 text-xs font-semibold transition ${
                 locale === code ? "bg-brand-cream text-brand-green" : "text-brand-cream hover:bg-brand-cream/10"
               }`}

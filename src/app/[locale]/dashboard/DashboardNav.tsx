@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import {
   MAIN_ITEMS,
@@ -62,8 +62,8 @@ function Badge({ count, label, className = "" }: { count: number; label: string;
 
 /** The barber's public booking page, opened in a new tab. */
 function usePublicPageHref(slug: string) {
-  const locale = useLocale();
-  return `/${locale}/book/${slug}`;
+  // The short URL has no language prefix; the visitor's saved language applies.
+  return `/${slug}`;
 }
 
 /**

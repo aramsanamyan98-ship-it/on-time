@@ -74,7 +74,7 @@ doc first:
 | Payments | In-shop only. No online payment processing in v1. |
 | Deposits / anti-no-show | Not in v1. Reminders only. Deposits are a v2 feature. |
 | Languages | Armenian, Russian, and English — all three from day one. |
-| Domain structure | Marketing site on `ontime.am` (Webflow). App on `app.ontime.am`. Public booking pages on `book.ontime.am/[specialist-slug]`. |
+| Domain structure | Marketing site on `on-time.am` (WordPress). The app (login, dashboard) and the public booking pages are one Next.js app on `book.on-time.am`; booking pages are `book.on-time.am/[specialist-slug]`. |
 
 ## Core Values
 

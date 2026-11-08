@@ -1,5 +1,7 @@
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
+// Plain next/link on purpose: booking URLs are the short, unprefixed form (/anna/new);
+// the i18n Link would add a /{locale} prefix that the proxy then has to redirect away.
+import Link from "next/link";
 import { CalendarIcon, ChevronRightIcon, ClockIcon, GiftIcon, NavigationIcon } from "./ProfileIcons";
 import type { HoursRow } from "@/lib/booking/public-profile";
 
@@ -42,7 +44,7 @@ export async function NextFreeTimes({
               {slots.map((slot, index) => (
                 <li key={slot.iso}>
                   <Link
-                    href={`/book/${slug}/new?service=${serviceId}&start=${encodeURIComponent(slot.iso)}`}
+                    href={`/${slug}/new?service=${serviceId}&start=${encodeURIComponent(slot.iso)}`}
                     className={`flex min-h-14 flex-col items-center justify-center rounded-2xl border-[1.5px] leading-tight transition ${
                       index === 0
                         ? "border-brand-green bg-brand-green text-brand-cream hover:bg-brand-green-hover"
@@ -60,14 +62,14 @@ export async function NextFreeTimes({
           )}
 
           <Link
-            href={`/book/${slug}/new`}
+            href={`/${slug}/new`}
             className="hidden min-h-12 items-center justify-center gap-2 rounded-xl bg-brand-gold px-5 text-base font-bold text-brand-green transition hover:bg-brand-gold-hover lg:flex"
           >
             <CalendarIcon className="h-[18px] w-[18px]" />
             {t("bookTime")}
           </Link>
           <Link
-            href={`/book/${slug}/new`}
+            href={`/${slug}/new`}
             className="flex min-h-11 items-center justify-center gap-1 self-center text-sm font-semibold text-brand-green hover:underline"
           >
             {t("seeAllTimes")}
@@ -148,7 +150,7 @@ export async function ServicesSection({
             </div>
             {canBook && (
               <Link
-                href={`/book/${slug}/new?service=${service.id}`}
+                href={`/${slug}/new?service=${service.id}`}
                 aria-label={t("selectServiceNamed", { name: service.name })}
                 className="flex min-h-11 shrink-0 items-center rounded-xl bg-brand-green px-[1.125rem] text-sm font-semibold text-brand-cream transition hover:bg-brand-green-hover"
               >
@@ -283,7 +285,7 @@ export async function StickyBookBar({
         {nextFreeLabel && <span className="truncate text-xs text-brand-muted">{nextFreeLabel}</span>}
       </div>
       <Link
-        href={`/book/${slug}/new`}
+        href={`/${slug}/new`}
         className="flex min-h-13 shrink-0 items-center gap-2 rounded-2xl bg-brand-gold px-5 text-base font-bold text-brand-green transition hover:bg-brand-gold-hover"
       >
         <CalendarIcon className="h-[18px] w-[18px]" />

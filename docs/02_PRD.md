@@ -7,13 +7,13 @@ until this document is updated.
 
 | Surface | Domain | Built With | Purpose |
 |---|---|---|---|
-| Marketing site | `ontime.am` | Webflow | SEO, pricing, sign-up funnel |
-| App (specialist dashboard) | `app.ontime.am` | Next.js | Where specialists manage their business |
-| Public booking pages | `book.ontime.am/[slug]` | Next.js (same app, public routes) | Where guests book appointments |
+| Marketing site | `on-time.am` | WordPress | SEO, pricing, sign-up funnel |
+| App (specialist dashboard) | `book.on-time.am` | Next.js | Where specialists manage their business |
+| Public booking pages | `book.on-time.am/[slug]` | Next.js (same app, public routes) | Where guests book appointments |
 
 The marketing site and the app are **fully separate codebases**. They share
 no database. They are connected only by links (e.g. "Sign Up" on Webflow
-links to `app.ontime.am/register`) and by consistent branding.
+links to `book.on-time.am/register`) and by consistent branding.
 
 ## 2. Languages
 
@@ -75,7 +75,7 @@ their own.
   the same specialist. This must be enforced at the database level (see
   05_Database.md), not just in the UI.
 
-## 7. Public Booking Page (`book.ontime.am/[slug]`)
+## 7. Public Booking Page (`book.on-time.am/[slug]`)
 
 Guest flow, in order:
 1. Guest lands on specialist's public page — sees photo, bio, portfolio
@@ -217,7 +217,7 @@ Price per month gets cheaper the longer the commitment:
 | 12 months | 1,750 AMD | 21,000 AMD |
 
 Every commitment length includes, identically:
-- Public profile page (`book.ontime.am/[slug]`)
+- Public profile page (`book.on-time.am/[slug]`)
 - Unlimited bookings and unlimited portfolio photos (no volume caps)
 - Full reminder notifications (booking confirmation + pre-appointment
   reminder)
@@ -240,7 +240,7 @@ and all booking-management functionality are blocked entirely, replaced
 by a clear "subscribe to continue" state (not a degraded/limited
 dashboard) showing the commitment-length options and how to subscribe.
 
-The public profile page (`book.ontime.am/[slug]`) stays reachable to
+The public profile page (`book.on-time.am/[slug]`) stays reachable to
 guests regardless — it never 404s just because a specialist's
 trial/subscription lapsed. Attempting to book shows a message ("This
 specialist isn't currently accepting bookings") instead of allowing a
