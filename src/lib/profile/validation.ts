@@ -13,9 +13,8 @@ const ADDRESS_MAX_LENGTH = 200;
 const PHONE_RE = /^[0-9+()\-.\s]{6,20}$/;
 const INSTAGRAM_HANDLE_RE = /^[a-zA-Z0-9._]{1,30}$/;
 const FACEBOOK_HANDLE_RE = /^[a-zA-Z0-9.]{5,50}$/;
-// Matches the 40-char cap generateUniqueSlug (src/lib/slug.ts) applies to
-// auto-generated slugs, so a manually-typed slug can't exceed what an
-// auto-generated one ever could.
+// Upper bound for a manually-typed slug (the auto-generated placeholder from
+// generateTemporarySlug, src/lib/slug.ts, is far shorter).
 const SLUG_MIN_LENGTH = 3;
 const SLUG_MAX_LENGTH = 40;
 // Lowercase letters/digits in hyphen-separated groups: no leading/trailing
@@ -57,7 +56,7 @@ export function validateDisplayName(name: string): FieldErrors<ProfileFields> {
   return {};
 }
 
-/** Lowercases, trims, and turns runs of whitespace into a single hyphen — the same shape generateUniqueSlug (src/lib/slug.ts) produces. */
+/** Lowercases, trims, and turns runs of whitespace into a single hyphen — the same shape as the placeholder from generateTemporarySlug (src/lib/slug.ts). */
 export function normalizeSlug(raw: string): string {
   return raw
     .trim()

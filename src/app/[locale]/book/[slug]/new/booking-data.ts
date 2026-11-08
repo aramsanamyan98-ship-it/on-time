@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { prisma } from "@/lib/prisma";
+import { hasDisplayName } from "@/lib/profile/public-name";
 
 /**
  * The specialist behind /book/[slug]/new, shared by the full page, the popup
@@ -28,5 +29,6 @@ export const loadBookingSpecialist = cache((slug: string) =>
 export function isReachable(
   specialist: Awaited<ReturnType<typeof loadBookingSpecialist>>,
 ): specialist is NonNullable<typeof specialist> {
-  return !!specialist && !!specialist.emailVerifiedAt && !specialist.deletedAt;
+  // A specialist who hasn't set a display name yet has no public page.
+  return !!specialist && !!specialist.emailVerifiedAt && !specialist.deletedAt && hasDisplayName(specialist.displayName);
 }

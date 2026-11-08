@@ -7,13 +7,15 @@
 // `specialists`, per docs/08_Roadmap.md.
 //
 // Deviations from the literal field list in 05_Database.md, and why:
-// - `display_name` and `slug` are populated automatically at registration
-//   (slug from a slugified/uniquified display_name, display_name from the
-//   email's local part) rather than collected in a form. Both remain
-//   editable once profile UI exists — the doc already calls the slug
-//   "auto-generated from name, editable once", so this just applies the
-//   same pattern to display_name. Editing either is still not built (not
-//   required by 08_Roadmap.md Phase 2's field list).
+// - `display_name` and `slug` are not collected at registration. A new
+//   account gets `display_name = ""` (empty, so the column stays NOT NULL and
+//   no placeholder text derived from the email ever shows up) and a random
+//   placeholder slug (`page-<10 hex chars>`, see src/lib/slug.ts). The
+//   specialist sets a real name and, optionally, a nicer slug from the
+//   profile page. The public booking page and guest booking are hidden until
+//   `display_name` is non-empty (src/lib/profile/public-name.ts). Accounts
+//   created before this change may still carry a name derived from the
+//   email's local part.
 // - `working_hours.start_time`/`end_time` are stored as "HH:mm" strings
 //   rather than a DB `time` column: v1 only needs them for display and
 //   slot-generation math done in application code (Phase 4), and a plain

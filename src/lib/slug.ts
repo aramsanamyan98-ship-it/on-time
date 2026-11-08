@@ -1,31 +1,16 @@
+import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 
-function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "") // strip accents
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 40);
-}
-
-function randomSuffix(): string {
-  return Math.random().toString(36).slice(2, 7);
-}
-
 /**
- * Auto-generates a public slug from a display name (02_PRD.md Section 4:
- * "Public slug (auto-generated from name, editable once)"), guaranteeing
- * uniqueness with a random suffix on collision.
+ * Neutral placeholder slug for brand-new accounts ("page-3f9a1c7b2e"): purely
+ * random, so nothing about the person (email, name) leaks into the URL. The
+ * specialist can replace it from the profile page. Valid per validateSlug
+ * (src/lib/profile/validation.ts), unique via a retry on collision.
  */
-export async function generateUniqueSlug(displayName: string): Promise<string> {
-  const base = slugify(displayName) || "specialist";
-  let candidate = base;
-
-  while (await prisma.specialist.findUnique({ where: { slug: candidate }, select: { id: true } })) {
-    candidate = `${base}-${randomSuffix()}`;
+export async function generateTemporarySlug(): Promise<string> {
+  for (;;) {
+    const candidate = `page-${randomBytes(5).toString("hex")}`;
+    const taken = await prisma.specialist.findUnique({ where: { slug: candidate }, select: { id: true } });
+    if (!taken) return candidate;
   }
-
-  return candidate;
 }

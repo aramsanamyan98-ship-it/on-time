@@ -7,6 +7,7 @@ import { utcToZonedDateStr } from "@/lib/booking/timezone";
 import { isAppointmentReviewable } from "@/lib/reviews/eligibility";
 import { ProfileTopBar } from "../../book/[slug]/ProfileTopBar";
 import { Link } from "@/i18n/navigation";
+import { displayNameOrFallback, hasDisplayName, EMAIL_NAME_FALLBACK } from "@/lib/profile/public-name";
 import { ManageBooking } from "./ManageBooking";
 import {
   getRescheduleSlotsAction,
@@ -47,6 +48,8 @@ export default async function ManageBookingPage({
   const existingReview = await prisma.review.findUnique({ where: { appointmentId: appointment.id } });
 
   const t = await getTranslations("Booking");
+  const specialistHasName = hasDisplayName(appointment.specialist.displayName);
+  const specialistName = displayNameOrFallback(appointment.specialist.displayName, EMAIL_NAME_FALLBACK);
 
   // Formatted server-side (not passed as raw startAt + locale for the
   // client to format) so the hydrated output can never diverge from the
@@ -64,13 +67,16 @@ export default async function ManageBookingPage({
     <div className="flex flex-1 flex-col">
       <header className="bg-brand-green px-4 pb-14 pt-3.5 lg:px-8">
         <div className="mx-auto flex w-full max-w-xl flex-col gap-4">
-          <ProfileTopBar shareTitle={appointment.specialist.displayName} showShare={false} />
-          <Link
-            href={`/book/${appointment.specialist.slug}`}
-            className="flex min-h-11 w-fit items-center text-sm font-semibold text-brand-cream/85 hover:text-brand-cream"
-          >
-            &lsaquo; {t("backToProfile", { name: appointment.specialist.displayName })}
-          </Link>
+          <ProfileTopBar shareTitle={specialistName} showShare={false} />
+          {/* The profile page is hidden for unnamed specialists, so don't link to it. */}
+          {specialistHasName && (
+            <Link
+              href={`/book/${appointment.specialist.slug}`}
+              className="flex min-h-11 w-fit items-center text-sm font-semibold text-brand-cream/85 hover:text-brand-cream"
+            >
+              &lsaquo; {t("backToProfile", { name: specialistName })}
+            </Link>
+          )}
           <h1 className="font-serif text-3xl font-bold leading-tight text-brand-cream">{t("manageTitle")}</h1>
         </div>
       </header>
@@ -84,7 +90,7 @@ export default async function ManageBookingPage({
           priceAmd: appointment.service.priceAmd,
           formattedDateTime: dateTimeFormatter.format(appointment.startAt),
           guestName: appointment.guestName,
-          specialistName: appointment.specialist.displayName,
+          specialistName,
           timezone: appointment.specialist.timezone,
           startAt: appointment.startAt.toISOString(),
           endAt: appointment.endAt.toISOString(),

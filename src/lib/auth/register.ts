@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
 import { generateRawToken, hashToken, EMAIL_VERIFICATION_TOKEN_TTL_MS } from "@/lib/tokens";
-import { generateUniqueSlug } from "@/lib/slug";
+import { generateTemporarySlug } from "@/lib/slug";
 import { sendEmail } from "@/lib/mailer";
 import { buildVerificationEmail } from "@/lib/email-templates";
 import { normalizeEmail, validateRegistration } from "@/lib/auth/validation";
@@ -9,11 +9,6 @@ import { routingLocaleToLanguage } from "@/lib/locale";
 import { TRIAL_LENGTH_MS } from "@/lib/subscription/trial";
 import type { AppLocale } from "@/i18n/routing";
 import type { AuthResult } from "@/lib/auth/errors";
-
-function displayNameFromEmail(email: string): string {
-  const localPart = email.split("@")[0] ?? "specialist";
-  return localPart.replace(/[._+-]+/g, " ").trim() || "Specialist";
-}
 
 async function issueVerificationEmail(
   specialistId: string,
@@ -53,14 +48,16 @@ export async function registerSpecialist(
   }
 
   const passwordHash = await hashPassword(password);
-  const displayName = displayNameFromEmail(email);
-  const slug = await generateUniqueSlug(displayName);
+  // The name starts empty (the specialist sets it on their profile page) and
+  // the slug is a random placeholder, so nothing derived from the email ends
+  // up on a public page. The booking page stays hidden until a name exists.
+  const slug = await generateTemporarySlug();
 
   const specialist = await prisma.specialist.create({
     data: {
       email,
       passwordHash,
-      displayName,
+      displayName: "",
       slug,
       languagePreference: routingLocaleToLanguage[locale],
       trialEndsAt: new Date(Date.now() + TRIAL_LENGTH_MS),

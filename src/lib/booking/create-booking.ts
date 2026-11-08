@@ -7,6 +7,7 @@ import { isSlotConflictError } from "@/lib/booking/conflict-error";
 import { enqueueBookingNotifications, enqueueNewBookingAlert } from "@/lib/notifications/queue";
 import { routingLocaleToLanguage } from "@/lib/locale";
 import { hasActiveAccess } from "@/lib/subscription/trial";
+import { hasDisplayName } from "@/lib/profile/public-name";
 import type { BookingActionResult } from "@/lib/booking/errors";
 import type { Appointment } from "@/generated/prisma/client";
 import type { AppLocale } from "@/i18n/routing";
@@ -44,7 +45,8 @@ export async function createGuestBooking(
   // wizard only ever sends IDs, but a specialist could deactivate/delete
   // their account or a service between page load and submit.
   const specialist = await prisma.specialist.findUnique({ where: { id: input.specialistId } });
-  if (!specialist || !specialist.emailVerifiedAt || specialist.deletedAt) {
+  // No display name yet means no public page, so no guest booking either.
+  if (!specialist || !specialist.emailVerifiedAt || specialist.deletedAt || !hasDisplayName(specialist.displayName)) {
     return { ok: false, formError: "notFound" };
   }
 

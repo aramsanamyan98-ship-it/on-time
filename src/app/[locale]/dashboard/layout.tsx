@@ -6,6 +6,7 @@ import { routing } from "@/i18n/routing";
 import type { AppLocale } from "@/i18n/routing";
 import { requireSpecialist } from "@/lib/dashboard/require-specialist";
 import { getPlanStatus } from "@/lib/subscription/status";
+import { displayNameOrFallback, hasDisplayName } from "@/lib/profile/public-name";
 import { getUnviewedAppointmentEventsCount } from "@/lib/dashboard/appointments-badge";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LogoutButton } from "./LogoutButton";
@@ -53,7 +54,12 @@ export default async function DashboardLayout({
   return (
     <div className="ot-dashboard flex flex-1 flex-col lg:flex-row">
       <DashboardNav
-        barber={{ name: specialist.displayName, photoUrl: specialist.profilePhotoUrl, slug: specialist.slug }}
+        barber={{
+          name: displayNameOrFallback(specialist.displayName, t("unnamedLabel")),
+          hasName: hasDisplayName(specialist.displayName),
+          photoUrl: specialist.profilePhotoUrl,
+          slug: specialist.slug,
+        }}
         unviewedAppointmentsCount={unviewedAppointmentsCount}
       />
       {/* Bottom padding clears the fixed phone tab bar (and the home-indicator safe area); the sidebar is fixed, so on lg its width is the left margin. */}

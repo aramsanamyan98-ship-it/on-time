@@ -16,6 +16,7 @@ import {
   type RebookReminderEmailParams,
   type TrialEmailParams,
 } from "@/lib/email-templates";
+import { displayNameOrFallback, hasDisplayName, EMAIL_NAME_FALLBACK } from "@/lib/profile/public-name";
 import { languageToRoutingLocale } from "@/lib/locale";
 import type { Appointment, NotificationLog, Specialist, Service } from "@/generated/prisma/client";
 import type { AppLocale } from "@/i18n/routing";
@@ -36,7 +37,7 @@ function formatAppointmentDateTime(date: Date, timezone: string, locale: string)
 function guestParams(appointment: AppointmentWithRelations, locale: AppLocale): AppointmentEmailParams {
   return {
     guestName: appointment.guestName,
-    specialistName: appointment.specialist.displayName,
+    specialistName: displayNameOrFallback(appointment.specialist.displayName, EMAIL_NAME_FALLBACK),
     serviceName: appointment.service.name,
     dateTime: formatAppointmentDateTime(appointment.startAt, appointment.specialist.timezone, locale),
     manageLink: `${process.env.APP_URL}/${locale}/booking/${appointment.bookingToken}`,
@@ -46,7 +47,7 @@ function guestParams(appointment: AppointmentWithRelations, locale: AppLocale): 
 function guestRebookParams(appointment: AppointmentWithRelations, locale: AppLocale): RebookReminderEmailParams {
   return {
     guestName: appointment.guestName,
-    specialistName: appointment.specialist.displayName,
+    specialistName: displayNameOrFallback(appointment.specialist.displayName, EMAIL_NAME_FALLBACK),
     serviceName: appointment.service.name,
     bookAgainLink: `${process.env.APP_URL}/${locale}/book/${appointment.specialist.slug}/new?service=${appointment.serviceId}`,
   };
@@ -71,7 +72,8 @@ function specialistParams(appointment: AppointmentWithRelations, locale: AppLoca
 export async function sendTrialNotification(row: NotificationLog, specialist: Specialist): Promise<void> {
   const locale = languageToRoutingLocale[specialist.languagePreference];
   const params: TrialEmailParams = {
-    name: specialist.displayName,
+    // Empty for accounts that never set a name; the templates then use a bare greeting.
+    name: hasDisplayName(specialist.displayName) ? specialist.displayName.trim() : "",
     endDate: specialist.trialEndsAt
       ? new Intl.DateTimeFormat(locale, {
           day: "numeric",

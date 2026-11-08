@@ -90,6 +90,21 @@
   "Dashboard": {
     "title": "Dashboard",
     "welcomeTitle": "Welcome, {name}",
+    "welcomeTitleNoName": "Welcome",
+    "unnamedLabel": "Your name",
+    "setup": {
+      "title": "Build your account",
+      "progress": "{done} of {total} done",
+      "nameHint": "Your booking page stays hidden until you add your name.",
+      "done": "(done)",
+      "todo": "(to do)",
+      "steps": {
+        "name": "Add your name",
+        "photo": "Upload a profile photo",
+        "services": "Add your first service",
+        "workingHours": "Set your working hours"
+      }
+    },
     "welcomeMessage": "Your dashboard is ready. Appointment scheduling and your public booking page are coming soon.",
     "logout": "Log out",
     "manageServices": "Manage services",
@@ -119,6 +134,8 @@
       "groupMyPage": "My page",
       "groupSettings": "Settings",
       "viewMyPage": "View my page",
+      "addNameToPublish": "Add your name to publish",
+      "addNameShort": "Add name",
       "myPageShort": "My page",
       "opensInNewTab": "(opens in a new tab)"
     },
@@ -172,6 +189,8 @@
     "uploading": "Uploading…",
     "displayNameLabel": "Display name",
     "displayNameHint": "Your name as clients see it on your booking page and in emails. Your booking link does not change.",
+    "displayNamePlaceholder": "e.g. Anna Petrosyan",
+    "pageHiddenNotice": "Your booking page is hidden until you save a display name. Until then, anyone opening this link sees a \"not found\" page.",
     "slugLabel": "Booking link",
     "slugWarning": "Changing this breaks any booking link you've already shared — clients using the old link will see a \"not found\" page.",
     "bioLabel": "Bio",

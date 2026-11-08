@@ -23,6 +23,7 @@ export function DisplayNameForm({ displayName }: { displayName: string }) {
         maxLength={60}
         autoComplete="name"
         defaultValue={displayName}
+        placeholder={t("displayNamePlaceholder")}
         aria-describedby="displayNameHint"
         className="rounded-md border border-brand-charcoal/20 px-3 py-2 text-sm focus:border-brand-gold focus:outline-none"
       />
