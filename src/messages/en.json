@@ -98,6 +98,7 @@
       "nameHint": "Your booking page stays hidden until you add your name.",
       "done": "(done)",
       "todo": "(to do)",
+      "action": "Complete your profile",
       "steps": {
         "name": "Add your name",
         "photo": "Upload a profile photo",

@@ -55,6 +55,9 @@ export async function SetupCard({ progress }: { progress: SetupProgress }) {
           </li>
         ))}
       </ul>
+      <Link href="/dashboard/profile" className="btn-primary w-fit">
+        {t("action")}
+      </Link>
     </section>
   );
 }
