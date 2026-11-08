@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { findOpenSlotsForServices } from "@/lib/booking/slots";
 import { languageToRoutingLocale } from "@/lib/locale";
 import { PageHeading } from "@/components/Heading";
+import { getBookingBaseUrl } from "@/lib/booking/urls";
 import { FillScheduleClient } from "./FillScheduleClient";
 
 export default async function FillSchedulePage({
@@ -64,7 +65,7 @@ export default async function FillSchedulePage({
           services={options}
           timezone={specialist.timezone}
           slug={specialist.slug}
-          baseUrl={process.env.APP_URL ?? ""}
+          baseUrl={getBookingBaseUrl()}
           defaultLanguage={languageToRoutingLocale[specialist.languagePreference]}
         />
       )}

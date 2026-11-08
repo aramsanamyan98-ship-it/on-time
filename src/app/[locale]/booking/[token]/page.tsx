@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { utcToZonedDateStr } from "@/lib/booking/timezone";
 import { isAppointmentReviewable } from "@/lib/reviews/eligibility";
 import { ProfileTopBar } from "../../book/[slug]/ProfileTopBar";
-import { Link } from "@/i18n/navigation";
+import Link from "next/link";
 import { displayNameOrFallback, hasDisplayName, EMAIL_NAME_FALLBACK } from "@/lib/profile/public-name";
 import { ManageBooking } from "./ManageBooking";
 import {
@@ -71,7 +71,7 @@ export default async function ManageBookingPage({
           {/* The profile page is hidden for unnamed specialists, so don't link to it. */}
           {specialistHasName && (
             <Link
-              href={`/book/${appointment.specialist.slug}`}
+              href={`/${appointment.specialist.slug}`}
               className="flex min-h-11 w-fit items-center text-sm font-semibold text-brand-cream/85 hover:text-brand-cream"
             >
               &lsaquo; {t("backToProfile", { name: specialistName })}

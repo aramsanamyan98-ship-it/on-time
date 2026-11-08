@@ -8,9 +8,9 @@ import { PhotoUploadForm } from "./PhotoUploadForm";
 import { DisplayNameForm } from "./DisplayNameForm";
 import { SlugForm } from "./SlugForm";
 import { ProfileForm } from "./ProfileForm";
-import { PublicLinkBox } from "./PublicLinkBox";
 import { PageHeading, SectionHeading } from "@/components/Heading";
-import { hasDisplayName } from "@/lib/profile/public-name";
+import { hasDisplayName, displayNameOrFallback } from "@/lib/profile/public-name";
+import { getBookingBaseUrl } from "@/lib/booking/urls";
 
 export default async function ProfilePage({
   params,
@@ -23,8 +23,7 @@ export default async function ProfilePage({
 
   const specialist = await requireSpecialist(locale as AppLocale);
   const t = await getTranslations("Profile");
-  const bookingBaseUrl = `${process.env.APP_URL}/${locale}/book`;
-  const publicLink = `${bookingBaseUrl}/${specialist.slug}`;
+  const bookingBaseUrl = getBookingBaseUrl();
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
@@ -45,9 +44,11 @@ export default async function ProfilePage({
             {t("pageHiddenNotice")}
           </p>
         )}
-        <PublicLinkBox link={publicLink} />
-        <hr className="border-brand-charcoal/10" />
-        <SlugForm slug={specialist.slug} baseUrl={bookingBaseUrl} />
+        <SlugForm
+          slug={specialist.slug}
+          baseUrl={bookingBaseUrl}
+          shareTitle={displayNameOrFallback(specialist.displayName, "On-Time")}
+        />
       </section>
 
       <div className="panel">

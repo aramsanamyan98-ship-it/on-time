@@ -31,7 +31,7 @@ services. No booking exists yet.
 
 ## Phase 3 — Public Profile Page
 
-- `book.ontime.am/[slug]` renders the specialist's public profile
+- `book.on-time.am/[slug]` renders the specialist's public profile
 - Portfolio photo display
 - Services and working hours displayed
 - "Book" button present but not yet functional
@@ -144,8 +144,8 @@ extension.** Follow-up work, in order:
 
 ## Phase 8 — Marketing Site Connection
 
-- Webflow site live on `ontime.am`
-- Sign-up/CTA buttons correctly linking to `app.ontime.am/register`
+- WordPress site live on `on-time.am`
+- Sign-up/CTA buttons correctly linking to `book.on-time.am/register`
 - Consistent branding between Webflow and app (see 09_Brand_Guidelines.md)
 
 ## Phase 9 — Reviews (COMPLETED)

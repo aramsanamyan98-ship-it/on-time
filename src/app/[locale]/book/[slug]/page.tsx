@@ -9,6 +9,7 @@ import { loadSchedule } from "@/lib/working-hours/load-schedule";
 import { getReviewStats, listReviewsForPublicProfile } from "@/lib/reviews/queries";
 import { hasActiveAccess } from "@/lib/subscription/trial";
 import { hasDisplayName } from "@/lib/profile/public-name";
+import { buildBookingUrl, getBookingBaseUrl } from "@/lib/booking/urls";
 import { findNextFreeSlots } from "@/lib/booking/slots";
 import { dayOfWeekFromDateStr, utcToZonedDateStr, utcToZonedTimeStr } from "@/lib/booking/timezone";
 import {
@@ -92,6 +93,8 @@ export async function generateMetadata({
   return {
     title,
     description,
+    // One URL for every language, so search engines index a single page per specialist.
+    alternates: { canonical: buildBookingUrl(getBookingBaseUrl(), slug) },
     openGraph: {
       title,
       description,

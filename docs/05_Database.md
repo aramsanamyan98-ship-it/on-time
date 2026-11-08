@@ -33,7 +33,7 @@ this as the required minimum, not the ceiling.
 - display_name (starts as an empty string at signup; the specialist sets it
   on the profile page. The public booking page stays hidden until it is
   non-empty)
-- slug (unique, used in `book.ontime.am/[slug]`; starts as a random
+- slug (unique, used in `book.on-time.am/[slug]`; starts as a random
   placeholder like `page-3f9a1c7b2e` and is editable from the profile page)
 - profile_photo_url
 - cover_photo_url

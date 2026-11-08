@@ -2,15 +2,16 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
-import { Link } from "@/i18n/navigation";
+import Link from "next/link";
 import { ProfileTopBar } from "../ProfileTopBar";
 import { BookingFlow } from "./BookingFlow";
 import { isReachable, loadBookingSpecialist } from "./booking-data";
 
-// Full-page booking wizard: what a direct visit, a refresh, or a link from an
-// Instagram Story / email lands on. Clicking Book/Select/a free time on the
-// profile page opens the same wizard as a popup instead, via the intercepting
-// route in ../@modal/(.)new.
+// Full-page booking wizard, served at the short URL /[slug]/new (the proxy
+// rewrites it to this route). Clicking Book/Select/a free time on the profile
+// page, a link from an Instagram Story and a link from an email all land here.
+// (The old popup relied on an intercepting route, which Next.js cannot match
+// once the browser URL is the rewritten short form, so it was removed.)
 export default async function NewBookingPage({
   params,
   searchParams,
@@ -34,7 +35,7 @@ export default async function NewBookingPage({
         <div className="mx-auto flex w-full max-w-xl flex-col gap-4">
           <ProfileTopBar shareTitle={specialist.displayName} showShare={false} />
           <Link
-            href={`/book/${specialist.slug}`}
+            href={`/${specialist.slug}`}
             className="flex min-h-11 w-fit items-center text-sm font-semibold text-brand-cream/85 hover:text-brand-cream"
           >
             &lsaquo; {t("backToProfile", { name: specialist.displayName })}

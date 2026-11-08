@@ -1,5 +1,8 @@
 import { defineRouting } from "next-intl/routing";
 
+/** Cookie remembering the visitor's language (set by next-intl and by the booking-page language switcher). */
+export const LOCALE_COOKIE_NAME = "ontime_locale";
+
 export const routing = defineRouting({
   // BCP-47 tags so browser Accept-Language auto-detection works correctly
   // (see src/lib/locale.ts for why this isn't ["am", "ru", "en"]).
@@ -7,7 +10,7 @@ export const routing = defineRouting({
   defaultLocale: "en",
   localePrefix: "always",
   localeCookie: {
-    name: "ontime_locale",
+    name: LOCALE_COOKIE_NAME,
   },
 });
 

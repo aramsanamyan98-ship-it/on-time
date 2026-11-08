@@ -3,7 +3,7 @@
 Booking and growth platform for independent barbers and beauty specialists
 in Armenia. See `docs/` for product background.
 
-This repo is the `app.ontime.am` app: Next.js (App Router) + TypeScript +
+This repo is the `book.on-time.am` app: Next.js (App Router) + TypeScript +
 Tailwind CSS + PostgreSQL (Prisma), with Armenian/Russian/English support
 from day one via next-intl.
 

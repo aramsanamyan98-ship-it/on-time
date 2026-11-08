@@ -2,8 +2,8 @@
 
 ## Flow 1: Specialist Onboarding
 
-1. Specialist visits `ontime.am` (Webflow), clicks "Sign Up"
-2. Redirected to `app.ontime.am/register`
+1. Specialist visits `on-time.am` (WordPress), clicks "Sign Up"
+2. Redirected to `book.on-time.am/register`
 3. Enters email + password
 4. Verification email sent → specialist confirms email
 5. Redirected into a guided setup:
@@ -11,7 +11,7 @@
    - Add first service (name, duration, price)
    - Set working hours
    - (Optional at this stage) upload portfolio photos
-6. Specialist receives their public link: `book.ontime.am/[slug]`
+6. Specialist receives their public link: `book.on-time.am/[slug]`
 7. Dashboard shown, with a profile-completion progress indicator
    encouraging remaining steps (portfolio photos, more services, etc.)
 
@@ -21,7 +21,7 @@ under 5 minutes, then fill in the rest later.
 
 ## Flow 2: Guest Booking (public, no account)
 
-1. Guest opens `book.ontime.am/[slug]` (from Instagram bio, WhatsApp share,
+1. Guest opens `book.on-time.am/[slug]` (from Instagram bio, WhatsApp share,
    or a QR code)
 2. Sees: photo, name, bio, portfolio images, service list, working hours
 3. Taps "Book"
@@ -48,7 +48,7 @@ under 5 minutes, then fill in the rest later.
 
 ## Flow 3: Specialist Manages Their Day
 
-1. Specialist logs into `app.ontime.am`
+1. Specialist logs into `book.on-time.am`
 2. Dashboard shows today's appointments first
 3. Specialist can:
    - Mark an appointment as completed / no-show (for their own records —

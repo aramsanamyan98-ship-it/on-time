@@ -1,4 +1,5 @@
 import type { FieldErrors } from "@/lib/dashboard/errors";
+import { RESERVED_SLUGS, SLUG_MAX_LENGTH, SLUG_MIN_LENGTH, SLUG_RE } from "@/lib/slug-rules";
 
 const DISPLAY_NAME_MIN_LENGTH = 2;
 const DISPLAY_NAME_MAX_LENGTH = 60;
@@ -13,31 +14,6 @@ const ADDRESS_MAX_LENGTH = 200;
 const PHONE_RE = /^[0-9+()\-.\s]{6,20}$/;
 const INSTAGRAM_HANDLE_RE = /^[a-zA-Z0-9._]{1,30}$/;
 const FACEBOOK_HANDLE_RE = /^[a-zA-Z0-9.]{5,50}$/;
-// Upper bound for a manually-typed slug (the auto-generated placeholder from
-// generateTemporarySlug, src/lib/slug.ts, is far shorter).
-const SLUG_MIN_LENGTH = 3;
-const SLUG_MAX_LENGTH = 40;
-// Lowercase letters/digits in hyphen-separated groups: no leading/trailing
-// hyphen, no "--", nothing but ASCII — this is a URL path segment
-// (book.ontime.am/[slug]), not a display string.
-const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-// Slugs that would be confusing (even though nothing in the router actually
-// collides with them — see src/app/[locale]/book/[slug]/).
-const RESERVED_SLUGS = new Set([
-  "new",
-  "book",
-  "booking",
-  "dashboard",
-  "login",
-  "register",
-  "admin",
-  "api",
-  "app",
-  "www",
-  "static",
-  "public",
-  "specialist",
-]);
 
 export type ProfileFields = "displayName" | "slug" | "bio" | "phone" | "address" | "instagramUrl" | "facebookUrl";
 
